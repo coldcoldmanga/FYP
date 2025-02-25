@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "886220198553",
+    "project_id": "fyp-facility-helpdesk",
+    "storage_bucket": "fyp-facility-helpdesk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886220198553:android:59db4428660e99b3f01e08",
+        "android_client_info": {
+          "package_name": "com.fyp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_mJRvKQFwj3-szbCrgjV7NL1Iipq5Apk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
