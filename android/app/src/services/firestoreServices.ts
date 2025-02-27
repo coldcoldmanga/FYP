@@ -1,33 +1,50 @@
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore } from '@react-native-firebase/firestore';
+import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, getDoc } from '@react-native-firebase/firestore';
 
 const firestore = getFirestore(firebaseApp);
 
-export const addUser = async (userData: any) => {
+export const addUser = async (fullname:string, email:string, phoneNumber:string, userType:string, createdAt:Date, updatedAt:Date, lastLogin:any, status:string, active_task:number) => {
     try{
-        const docID = userData.email.split('@')[0];
+        const docID = email.split('@')[0];
 
-        if (userData.userType === 'Maintenance Worker') {
-            userData.active_task = 0;
-        }
+        if(userType === 'Maintenance Worker'){
+            await setDoc(doc(firestore, 'user', docID), {
+                fullname,
+                email,
+                phoneNumber,
+                userType,
+                createdAt,
+                updatedAt,
+                active_task
+            });
+        }else{
 
-        await setDoc(doc(firestore, 'user', docID), userData);
-        
-    } catch (error) {
+        await setDoc(doc(firestore, 'user', docID), {
+            fullname,
+            email,
+            phoneNumber,
+            userType,
+            createdAt,
+            updatedAt,
+            lastLogin,
+        });
+
+    } 
+}catch (error) {
         console.error('Add User Error: ', error);
         throw error;
     }
-}
+};
 
-export const updateUser = async (userData: any) => {
+export const updateUser = async (email:string) => {
     try{
-        const docID = userData.email.split('@')[0];
-        await updateDoc(doc(firestore, 'user', docID), userData);
+        const docID = email.split('@')[0];
+        await updateDoc(doc(firestore, 'user', docID), {lastLogin: new Date()});
     } catch (error) {
         console.error('Update User Error: ', error);
         throw error;
     }
-}       
+};       
 
 export const getUser = async (email: string) => {
     try{
@@ -38,4 +55,7 @@ export const getUser = async (email: string) => {
         console.error('Get User Error: ', error);
         throw error;
     }
-}
+};
+
+
+

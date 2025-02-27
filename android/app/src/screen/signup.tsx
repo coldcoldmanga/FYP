@@ -23,14 +23,19 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userType, setUserType] = useState('Select User Type'); // Default user type
+  const [lastLogin, setLastLogin] = useState(null);
   const [active_task, setActive_task] = useState(0);
 
-  const userData = {
+  let userData:any = {
     fullName,
     email,
-    password,
     phoneNumber,
     userType,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    lastLogin: null,
+    status: 'active',
+    active_task
   };
 
   const handleSignUp = async () => {
@@ -39,8 +44,8 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
       return;
     }
     try{
-        await signUp(userData);
-        await addUser(userData);
+        await signUp(email, password);
+        await addUser(fullName, email, phoneNumber, userType, new Date(), new Date(), lastLogin, 'active', 0);
         navigation.navigate('Login');
     }catch(error){
         Alert.alert('Error', (error as Error).message);

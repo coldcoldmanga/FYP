@@ -24,25 +24,20 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
       return;
     }
     try {
-      const userType = await login(email, password);
+      const user = await login(email, password);
 
-      if(userType === 'Student' || userType === 'Staff'){
-        const lastLogin = new Date();
-        await updateUser(lastLogin);
+      if(user.userType === 'Student' || user.userType === 'Staff'){
+       await updateUser(email);
         navigation.reset({
             index: 0,
             routes: [{name: 'UserHome'}]
         })
-      }else if(userType === 'Maintenance Worker'){
-        const lastLogin = new Date();
-        await updateUser(lastLogin);
+      }else if(user.userType === 'Maintenance Worker'){
         navigation.reset({
             index: 0,
             routes: [{name: 'WorkerHome'}]
         })
       }else{
-        const lastLogin = new Date();
-        await updateUser(lastLogin);
         navigation.reset({
             index: 0,
             routes: [{name: 'AdminHome'}]
