@@ -43,8 +43,6 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
             routes: [{name: 'AdminHome'}]
         })
       }
-
-      Alert.alert('Success', 'Login successful!');
     
     } catch (error) {
       console.error('Login Error: ', error);
