@@ -9,8 +9,6 @@ const auth = getAuth(firebaseApp);
 export const signUp = async (email:string, password:string) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password)
-
-      Alert.alert('Welcome Onboard', 'Your account has been created successfully!');
       
     } catch (error) {
       console.error('Sign Up Error: ', error);

@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { NavigationProp } from '@react-navigation/native';
 import { signUp } from '../services/authServices';
 import { Picker } from '@react-native-picker/picker';
-import { addUser } from '../services/firestoreServices';
+import { addUser, getUser } from '../services/firestoreServices';
 
 const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [fullName, setFullName] = useState('');
@@ -46,6 +46,9 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
     try{
         await signUp(email, password);
         await addUser(fullName, email, phoneNumber, userType, new Date(), new Date(), lastLogin, 'active', 0);
+        
+        const user = await getUser(email);
+        Alert.alert('Welcome ' + user.fullname, 'Your account has been created successfully!');
         navigation.navigate('Login');
     }catch(error){
         Alert.alert('Error', (error as Error).message);
