@@ -17,17 +17,22 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
 
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
+    else if(!RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email)){
+        Alert.alert('Error', 'Please enter a valid email address.');
+        return;
+    }
     try {
       const user = await login(email, password);
-
+      await updateUser(email); //update user lastLogin
       if(user.userType === 'Student' || user.userType === 'Staff'){
-       await updateUser(email);
+       
         navigation.reset({
             index: 0,
             routes: [{name: 'UserHome'}]
@@ -54,7 +59,7 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <Image
-          source={require('../assets/login.png')} // Replace with your logo path
+          source={require('../assets/login.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>Login</Text>

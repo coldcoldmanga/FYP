@@ -1,10 +1,29 @@
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from '@react-native-firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from '@react-native-firebase/auth';
 import { Alert } from 'react-native';
 import { firebaseApp } from '../config/firebase';
 import { getUser } from './firestoreServices';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 //Initialize Auth
 const auth = getAuth(firebaseApp);
+
+const LOGGED_IN = 'isLoggedIn';
+const USER_TYPE = 'userType';
+const USER_ID = 'userID';
+
+// const isSessionExpired = async (email:string) => {
+//   //const lastLogin = await AsyncStorage.getItem(LAST_LOGIN_KEY);
+//   const user = await getUser(email);
+
+//   if(!user) return true;
+
+//   const lastLogin = user.lastLogin.toDate();
+//   if(!lastLogin) return true;
+
+//   const currentTime = new Date().getTime();
+//   const oneWeek = 7 * 24 * 60 * 60 * 1000;
+//   const isExpired = (currentTime - lastLogin.getTime()) > oneWeek;
+//   return isExpired;
+// }
 
 export const signUp = async (email:string, password:string) => {
     try {
@@ -22,8 +41,12 @@ export const login = async (email:string, password:string) => {
 
         await signInWithEmailAndPassword(auth, email, password);
         const user = await getUser(email);
+
+        await AsyncStorage.setItem(LOGGED_IN, 'true');
+        await AsyncStorage.setItem(USER_TYPE, user.userType);
+        await AsyncStorage.setItem(USER_ID, email.split('@')[0]);
+
         return user;
-       
 
     } catch (error) {
         Alert.alert('Error', (error as Error).message);
@@ -35,6 +58,9 @@ export const login = async (email:string, password:string) => {
 export const logout = async () => {
     try{
         await signOut(auth);
+        await AsyncStorage.removeItem(LOGGED_IN);
+        await AsyncStorage.removeItem(USER_TYPE);
+        await AsyncStorage.removeItem(USER_ID);
         Alert.alert('Success', 'Logout successful!');
     } catch (error) {
         console.error('Logout Error: ', error);
@@ -53,3 +79,28 @@ export const forgotPassword = async (email: string) => {
     Alert.alert('Error', errorMessage);
   });
 };
+
+export const isLoggedIn = async () => {
+  const isLoggedIn = await AsyncStorage.getItem(LOGGED_IN);
+  return isLoggedIn === 'true';
+}
+
+// export const checkAuthState = (callback: (user: any) => void) => {
+//   return onAuthStateChanged(auth, async (user: any) => {
+//     if(user){
+//       //await new Promise(resolve => setTimeout(resolve, 1000));
+//       const email = user.email;
+//       const expired = await isSessionExpired(email);
+//       if(expired){
+//         await logout();
+//         callback(null);
+//       }
+//       else{
+//         callback(user);
+//       }
+//     }
+//     else{
+//       callback(null);
+//     }
+//   });
+// };

@@ -11,6 +11,10 @@ const ForgotPassword = ({navigation}: {navigation: NavigationProp<any>}) => {
             Alert.alert('Error', 'Please enter your email');
             return;
         }
+        else if(!RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email)){
+            Alert.alert('Error', 'Please enter a valid email address.');
+            return;
+        }
 
         try{
             await forgotPassword(email);

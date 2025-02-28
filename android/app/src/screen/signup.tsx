@@ -43,6 +43,17 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
+    else if(!RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email)){
+        Alert.alert('Error', 'Please enter a valid email address.');
+        return;
+    }
+    else if(!RegExp(/^[0-9]{10,11}$/).test(phoneNumber)){
+        Alert.alert('Error', 'Please enter a valid phone number.');
+        return;
+    }else if(userType === 'Select User Type'){
+        Alert.alert('Error', 'Please select a user type.');
+        return;
+    }
     try{
         await signUp(email, password);
         await addUser(fullName, email, phoneNumber, userType, new Date(), new Date(), lastLogin, 'active', 0);

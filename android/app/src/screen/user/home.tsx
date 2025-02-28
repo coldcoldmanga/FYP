@@ -11,7 +11,7 @@ const UserHome = ({navigation}: {navigation: NavigationProp<any>}) => {
             await logout();
             navigation.reset({
                 index: 0,
-                routes: [{name: 'SignUp'}]
+                routes: [{name: 'Login'}]
             })
         }catch(error){
             console.error('Logout Error: ', error);
