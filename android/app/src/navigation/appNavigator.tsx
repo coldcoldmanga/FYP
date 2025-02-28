@@ -8,9 +8,9 @@ import Login from '../screen/login';
 import UserHome from '../screen/user/home';
 import AdminHome from '../screen/admin/home';
 import WorkerHome from '../screen/worker/home';
-import { isLoggedIn } from '../services/authServices';
+import { isLoggedIn, isSessionExpired } from '../services/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View } from 'react-native';
+import { Alert } from 'react-native';
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
@@ -21,24 +21,37 @@ const AppNavigator = () => {
     useEffect(()=>{
         const checkLoginStatus = async () => {
             const loggedIn = await isLoggedIn();
+            
             if(loggedIn){
-                const userType = await AsyncStorage.getItem('userType');
-                switch(userType){
-                    case 'Student':
-                    case 'Staff':
-                        setInitialRoute('UserHome');
-                        break;
-                    case 'Maintenance Worker':
-                        setInitialRoute('WorkerHome');
-                        break;
-                    default:
-                        setInitialRoute('AdminHome');
-                        break;
+                const isExpired = await isSessionExpired();
+                if(isExpired){
+                    await AsyncStorage.removeItem('userEmail');
+                    await AsyncStorage.removeItem('isLoggedIn');
+                    await AsyncStorage.removeItem('userType');
+                    Alert.alert('Session Expired', 'Please login again');
+                    setInitialRoute('Login');
+                }
+                else{
+                    const userType = await AsyncStorage.getItem('userType');
+                    switch(userType){
+                        case 'Student':
+                        case 'Staff':
+                            setInitialRoute('UserHome');
+                            break;
+                        case 'Maintenance Worker':
+                            setInitialRoute('WorkerHome');
+                            break;
+                        default:
+                            setInitialRoute('AdminHome');
+                            break;
+                    }
+                }
 
                 }
-            }
-            else{
-                setInitialRoute('Login');
+                else{
+
+                    setInitialRoute('Login');
+                    
             }
             setLoading(false);
         }

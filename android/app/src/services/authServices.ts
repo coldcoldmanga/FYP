@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from '@react-native-firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from '@react-native-firebase/auth';
 import { Alert } from 'react-native';
 import { firebaseApp } from '../config/firebase';
 import { getUser } from './firestoreServices';
@@ -8,22 +8,22 @@ const auth = getAuth(firebaseApp);
 
 const LOGGED_IN = 'isLoggedIn';
 const USER_TYPE = 'userType';
-const USER_ID = 'userID';
+const USER_EMAIL = 'userEmail';
 
-// const isSessionExpired = async (email:string) => {
-//   //const lastLogin = await AsyncStorage.getItem(LAST_LOGIN_KEY);
-//   const user = await getUser(email);
+export const isSessionExpired = async () => {
+  const email = await AsyncStorage.getItem(USER_EMAIL);
+  const user = await getUser(email??'');
 
-//   if(!user) return true;
+  if(!user) return true;
 
-//   const lastLogin = user.lastLogin.toDate();
-//   if(!lastLogin) return true;
+  const lastLogin = user.lastLogin.toDate();
+  if(!lastLogin) return true;
 
-//   const currentTime = new Date().getTime();
-//   const oneWeek = 7 * 24 * 60 * 60 * 1000;
-//   const isExpired = (currentTime - lastLogin.getTime()) > oneWeek;
-//   return isExpired;
-// }
+  const currentTime = new Date().getTime();
+  const oneWeek = 7 * 24 * 60 * 60 * 1000;
+  const isExpired = (currentTime - lastLogin.getTime()) > oneWeek;
+  return isExpired;
+}
 
 export const signUp = async (email:string, password:string) => {
     try {
@@ -31,7 +31,7 @@ export const signUp = async (email:string, password:string) => {
       
     } catch (error) {
       console.error('Sign Up Error: ', error);
-      throw error; // Rethrow the error for further handling if needed
+      throw error; 
     }
   };
 
@@ -44,7 +44,11 @@ export const login = async (email:string, password:string) => {
 
         await AsyncStorage.setItem(LOGGED_IN, 'true');
         await AsyncStorage.setItem(USER_TYPE, user.userType);
-        await AsyncStorage.setItem(USER_ID, email.split('@')[0]);
+        await AsyncStorage.setItem(USER_EMAIL, email);
+
+        console.log(await AsyncStorage.getItem(USER_EMAIL));
+        console.log(await AsyncStorage.getItem(USER_TYPE));
+        console.log(await AsyncStorage.getItem(LOGGED_IN));
 
         return user;
 
@@ -60,7 +64,7 @@ export const logout = async () => {
         await signOut(auth);
         await AsyncStorage.removeItem(LOGGED_IN);
         await AsyncStorage.removeItem(USER_TYPE);
-        await AsyncStorage.removeItem(USER_ID);
+        await AsyncStorage.removeItem(USER_EMAIL);
         Alert.alert('Success', 'Logout successful!');
     } catch (error) {
         console.error('Logout Error: ', error);

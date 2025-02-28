@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { logout } from '../../services/authServices';
 import { NavigationProp } from '@react-navigation/native';
-
 const WorkerHome = ({navigation}: {navigation: NavigationProp<any>}) => {
+
     const handleLogout = async () => {
         try{
             await logout();
