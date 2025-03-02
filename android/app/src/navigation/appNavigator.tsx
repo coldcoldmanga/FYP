@@ -8,6 +8,7 @@ import Login from '../screen/login';
 import UserHome from '../screen/user/home';
 import AdminHome from '../screen/admin/home';
 import WorkerHome from '../screen/worker/home';
+import SubmitReport from '../screen/user/submit_report';
 import { isLoggedIn, isSessionExpired } from '../services/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
@@ -71,6 +72,7 @@ const AppNavigator = () => {
                 <Stack.Screen name='AdminHome' component={AdminHome} options={{headerShown: false}} />
                 <Stack.Screen name='WorkerHome' component={WorkerHome} options={{headerShown: false}} />
                 <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerShown: false}} />
+                <Stack.Screen name='SubmitReport' component={SubmitReport} />
             </Stack.Navigator>
         </NavigationContainer>
     )

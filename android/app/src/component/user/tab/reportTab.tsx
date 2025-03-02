@@ -1,122 +1,112 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-// Define types for report status and priority
-type Status = 'In Progress' | 'Pending' | 'Completed';
-type Priority = 'High Priority' | 'Medium Priority' | 'Low Priority';
-
-interface Report {
-    id: string;
-    title: string;
-    location: string;
-    priority: Priority;
-    status: Status;
-}
+import { getReport } from '../../../services/firestoreServices';
 
 const ReportsTab = () => {
-    const [searchQuery, setSearchQuery] = useState('');
+    const [reports, setReports] = useState<Array<any>>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Sample data
-    const reports: Report[] = [
-        {
-            id: '1',
-            title: 'Broken AC Unit - Floor 3',
-            location: 'Building A',
-            priority: 'High Priority',
-            status: 'In Progress'
-        },
-        {
-            id: '2',
-            title: 'Water Leakage - Pantry',
-            location: 'Building B',
-            priority: 'Medium Priority',
-            status: 'Pending'
-        },
-        {
-            id: '3',
-            title: 'Faulty Light Fixtures',
-            location: 'Building A',
-            priority: 'Low Priority',
-            status: 'Pending'
-        },
-    ];
+    useEffect(() => {
+        fetchReports();
+    }, []);
 
-    // Status badge component
-    const StatusBadge = ({ status }: { status: Status }) => {
-        const getStatusColor = () => {
-            switch (status) {
-                case 'In Progress':
-                    return '#E3F2FD';
-                case 'Pending':
-                    return '#FFF9C4';
-                case 'Completed':
-                    return '#E8F5E9';
-                default:
-                    return '#E0E0E0';
-            }
-        };
-
-        return (
-            <View style={[styles.badge, { backgroundColor: getStatusColor() }]}>
-                <Text style={[styles.badgeText, { color: '#1a2847' }]}>{status}</Text>
-            </View>
-        );
+    const fetchReports = async () => {
+        try {
+            setLoading(true);
+            const fetchedReports = await getReport();
+            console.log(fetchedReports);
+            setReports(fetchedReports);
+            setError(null);
+        } catch (error) {
+            console.error('Error fetching reports:', error);
+            setError('Failed to load reports');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Priority badge component
-    const PriorityBadge = ({ priority }: { priority: Priority }) => {
-        const getPriorityColor = () => {
-            switch (priority) {
-                case 'High Priority':
-                    return '#FFEBEE';
-                case 'Medium Priority':
-                    return '#FFF3E0';
-                case 'Low Priority':
-                    return '#F1F8E9';
-                default:
-                    return '#E0E0E0';
-            }
-        };
-
-        return (
-            <View style={[styles.badge, { backgroundColor: getPriorityColor() }]}>
-                <Text style={[styles.badgeText, { color: '#1a2847' }]}>{priority}</Text>
-            </View>
-        );
+    // Format date helper
+    const formatDate = (timestamp: any) => {
+        if (!timestamp) return 'Unknown date';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
     };
 
     return (
         <View style={styles.container}>
-            {/* Search Bar */}
-            <View style={styles.searchContainer}>
-                <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search reports..."
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-            </View>
-
             {/* Reports List */}
-            <ScrollView style={styles.reportsList}>
-                {reports.map((report) => (
-                    <TouchableOpacity key={report.id} style={styles.reportCard}>
-                        <View style={styles.reportIcon}>
-                            <Icon name="error-outline" size={24} color="#666" />
-                        </View>
-                        <View style={styles.reportContent}>
-                            <Text style={styles.reportTitle}>{report.title}</Text>
-                            <Text style={styles.reportLocation}>{report.location}</Text>
-                            <View style={styles.badgeContainer}>
-                                <PriorityBadge priority={report.priority} />
-                                <StatusBadge status={report.status} />
-                            </View>
-                        </View>
+            {loading ? (
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color="#1a2847" />
+                    <Text style={styles.messageText}>Loading reports...</Text>
+                </View>
+            ) : error ? (
+                <View style={styles.centerContainer}>
+                    <Icon name="error-outline" size={48} color="#c62828" />
+                    <Text style={styles.messageText}>{error}</Text>
+                    <TouchableOpacity style={styles.retryButton} onPress={fetchReports}>
+                        <Text style={styles.retryButtonText}>Retry</Text>
                     </TouchableOpacity>
-                ))}
-            </ScrollView>
+                </View>
+            ) : reports.length === 0 ? (
+                <View style={styles.centerContainer}>
+                    <Icon name="inbox" size={48} color="#9e9e9e" />
+                    <Text style={styles.messageText}>No reports found</Text>
+                </View>
+            ) : (
+                <ScrollView 
+                    style={styles.reportsList}
+                    contentContainerStyle={styles.reportsListContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {reports.map((report) => (
+                        <TouchableOpacity key={report.id} style={styles.reportCard}>
+                            <View style={styles.reportHeader}>
+                                <View style={styles.reportIcon}>
+                                    <Icon name="report-problem" size={24} color="#1a2847" />
+                                </View>
+                                <View style={styles.reportContent}>
+                                    <Text style={styles.reportTitle}>{report.fault_id || 'Unknown Issue'}</Text>
+                                    <View style={styles.locationContainer}>
+                                        <Icon name="location-on" size={16} color="#666" />
+                                        <Text style={styles.reportLocation}>{report.facility_id || 'Unknown Location'}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            
+                            {report.description && (
+                                <Text style={styles.reportDescription} numberOfLines={2}>
+                                    {report.description}
+                                </Text>
+                            )}
+                            
+                            <View style={styles.reportFooter}>
+                                <View style={styles.badgeContainer}>
+                                    {report.priority && (
+                                        <View style={[styles.badge, { backgroundColor: '#FFF3E0' }]}>
+                                            <Text style={styles.badgeText}>{report.priority}</Text>
+                                        </View>
+                                    )}
+                                    {report.status && (
+                                        <View style={[styles.badge, { backgroundColor: '#E3F2FD' }]}>
+                                            <Text style={styles.badgeText}>{report.status}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                                <Text style={styles.reportDate}>
+                                    {formatDate(report.submitted_at)}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            )}
         </View>
     );
 };
@@ -124,71 +114,114 @@ const ReportsTab = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
+        backgroundColor: '#F5F7FA',
+        paddingTop: 16,
     },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFF',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
-    },
-    searchIcon: {
-        marginRight: 8,
-    },
-    searchInput: {
+    centerContainer: {
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    messageText: {
+        marginTop: 12,
         fontSize: 16,
-        color: '#000',
-        height: 40,
+        color: '#666',
+        textAlign: 'center',
+    },
+    retryButton: {
+        marginTop: 16,
+        backgroundColor: '#1a2847',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    retryButtonText: {
+        color: '#FFF',
+        fontSize: 16,
     },
     reportsList: {
         flex: 1,
     },
+    reportsListContent: {
+        paddingHorizontal: 16,
+        paddingBottom: 100, // Extra padding for bottom nav
+    },
     reportCard: {
-        flexDirection: 'row',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
         backgroundColor: '#FFF',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
+    },
+    reportHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
     },
     reportIcon: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#F0F4FF',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
     },
     reportContent: {
         flex: 1,
     },
     reportTitle: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
         color: '#1a2847',
         marginBottom: 4,
+    },
+    locationContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     reportLocation: {
         fontSize: 14,
         color: '#666',
-        marginBottom: 8,
+        marginLeft: 4,
+    },
+    reportDescription: {
+        fontSize: 14,
+        color: '#555',
+        marginBottom: 12,
+        lineHeight: 20,
+    },
+    reportFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     badgeContainer: {
         flexDirection: 'row',
         gap: 8,
     },
     badge: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        alignSelf: 'flex-start',
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
+        marginRight: 8,
     },
     badgeText: {
         fontSize: 12,
         fontWeight: '500',
+        color: '#1a2847',
+    },
+    reportDate: {
+        fontSize: 12,
+        color: '#999',
+        fontStyle: 'italic',
     },
 });
 
