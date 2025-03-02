@@ -65,12 +65,12 @@ const AppNavigator = () => {
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName={initialRoute}>
-                <Stack.Screen name='SignUp' component={SignUp} />
-                <Stack.Screen name='Login' component={Login} />
-                <Stack.Screen name='UserHome' component={UserHome} />
-                <Stack.Screen name='AdminHome' component={AdminHome} />
-                <Stack.Screen name='WorkerHome' component={WorkerHome} />
-                <Stack.Screen name='ForgotPassword' component={ForgotPassword} />
+                <Stack.Screen name='SignUp' component={SignUp} options={{headerShown: false}} />
+                <Stack.Screen name='Login' component={Login} options={{headerShown: false}} />
+                <Stack.Screen name='UserHome' component={UserHome} options={{headerShown: false}} />
+                <Stack.Screen name='AdminHome' component={AdminHome} options={{headerShown: false}} />
+                <Stack.Screen name='WorkerHome' component={WorkerHome} options={{headerShown: false}} />
+                <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerShown: false}} />
             </Stack.Navigator>
         </NavigationContainer>
     )

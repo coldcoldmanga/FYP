@@ -59,7 +59,7 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <Image
-          source={require('../assets/login.png')}
+          source={require('../asset/login.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>Login</Text>

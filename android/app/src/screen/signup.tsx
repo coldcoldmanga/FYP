@@ -23,20 +23,6 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [password, setPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [userType, setUserType] = useState('Select User Type'); // Default user type
-  const [lastLogin, setLastLogin] = useState(null);
-  const [active_task, setActive_task] = useState(0);
-
-  let userData:any = {
-    fullName,
-    email,
-    phoneNumber,
-    userType,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    lastLogin: null,
-    status: 'active',
-    active_task
-  };
 
   const handleSignUp = async () => {
     if (!fullName || !email || !password || !phoneNumber || !userType) {
@@ -56,7 +42,7 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
     try{
         await signUp(email, password);
-        await addUser(fullName, email, phoneNumber, userType, new Date(), new Date(), lastLogin, 'active', 0);
+        await addUser(fullName, email, phoneNumber, userType, new Date(), new Date(), null, 'active', 0);
         
         const user = await getUser(email);
         Alert.alert('Welcome ' + user.fullname, 'Your account has been created successfully!');
@@ -71,7 +57,7 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <Image
-          source={require('../assets/login.png')} // Replace with your logo path
+          source={require('../asset/login.png')} // Replace with your logo path
           style={styles.logo}
         />
         <Text style={styles.title}>Sign Up</Text>
@@ -123,7 +109,10 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
           <Text style={styles.submitButtonText}>Sign Up</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => navigation.reset({
+            index: 0,
+            routes: [{name: 'Login'}]
+        })}>
           <Text style={styles.linkText}>Already have an account? Login</Text>
         </TouchableOpacity>
       </View>
