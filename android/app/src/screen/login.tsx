@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { login } from '../services/authServices';
-import { updateUser } from '../services/firestoreServices';
+import { updateLastLogin } from '../services/firestoreServices';
 const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
   
   const [email, setEmail] = useState('');
@@ -30,7 +30,7 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
     try {
       const user = await login(email, password);
-      await updateUser(email); //update user lastLogin
+      await updateLastLogin(email); //update user lastLogin
       if(user.userType === 'Student' || user.userType === 'Staff'){
        
         navigation.reset({

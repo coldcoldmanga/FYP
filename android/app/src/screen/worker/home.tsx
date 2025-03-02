@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform } from
 import { logout } from '../../services/authServices';
 import { NavigationProp } from '@react-navigation/native';
 import HomeTab from '../../component/worker/tab/homeTab';
-import ProfileTab from '../../component/user/tab/profileTab';
+import ProfileTab from '../../component/profileTab';
 import ReportTab from '../../component/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';
 

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getReport } from '../services/firestoreServices';
+import { Alert } from 'react-native';
+import ReportDetail from './reportDetail';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedReport, setSelectedReport] = useState<any>(null);
+    const [viewReportDetail, setViewReportDetail] = useState(false);
 
     useEffect(() => {
         fetchReports();
@@ -16,15 +20,19 @@ const ReportsTab = () => {
         try {
             setLoading(true);
             const fetchedReports = await getReport();
-            console.log(fetchedReports);
             setReports(fetchedReports);
             setError(null);
         } catch (error) {
-            console.error('Error fetching reports:', error);
             setError('Failed to load reports');
+            Alert.alert('Error', (error as Error).message);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleReportPress = (report: any) => {
+        setSelectedReport(report);
+        setViewReportDetail(true);
     };
 
     // Format date helper
@@ -39,9 +47,10 @@ const ReportsTab = () => {
     };
 
     return (
-        <View style={styles.container}>
-            {/* Reports List */}
-            {loading ? (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.container}>
+                {/* Reports List */}
+                {loading ? (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#1a2847" />
                     <Text style={styles.messageText}>Loading reports...</Text>
@@ -66,7 +75,7 @@ const ReportsTab = () => {
                     showsVerticalScrollIndicator={false}
                 >
                     {reports.map((report) => (
-                        <TouchableOpacity key={report.id} style={styles.reportCard}>
+                        <TouchableOpacity key={report.id} style={styles.reportCard} onPress={() => handleReportPress(report)}>
                             <View style={styles.reportHeader}>
                                 <View style={styles.reportIcon}>
                                     <Icon name="report-problem" size={24} color="#1a2847" />
@@ -107,7 +116,17 @@ const ReportsTab = () => {
                     ))}
                 </ScrollView>
             )}
+            
+            {selectedReport && (
+                <ReportDetail
+                    report={selectedReport}
+                    visible={viewReportDetail}
+                    onClose={() => setViewReportDetail(false)}
+                />
+            )}
+
         </View>
+        </SafeAreaView>
     );
 };
 

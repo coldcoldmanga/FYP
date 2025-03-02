@@ -2,17 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import HomeTab from '../../component/user/tab/homeTab';
-import ProfileTab from '../../component/user/tab/profileTab';
+import ProfileTab from '../../component/profileTab';
 import ReportTab from '../../component/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';
-import { addDummyReports } from '../../services/firestoreServices';
-import { useEffect } from 'react';
 
 const UserHome = ({navigation}: {navigation: NavigationProp<any>}) => {
-
-    // useEffect(() => {
-    //     addDummyReports();
-    // }, []);
 
     const [ activeTab, setActiveTab] = useState('Home');
 

@@ -1,11 +1,41 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { logout } from '../../../services/authServices';
+import { logout } from '../services/authServices';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUser } from '../services/firestoreServices';
 
 const ProfileTab = () => {
     const navigation = useNavigation<NavigationProp<any>>();
+    const [profileData, setProfileData] = useState({
+        fullname: '',
+        email: '',
+        phone_number: '',
+        profile_picture: null as string | null,
+      });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    const fetchUserProfile = async () => {
+        try {
+            const userEmail = await AsyncStorage.getItem('userEmail');
+            const userData = await getUser(userEmail || '');
+            setProfileData({
+                fullname: userData?.fullname || '',
+                email: userData?.email || userEmail,
+                phone_number: userData?.phone_number || '',
+                profile_picture: userData?.profile_picture || null,
+            });
+        } catch (error) {
+            console.error('Error fetching user profile: ', error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const handleLogout = async () => {
         try {
@@ -19,21 +49,12 @@ const ProfileTab = () => {
         }
     };
 
-    // Sample user data
-    const userData = {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        studentId: '2024123456',
-        building: 'Building A',
-        room: 'Room 301'
-    };
-
     const menuItems = [
         {
             icon: 'person-outline',
             title: 'Personal Information',
             subtitle: 'Update your personal details',
-            action: () => console.log('Personal Info pressed')
+            action: () => navigation.navigate('EditProfile')
         },
         {
             icon: 'notifications-none',
@@ -42,10 +63,10 @@ const ProfileTab = () => {
             action: () => console.log('Notifications pressed')
         },
         {
-            icon: 'security',
-            title: 'Security',
-            subtitle: 'Password and security settings',
-            action: () => console.log('Security pressed')
+            icon: 'password',
+            title: 'Change Password',
+            subtitle: 'Change your password',
+            action: () => navigation.navigate('ForgotPassword')
         },
         {
             icon: 'help-outline',
@@ -54,6 +75,15 @@ const ProfileTab = () => {
             action: () => console.log('Help pressed')
         }
     ];
+
+    if (loading && !profileData.fullname) {
+        return (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#1a2847" />
+            <Text style={styles.loadingText}>Loading profile...</Text>
+          </View>
+        );
+      }
 
     return (
         <ScrollView style={styles.container}>
@@ -68,8 +98,8 @@ const ProfileTab = () => {
                         <Icon name="camera-alt" size={20} color="#FFF" />
                     </TouchableOpacity>
                 </View>
-                <Text style={styles.userName}>{userData.name}</Text>
-                <Text style={styles.userEmail}>{userData.email}</Text>
+                <Text style={styles.userName}>{profileData.fullname}</Text>
+                <Text style={styles.userEmail}>{profileData.email}</Text>
             </View>
 
             {/* User Info Cards */}
@@ -78,14 +108,7 @@ const ProfileTab = () => {
                     <Icon name="badge" size={20} color="#1a2847" />
                     <View style={styles.infoContent}>
                         <Text style={styles.infoLabel}>Student ID</Text>
-                        <Text style={styles.infoValue}>{userData.studentId}</Text>
-                    </View>
-                </View>
-                <View style={styles.infoCard}>
-                    <Icon name="apartment" size={20} color="#1a2847" />
-                    <View style={styles.infoContent}>
-                        <Text style={styles.infoLabel}>Residence</Text>
-                        <Text style={styles.infoValue}>{`${userData.building}, ${userData.room}`}</Text>
+                        <Text style={styles.infoValue}>{profileData.email.split('@')[0]}</Text>
                     </View>
                 </View>
             </View>
@@ -219,6 +242,16 @@ const styles = StyleSheet.create({
         color: '#FF3B30',
         fontWeight: '500',
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      loadingText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#666',
+      },
 });
 
 export default ProfileTab;
