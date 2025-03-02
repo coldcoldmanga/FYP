@@ -44,8 +44,8 @@ const ForgotPassword = ({navigation}: {navigation: NavigationProp<any>}) => {
               <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
     
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.linkText}>Back to Login</Text>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text style={styles.linkText}>Go Back</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>

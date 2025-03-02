@@ -49,7 +49,6 @@ const EditProfile = () => {
       
       // Fetch user data from Firestore
       const userData = await getUser(userEmail || '');
-      console.log(userData);
       if (userData) {
         setProfileData({
           fullname: userData?.fullname || '',
@@ -63,7 +62,6 @@ const EditProfile = () => {
       Alert.alert('Error', 'Failed to load profile data');
     } finally {
       setLoading(false);
-      console.log(profileData);
     }
   };
 
