@@ -15,6 +15,7 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
             <MapView
                 provider={PROVIDER_GOOGLE}
                 style={styles.map}
+                
                 initialRegion={{
                     latitude: 2.2496328650989734,
                     longitude: 102.27609213877413,
@@ -44,7 +45,7 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
             </View>
 
             {/* Floating Action Button */}
-            <TouchableOpacity style={styles.fab}>
+            <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('SubmitReport')}>
                 <Icon name="add" size={24} color="#FFF" />
             </TouchableOpacity>
 
@@ -58,7 +59,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     map: {
-        
         ...StyleSheet.absoluteFillObject,
     },
     topContainer: {
@@ -79,14 +79,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 12,
         height: 45,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
     },
     searchIcon: {
         marginRight: 8,
@@ -103,48 +97,21 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
     },
     fab: {
         position: 'absolute',
-    right: 20,
-    bottom: 90,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#1a2847',
-    justifyContent: 'center',
-    alignItems: 'center',
-    
-    // Refined shadow to match search bar style
-    shadowColor: '#000',
-    shadowOffset: {
-        width: 0,
-        height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 3,
-    },
-
-    navItem: {
-        alignItems: 'center',
+        right: 20,
+        bottom: 90,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#1a2847',
         justifyContent: 'center',
-    },
-    navText: {
-        fontSize: 12,
-        marginTop: 4,
-        color: '#666',
-    },
-    activeNavText: {
-        color: '#4A90E2',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#1a2847', // Same as background color for seamless look
     },
 });
 

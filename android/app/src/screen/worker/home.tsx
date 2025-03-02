@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
 import { logout } from '../../services/authServices';
 import { NavigationProp } from '@react-navigation/native';
-import HomeTab from '../../component/user/tab/homeTab';
+import HomeTab from '../../component/worker/tab/homeTab';
 import ProfileTab from '../../component/user/tab/profileTab';
 import ReportTab from '../../component/user/tab/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';

@@ -5,8 +5,14 @@ import HomeTab from '../../component/user/tab/homeTab';
 import ProfileTab from '../../component/user/tab/profileTab';
 import ReportTab from '../../component/user/tab/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';
+import { addDummyReports } from '../../services/firestoreServices';
+import { useEffect } from 'react';
 
 const UserHome = ({navigation}: {navigation: NavigationProp<any>}) => {
+
+    // useEffect(() => {
+    //     addDummyReports();
+    // }, []);
 
     const [ activeTab, setActiveTab] = useState('Home');
 
