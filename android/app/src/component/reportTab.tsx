@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getReport } from '../../../services/firestoreServices';
+import { getReport } from '../services/firestoreServices';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);

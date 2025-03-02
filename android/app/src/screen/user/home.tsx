@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Pla
 import { NavigationProp } from '@react-navigation/native';
 import HomeTab from '../../component/user/tab/homeTab';
 import ProfileTab from '../../component/user/tab/profileTab';
-import ReportTab from '../../component/user/tab/reportTab';
+import ReportTab from '../../component/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';
 import { addDummyReports } from '../../services/firestoreServices';
 import { useEffect } from 'react';

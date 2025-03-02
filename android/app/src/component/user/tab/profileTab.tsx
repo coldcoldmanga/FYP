@@ -81,13 +81,6 @@ const ProfileTab = () => {
                         <Text style={styles.infoValue}>{userData.studentId}</Text>
                     </View>
                 </View>
-                <View style={styles.infoCard}>
-                    <Icon name="apartment" size={20} color="#1a2847" />
-                    <View style={styles.infoContent}>
-                        <Text style={styles.infoLabel}>Residence</Text>
-                        <Text style={styles.infoValue}>{`${userData.building}, ${userData.room}`}</Text>
-                    </View>
-                </View>
             </View>
 
             {/* Menu Items */}

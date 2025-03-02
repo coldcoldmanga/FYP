@@ -72,6 +72,10 @@ export const logout = async () => {
     }
 };
 
+const resetPassword = async (email:string) => {
+    
+}
+
 export const forgotPassword = async (email: string) => {
     sendPasswordResetEmail(auth, email)
   .then(() => {
@@ -89,22 +93,3 @@ export const isLoggedIn = async () => {
   return isLoggedIn === 'true';
 }
 
-// export const checkAuthState = (callback: (user: any) => void) => {
-//   return onAuthStateChanged(auth, async (user: any) => {
-//     if(user){
-//       //await new Promise(resolve => setTimeout(resolve, 1000));
-//       const email = user.email;
-//       const expired = await isSessionExpired(email);
-//       if(expired){
-//         await logout();
-//         callback(null);
-//       }
-//       else{
-//         callback(user);
-//       }
-//     }
-//     else{
-//       callback(null);
-//     }
-//   });
-// };
