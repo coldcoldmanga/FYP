@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Pla
 import { NavigationProp } from '@react-navigation/native';
 import HomeTab from '../../component/user/tab/homeTab';
 import ProfileTab from '../../component/profileTab';
-import ReportTab from '../../component/reportTab';
+import ReportTab from '../../component/user/tab/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';
 
 const UserHome = ({navigation}: {navigation: NavigationProp<any>}) => {

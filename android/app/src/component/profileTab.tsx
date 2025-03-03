@@ -56,12 +56,12 @@ const ProfileTab = () => {
             subtitle: 'Update your personal details',
             action: () => navigation.navigate('EditProfile')
         },
-        {
-            icon: 'notifications-none',
-            title: 'Notifications',
-            subtitle: 'Manage your notification preferences',
-            action: () => console.log('Notifications pressed')
-        },
+        // {
+        //     icon: 'notifications-none',
+        //     title: 'Notifications',
+        //     subtitle: 'Manage your notification preferences',
+        //     action: () => console.log('Notifications pressed')
+        // },
         {
             icon: 'password',
             title: 'Change Password',
@@ -91,12 +91,12 @@ const ProfileTab = () => {
             <View style={styles.header}>
                 <View style={styles.profileImageContainer}>
                     <Image
-                        source={{ uri: 'https://via.placeholder.com/100' }}
+                        source={require('../asset/avatar.png')}
                         style={styles.profileImage}
                     />
-                    <TouchableOpacity style={styles.editImageButton}>
+                    {/* <TouchableOpacity style={styles.editImageButton}>
                         <Icon name="camera-alt" size={20} color="#FFF" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 <Text style={styles.userName}>{profileData.fullname}</Text>
                 <Text style={styles.userEmail}>{profileData.email}</Text>

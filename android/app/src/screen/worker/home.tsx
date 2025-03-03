@@ -4,7 +4,7 @@ import { logout } from '../../services/authServices';
 import { NavigationProp } from '@react-navigation/native';
 import HomeTab from '../../component/worker/tab/homeTab';
 import ProfileTab from '../../component/profileTab';
-import ReportTab from '../../component/reportTab';
+import ReportTab from '../../component/worker/tab/reportTab';
 import BottomNavBar from '../../component/bottomNavBar';
 
 const WorkerHome = ({navigation}: {navigation: NavigationProp<any>}) => {
