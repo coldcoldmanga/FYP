@@ -1,20 +1,95 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform } from 'react-native';
+import { NavigationProp } from '@react-navigation/native';
+import HomeTab from '../../component/admin/tab/homeTab';
+import ProfileTab from '../../component/profileTab';
+import ReportTab from '../../component/admin/tab/reportTab';
+import AdminBottomNavBar from '../../component/adminBottomNavBar';
+import FacilityTab from '../../component/admin/tab/facilityTab';
 
-const AdminHome = () => {
+const AdminHome = ({navigation}: {navigation: NavigationProp<any>}) => {
+
+    console.log('AdminHome');
+
+    const [ activeTab, setActiveTab] = useState('Home');
+
+    const renderTabContent = () => {
+        switch(activeTab){
+            case 'Home':
+                return <HomeTab navigation={navigation} />;
+            case 'Profile':
+                return <ProfileTab />;
+            case 'Report':
+                return <ReportTab />;
+            case 'Facility':
+                return <FacilityTab />;
+            default:
+                return <HomeTab navigation={navigation} />;
+        }
+    };
+
     return (
-        <View style={styles.container}>
-            <Text>Admin Home</Text>
-        </View>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    {renderTabContent()}
+                </View>
+
+                <AdminBottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            </View>
+        </SafeAreaView>
     )
+    
 }
 
 export default AdminHome;
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#FFF',
+    },
     container: {
         flex: 1,
-        justifyContent: 'center',
+        backgroundColor: '#FFF',
+    },
+    content: {
+        flex: 1,
+    },
+    bottomNav: {
+        flexDirection: 'row',
+        height: 60,
+        backgroundColor: '#FFF',
+        borderTopWidth: 0,
+        borderTopColor: '#E5E5E5',
+        justifyContent: 'space-around',
         alignItems: 'center',
-    }
+        position: 'absolute',
+        bottom: Platform.OS === 'ios' ? 30 : 20,
+        left: 20,
+        right: 20,
+        borderRadius: 30,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+    },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 0,
+        paddingBottom: Platform.OS === 'android' ? 0 : 20,
+    },
+    navItem: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    navText: {
+        fontSize: 12,
+        marginTop: 4,
+        color: '#666',
+    },
+    activeNavText: {
+        color: '#4A90E2',
+    },
 });

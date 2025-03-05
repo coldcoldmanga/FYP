@@ -1,14 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Picker } from '@react-native-picker/picker';
+import { updateReport } from '../../../service/firestoreServices';
 
 interface ReportDetailProps {
     report: any;
     visible: boolean;
     onClose: () => void;
+    onUpdate: () => void;
 }
 
-const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
+const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) => {
+    
+    const [loading, setLoading] = useState(false);
+
     const formatDate = (timestamp: any) => {
         if (!timestamp) return 'Not specified';
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -19,6 +25,27 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const handleUpdateReport = async () => {
+        try {
+            setLoading(true);
+            await updateReport(report.id, {
+                status: report.status,
+                progress: report.progress,
+                updated_at: new Date()
+            });
+
+            if(onUpdate){
+                onUpdate();
+            }
+            onClose();
+        } catch (error) {
+            console.error('Error updating report:', error);
+            Alert.alert('Error', 'Failed to update report');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -36,17 +63,16 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
 
                     <ScrollView>
                         <Text style={styles.title}>{report.fault_id}</Text>
+
+                        {report.updated_at && (
+                            <Text style={styles.lastUpdated}>
+                                Last updated: {formatDate(report.updated_at)}
+                            </Text>
+                        )}
                         
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Location</Text>
-                            <Text style={styles.sectionContent}>{report.building_id}</Text>
-                        </View>
-
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Status</Text>
-                            <View style={styles.badge}>
-                                <Text style={styles.badgeText}>{report.status}</Text>
-                            </View>
+                            <Text style={styles.sectionContent}>{`${report.building_id} - ${report.facility_id}`}</Text>
                         </View>
 
                         <View style={styles.section}>
@@ -59,12 +85,48 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
                             <Text style={styles.sectionContent}>{formatDate(report.submitted_at)}</Text>
                         </View>
 
-                        {report.assigned_to && (
-                            <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>Assigned To</Text>
-                                <Text style={styles.sectionContent}>{report.assigned_to}</Text>
+                        {/* Status Update Dropdown */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Update Status</Text>
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={report.status}
+                                    onValueChange={(itemValue) => report.status = itemValue}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Pending" value="Pending" />
+                                    <Picker.Item label="In Progress" value="In Progress" />
+                                    <Picker.Item label="Completed" value="Completed" />
+                                </Picker>
                             </View>
-                        )}
+                        </View>
+
+                        {/* Progress Update Input */}
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Progress Notes</Text>
+                            <TextInput
+                                style={styles.progressInput}
+                                value={report.progress}
+                                onChangeText={(text) => report.progress = text}
+                                placeholder="Enter progress details..."
+                                multiline
+                                numberOfLines={4}
+                                textAlignVertical="top"
+                            />
+                        </View>
+
+                        {/* Update Button */}
+                        <TouchableOpacity 
+                            style={styles.updateButton}
+                            onPress={handleUpdateReport}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={styles.updateButtonText}>Update Report</Text>
+                            )}
+                        </TouchableOpacity>
                     </ScrollView>
                 </View>
             </View>
@@ -89,6 +151,13 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         padding: 8,
     },
+    lastUpdated: {
+        fontSize: 12,
+        color: '#666',
+        fontStyle: 'italic',
+        marginTop: -16,
+        marginBottom: 20,
+    },
     title: {
         fontSize: 24,
         fontWeight: '600',
@@ -107,17 +176,36 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    badge: {
-        backgroundColor: '#E3F2FD',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+    pickerContainer: {
+        borderWidth: 1,
+        borderColor: '#ddd',
         borderRadius: 8,
-        alignSelf: 'flex-start',
+        backgroundColor: '#fff',
+        marginTop: 4,
     },
-    badgeText: {
-        color: '#1a2847',
-        fontSize: 14,
-        fontWeight: '500',
+    picker: {
+        height: 50,
+    },
+    progressInput: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 16,
+        backgroundColor: '#fff',
+        minHeight: 100,
+    },
+    updateButton: {
+        backgroundColor: '#1a2847',
+        borderRadius: 8,
+        paddingVertical: 14,
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    updateButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

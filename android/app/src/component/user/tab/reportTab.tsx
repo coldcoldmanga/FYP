@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getReport } from '../../../services/firestoreServices';
+import { getReport } from '../../../service/firestoreServices';
 import { Alert } from 'react-native';
-import ReportDetail from '../../../component/reportDetail';
+import ReportDetail from '../../../component/user/tab/reportDetail';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
@@ -84,7 +84,7 @@ const ReportsTab = () => {
                                     <Text style={styles.reportTitle}>{report.fault_id || 'Unknown Issue'}</Text>
                                     <View style={styles.locationContainer}>
                                         <Icon name="location-on" size={16} color="#666" />
-                                        <Text style={styles.reportLocation}>{report.facility_id || 'Unknown Location'}</Text>
+                                        <Text style={styles.reportLocation}>{report.building_id + ' - ' + report.facility_id || 'Unknown Location'}</Text>
                                     </View>
                                 </View>
                             </View>

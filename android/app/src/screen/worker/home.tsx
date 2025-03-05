@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
-import { logout } from '../../services/authServices';
+import { logout } from '../../service/authServices';
 import { NavigationProp } from '@react-navigation/native';
 import HomeTab from '../../component/worker/tab/homeTab';
 import ProfileTab from '../../component/profileTab';

@@ -18,7 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { updateUser, getUser } from '../services/firestoreServices';
+import { updateUser, getUser } from '../service/firestoreServices';
 
 const EditProfile = () => {
   const navigation = useNavigation<NavigationProp<any>>();

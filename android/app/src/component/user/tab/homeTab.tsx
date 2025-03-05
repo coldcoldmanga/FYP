@@ -4,12 +4,11 @@ import { NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
-const { width, height } = Dimensions.get('window');
-
 const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
     const [searchQuery, setSearchQuery] = useState('');
 
     return (
+        <SafeAreaView style={styles.container}>
         <View style={styles.container}>
             {/* Map View */}
             <MapView
@@ -51,6 +50,7 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
 
             
         </View>
+        </SafeAreaView>
     );
 };
 

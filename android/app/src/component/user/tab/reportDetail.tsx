@@ -36,10 +36,16 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
 
                     <ScrollView>
                         <Text style={styles.title}>{report.fault_id}</Text>
+
+                        {report.updated_at && (
+                            <Text style={styles.lastUpdated}>
+                                Last updated: {formatDate(report.updated_at)}
+                            </Text>
+                        )}
                         
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Location</Text>
-                            <Text style={styles.sectionContent}>{report.building_id}</Text>
+                            <Text style={styles.sectionContent}>{`${report.building_id} - ${report.facility_id}`}</Text>
                         </View>
 
                         <View style={styles.section}>
@@ -118,6 +124,13 @@ const styles = StyleSheet.create({
         color: '#1a2847',
         fontSize: 14,
         fontWeight: '500',
+    },
+    lastUpdated: {
+        fontSize: 12,
+        color: '#666',
+        fontStyle: 'italic',
+        marginTop: -16,
+        marginBottom: 20,
     },
 });
 

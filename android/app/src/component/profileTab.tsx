@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { logout } from '../services/authServices';
+import { logout } from '../service/authServices';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getUser } from '../services/firestoreServices';
+import { getUser } from '../service/firestoreServices';
 
 const ProfileTab = () => {
     const navigation = useNavigation<NavigationProp<any>>();

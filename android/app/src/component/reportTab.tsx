@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getReport } from '../services/firestoreServices';
+import { getReport } from '../service/firestoreServices';
 import { Alert } from 'react-native';
 import ReportDetail from './reportDetail';
 
