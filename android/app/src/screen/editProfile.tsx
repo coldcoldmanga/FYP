@@ -15,10 +15,9 @@ import {
 } from 'react-native';
 import { launchImageLibrary, ImageLibraryOptions } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { updateUser, getUser } from '../service/firestoreServices';
+import { updateUser, getUser } from '../service/userServices';
 
 const EditProfile = () => {
   const navigation = useNavigation<NavigationProp<any>>();

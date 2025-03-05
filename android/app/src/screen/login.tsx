@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { login } from '../service/authServices';
-import { updateLastLogin } from '../service/firestoreServices';
+import { updateLastLogin } from '../service/userServices';
 const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
   
   const [email, setEmail] = useState('');

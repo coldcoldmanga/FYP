@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { NavigationProp } from '@react-navigation/native';
 import { signUp } from '../service/authServices';
 import { Picker } from '@react-native-picker/picker';
-import { addUser, getUser } from '../service/firestoreServices';
+import { addUser, getUser } from '../service/userServices';
 
 const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [fullName, setFullName] = useState('');
