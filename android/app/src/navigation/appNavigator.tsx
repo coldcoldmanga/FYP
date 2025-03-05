@@ -10,7 +10,7 @@ import AdminHome from '../screen/admin/home';
 import WorkerHome from '../screen/worker/home';
 import SubmitReport from '../screen/user/submit_report';
 import EditProfile from '../screen/editProfile';
-import { isLoggedIn, isSessionExpired } from '../services/authServices';
+import { isLoggedIn, isSessionExpired } from '../service/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 const Stack = createNativeStackNavigator();
@@ -23,9 +23,11 @@ const AppNavigator = () => {
     useEffect(()=>{
         const checkLoginStatus = async () => {
             const loggedIn = await isLoggedIn();
-            
+            console.log('loggedIn:', loggedIn);
+
             if(loggedIn){
                 const isExpired = await isSessionExpired();
+                console.log('isExpired:', isExpired);
                 if(isExpired){
                     await AsyncStorage.removeItem('userEmail');
                     await AsyncStorage.removeItem('isLoggedIn');
@@ -35,6 +37,7 @@ const AppNavigator = () => {
                 }
                 else{
                     const userType = await AsyncStorage.getItem('userType');
+                    console.log('userType:', userType);
                     switch(userType){
                         case 'Student':
                         case 'Staff':

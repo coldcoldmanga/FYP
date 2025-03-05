@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import { forgotPassword } from '../services/authServices';
+import { forgotPassword } from '../service/authServices';
 import { NavigationProp } from '@react-navigation/native';
 
 const ForgotPassword = ({navigation}: {navigation: NavigationProp<any>}) => {

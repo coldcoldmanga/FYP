@@ -11,8 +11,8 @@ import {
   Button,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
-import { login } from '../services/authServices';
-import { updateLastLogin } from '../services/firestoreServices';
+import { login } from '../service/authServices';
+import { updateLastLogin } from '../service/firestoreServices';
 const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
   
   const [email, setEmail] = useState('');
@@ -31,13 +31,13 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
     try {
       const user = await login(email, password);
       await updateLastLogin(email); //update user lastLogin
-      if(user.userType === 'Student' || user.userType === 'Staff'){
+      if(user.user_type === 'Student' || user.user_type === 'Staff'){
        
         navigation.reset({
             index: 0,
             routes: [{name: 'UserHome'}]
         })
-      }else if(user.userType === 'Maintenance Worker'){
+      }else if(user.user_type === 'Maintenance Worker'){
         navigation.reset({
             index: 0,
             routes: [{name: 'WorkerHome'}]
