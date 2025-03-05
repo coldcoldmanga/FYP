@@ -48,6 +48,16 @@ const SubmitReport = () => {
   const [faultType, setFaultType] = useState('Air Conditioning');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
 
+  const building_data = {
+    building_id: Number,
+    building_name: String,
+    description: String,
+    latitude: Number,
+    longitude: Number,
+    created_at: Date,
+    updated_at: Date,
+  }
+
   const addData = async () => {
     if (!selectedBuilding) {
       Alert.alert('No building selected', 'Please select a building on the map.');
@@ -85,12 +95,12 @@ const SubmitReport = () => {
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          mapType="satellite" // Set map type to satellite
+          mapType="hybrid"
           initialRegion={{
-            latitude: 2.24963,
-            longitude: 102.27609,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
+            latitude: 2.2490057879268996,  
+            longitude: 102.27706624157103,
+            latitudeDelta: 0.001,
+            longitudeDelta: 0.001,
           }}
         >
           {buildingData.map((building) => (

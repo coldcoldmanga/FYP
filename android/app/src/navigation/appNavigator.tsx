@@ -10,6 +10,9 @@ import AdminHome from '../screen/admin/home';
 import WorkerHome from '../screen/worker/home';
 import SubmitReport from '../screen/user/submit_report';
 import EditProfile from '../screen/editProfile';
+import ManageBuilding from '../screen/admin/manageBuilding';
+import ManageEquipment from '../screen/admin/manageEquipment';
+import ManageFacility from '../screen/admin/manageFacility';
 import { isLoggedIn, isSessionExpired } from '../service/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
@@ -23,11 +26,9 @@ const AppNavigator = () => {
     useEffect(()=>{
         const checkLoginStatus = async () => {
             const loggedIn = await isLoggedIn();
-            console.log('loggedIn:', loggedIn);
 
             if(loggedIn){
                 const isExpired = await isSessionExpired();
-                console.log('isExpired:', isExpired);
                 if(isExpired){
                     await AsyncStorage.removeItem('userEmail');
                     await AsyncStorage.removeItem('isLoggedIn');
@@ -37,7 +38,6 @@ const AppNavigator = () => {
                 }
                 else{
                     const userType = await AsyncStorage.getItem('userType');
-                    console.log('userType:', userType);
                     switch(userType){
                         case 'Student':
                         case 'Staff':
@@ -78,6 +78,9 @@ const AppNavigator = () => {
                 <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerShown: false}} />
                 <Stack.Screen name='SubmitReport' component={SubmitReport} />
                 <Stack.Screen name='EditProfile' component={EditProfile} options={{headerShown: false}} />
+                <Stack.Screen name='ManageBuilding' component={ManageBuilding} options={{headerShown: false}} />
+                <Stack.Screen name='ManageEquipment' component={ManageEquipment} options={{headerShown: false}} />
+                <Stack.Screen name='ManageFacility' component={ManageFacility} options={{headerShown: false}} />
             </Stack.Navigator>
         </NavigationContainer>
     )
