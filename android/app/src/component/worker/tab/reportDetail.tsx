@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput,
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import { updateReport } from '../../../service/firestoreServices';
+import { updateWorker } from '../../../service/userServices';
 
 interface ReportDetailProps {
     report: any;
@@ -14,6 +15,9 @@ interface ReportDetailProps {
 const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) => {
     
     const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState(report.progress);
+    const [status, setStatus] = useState(report.status);
+
 
     const formatDate = (timestamp: any) => {
         if (!timestamp) return 'Not specified';
@@ -31,15 +35,22 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
         try {
             setLoading(true);
             await updateReport(report.id, {
-                status: report.status,
-                progress: report.progress,
+                status: status,
+                progress: progress,
                 updated_at: new Date()
             });
 
-            if(onUpdate){
-                onUpdate();
+            if(status === 'Completed'){
+                await updateWorker(report.assigned_to, status);
             }
-            onClose();
+
+            Alert.alert('Success', 'Report updated successfully', [
+                {text: 'OK', onPress: () => {
+                    onUpdate();
+                    onClose();
+                }}
+            ]);
+
         } catch (error) {
             console.error('Error updating report:', error);
             Alert.alert('Error', 'Failed to update report');
@@ -90,11 +101,11 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                             <Text style={styles.sectionTitle}>Update Status</Text>
                             <View style={styles.pickerContainer}>
                                 <Picker
-                                    selectedValue={report.status}
-                                    onValueChange={(itemValue) => report.status = itemValue}
+                                    selectedValue={status}
+                                    onValueChange={(itemValue) => setStatus(itemValue)}
                                     style={styles.picker}
                                 >
-                                    <Picker.Item label="Pending" value="Pending" />
+                                    <Picker.Item label="Assigned" value="Assigned" />
                                     <Picker.Item label="In Progress" value="In Progress" />
                                     <Picker.Item label="Completed" value="Completed" />
                                 </Picker>
@@ -106,8 +117,8 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                             <Text style={styles.sectionTitle}>Progress Notes</Text>
                             <TextInput
                                 style={styles.progressInput}
-                                value={report.progress}
-                                onChangeText={(text) => report.progress = text}
+                                value={progress}
+                                onChangeText={(text) => setProgress(text)}
                                 placeholder="Enter progress details..."
                                 multiline
                                 numberOfLines={4}
@@ -117,15 +128,17 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
 
                         {/* Update Button */}
                         <TouchableOpacity 
-                            style={styles.updateButton}
+                            style={[
+                                styles.updateButton,
+                                (loading || (status === report.status && progress === report.progress)) && 
+                                styles.updateButtonDisabled
+                            ]}
                             onPress={handleUpdateReport}
-                            disabled={loading}
+                            disabled={loading || (status === report.status && progress === report.progress)}
                         >
-                            {loading ? (
-                                <ActivityIndicator size="small" color="#fff" />
-                            ) : (
-                                <Text style={styles.updateButtonText}>Update Report</Text>
-                            )}
+                            <Text style={styles.updateButtonText}>
+                                {loading ? 'Updating...' : 'Update Report'}
+                            </Text>
                         </TouchableOpacity>
                     </ScrollView>
                 </View>
@@ -206,6 +219,9 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+    },
+    updateButtonDisabled: {
+        backgroundColor: '#cccccc',
     },
 });
 

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, writeBatch, orderBy } from '@react-native-firebase/firestore';
+import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, writeBatch, orderBy, increment } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 const firestore = getFirestore(firebaseApp);
 
@@ -84,3 +84,31 @@ export const getUser = async (email: string) => {
         throw error;
     }
 };
+
+export const getWorker = async () => {
+    try{
+        const workerQuery = query(collection(firestore, 'user'), where('user_type', '==', 'Maintenance Worker'), where('active_task', '<', 5));
+        const workerSnapshot = await getDocs(workerQuery);
+        return workerSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+    } catch (error) {
+        console.error('Get Worker Error: ', error);
+        throw error;
+    }
+}
+
+export const updateWorker = async (workerID: string, status:string) => {
+    try{
+        const workerRef = doc(firestore, 'user', workerID);
+        if(status !== 'Completed'){
+            await updateDoc(workerRef, {active_task: increment(1)});
+        }else{
+            await updateDoc(workerRef, {active_task: increment(-1)});
+        }
+    }catch(error){
+        console.error('Update Worker Error: ', error);
+        throw error;
+    }
+}

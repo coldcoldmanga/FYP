@@ -38,7 +38,7 @@ export const getReport = async () => {
         }
         const reportSnapshot = await getDocs(reportQuery);
         
-        // Include the document ID with each report
+
         return reportSnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()

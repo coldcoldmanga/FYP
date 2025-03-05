@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Dimensions } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import Map from '../../map';
 
 const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -11,17 +11,7 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
         <SafeAreaView style={styles.container}>
         <View style={styles.container}>
             {/* Map View */}
-            <MapView
-                provider={PROVIDER_GOOGLE}
-                style={styles.map}
-                
-                initialRegion={{
-                    latitude: 2.2496328650989734,
-                    longitude: 102.27609213877413,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                }}
-            />
+            <Map />
             
             {/* Search Bar and Notification Container */}
             <View style={styles.topContainer}>

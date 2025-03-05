@@ -121,6 +121,7 @@ const ReportsTab = () => {
                     report={selectedReport}
                     visible={viewReportDetail}
                     onClose={() => setViewReportDetail(false)}
+                    onUpdate={fetchReports}
                 />
             )}
 

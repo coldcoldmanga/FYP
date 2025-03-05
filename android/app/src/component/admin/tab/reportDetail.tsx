@@ -1,14 +1,19 @@
-import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import { getWorker } from '../../../service/userServices';
+import { updateReport } from '../../../service/firestoreServices';
+import { updateWorker } from '../../../service/userServices';
+import { Picker } from '@react-native-picker/picker';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
     onClose: () => void;
+    onUpdate: () => void;
 }
 
-const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
+const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps) => {
+
     const formatDate = (timestamp: any) => {
         if (!timestamp) return 'Not specified';
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -20,6 +25,52 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
             minute: '2-digit'
         });
     };
+
+    const [selectedWorker, setSelectedWorker] = useState(report.assigned_to);
+    const [availableWorkers, setAvailableWorkers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() =>{
+        if(visible){
+            fetchWorkers();
+        }
+    }, [visible]);
+
+    const fetchWorkers = async () => {
+        try{
+            const workers = await getWorker();
+            setAvailableWorkers(workers);
+        }catch(error){
+            console.error('Error fetching workers:', error);
+        }
+    }
+
+    const handleUpdate = async () => {
+        if(!selectedWorker){
+            Alert.alert('Error', 'Please select a worker');
+            return;
+        }
+
+        setLoading(true);
+        try{
+            await updateReport(report.id, {assigned_to: selectedWorker, status: 'Assigned', updated_at: new Date()});
+            await updateWorker(selectedWorker, 'Assigned');
+            await fetchWorkers();
+           
+            Alert.alert('Success', 'Report updated successfully', [
+                {text: 'OK', onPress: () => {
+                    onUpdate();
+                    onClose();
+                }}
+            ]);
+        }catch(error){  
+            console.error('Error updating report:', error);
+            Alert.alert('Error', 'Failed to update report');
+        }finally{
+            setLoading(false);
+        }
+    }
+    
 
     return (
         <Modal
@@ -71,6 +122,37 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
                                 <Text style={styles.sectionContent}>{report.assigned_to}</Text>
                             </View>
                         )}
+
+<View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Assign Worker</Text>
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={report.assigned_to}
+                                    onValueChange={(itemValue) => setSelectedWorker(itemValue)}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Select a worker" value="" />
+                                    {availableWorkers.map((worker: any) => (
+                                        <Picker.Item
+                                            key={worker.id}
+                                            label={`${worker.fullname} (${worker.active_task || 0} active tasks)`}
+                                            value={worker.email.split('@')[0]}
+                                        />
+                                    ))}
+                                </Picker>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity 
+                            style={[styles.updateButton, (report.status === 'Completed') ? styles.updateButtonDisabled : (loading || selectedWorker === report.assigned_to || !selectedWorker) && styles.updateButtonDisabled]}
+                            onPress={handleUpdate}
+                            disabled={loading || selectedWorker === report.assigned_to || !selectedWorker}
+                        >
+                            <Text style={styles.updateButtonText}>
+                                {loading ? 'Updating...' : 'Update Assignment'}
+                            </Text>
+                        </TouchableOpacity>
+                        
                     </ScrollView>
                 </View>
             </View>
@@ -131,6 +213,34 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         marginTop: -16,
         marginBottom: 20,
+    },
+    pickerContainer: {
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
+        borderRadius: 8,
+        marginTop: 8,
+        backgroundColor: '#FFF',
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 50,
+        width: '100%',
+    },
+    updateButton: {
+        backgroundColor: '#4A90E2',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    updateButtonDisabled: {
+        backgroundColor: '#cccccc',
+    },
+    updateButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 
