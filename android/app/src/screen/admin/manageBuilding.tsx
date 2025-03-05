@@ -1,17 +1,17 @@
 import React from "react"   ;
 import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 
-const ManageFacility = () => {
+const ManageBuilding = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
-                <Text>Manage Facility</Text>
+                <Text>Manage Building</Text>
             </View>
         </SafeAreaView>
     );
 };
 
-export default ManageFacility;
+export default ManageBuilding;
 
 const styles = StyleSheet.create({
     container: {
