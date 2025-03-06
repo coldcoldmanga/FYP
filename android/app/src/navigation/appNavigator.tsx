@@ -10,9 +10,15 @@ import AdminHome from '../screen/admin/home';
 import WorkerHome from '../screen/worker/home';
 import SubmitReport from '../screen/user/submit_report';
 import EditProfile from '../screen/editProfile';
-import ManageBuilding from '../screen/admin/manageBuilding';
-import ManageEquipment from '../screen/admin/manageEquipment';
-import ManageFacility from '../screen/admin/manageFacility';
+import AddBuilding from '../screen/admin/addBuilding';
+import AddEquipment from '../screen/admin/addEquipment';
+import AddFacility from '../screen/admin/addFacility';
+import EditBuilding from '../component/admin/tab/editBuildingModal';
+import EditEquipment from '../component/admin/tab/editEquipmentModal';
+import EditFacility from '../component/admin/tab/editFacilityModal';
+import BuildingsList from '../screen/admin/buildingsList';
+import FacilitiesList from '../screen/admin/facilitiesList';
+import EquipmentsList from '../screen/admin/equipmentsList';
 import { isLoggedIn, isSessionExpired } from '../service/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
@@ -78,9 +84,12 @@ const AppNavigator = () => {
                 <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerShown: false}} />
                 <Stack.Screen name='SubmitReport' component={SubmitReport} />
                 <Stack.Screen name='EditProfile' component={EditProfile} options={{headerShown: false}} />
-                <Stack.Screen name='ManageBuilding' component={ManageBuilding} options={{headerShown: false}} />
-                <Stack.Screen name='ManageEquipment' component={ManageEquipment} options={{headerShown: false}} />
-                <Stack.Screen name='ManageFacility' component={ManageFacility} options={{headerShown: false}} />
+                <Stack.Screen name='AddBuilding' component={AddBuilding} options={{headerShown: false}} />
+                <Stack.Screen name='AddEquipment' component={AddEquipment} options={{headerShown: false}} />
+                <Stack.Screen name='AddFacility' component={AddFacility} options={{headerShown: false}} />
+                <Stack.Screen name='BuildingsList' component={BuildingsList} options={{headerShown: false}} />
+                <Stack.Screen name='FacilitiesList' component={FacilitiesList} options={{headerShown: false}} />
+                <Stack.Screen name='EquipmentsList' component={EquipmentsList} options={{headerShown: false}} />
             </Stack.Navigator>
         </NavigationContainer>
     )
