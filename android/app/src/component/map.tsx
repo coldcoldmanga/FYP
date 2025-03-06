@@ -1,41 +1,54 @@
-import React, { useState } from 'react';
-import { Modal, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Modal, StyleSheet, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import MapView, { PoiClickEvent, PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 const Map = () => {
 
+    const INITIAL_REGION = {
+        latitude: 2.2490057879268996,  
+        longitude: 102.27706624157103,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
+    };
+    const [loading, setLoading] = useState(true);
     const [selectedPoi, setSelectedPoi] = useState<any>(null);
+    const [region, setRegion] = useState({
+        latitude: 2.2490057879268996,  
+        longitude: 102.27706624157103,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
+    });
+
+    useEffect(() => {
+        // Set the initial region when the component mounts
+        setRegion(INITIAL_REGION);
+        setLoading(false);
+    }, []);
 
     const handlePoiClick = (event: PoiClickEvent) => {
         const poi = event.nativeEvent;
-        console.log(poi);
         setSelectedPoi(poi);
     }
+
+    const handleRegionChange = (newRegion: any) => {
+        setRegion(newRegion); // Update region as the user interacts with the map
+    }
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
     return (
             <View>
                 <MapView
                 provider={PROVIDER_GOOGLE}
                 style={styles.map}
                 mapType='hybrid'
-                initialRegion={{
-                    latitude: 2.2490057879268996,  
-                    longitude: 102.27706624157103,
-                    latitudeDelta: 0.001,
-                    longitudeDelta: 0.001,
-                }}
-                zoomEnabled={true}           // Enable pinch to zoom
-                zoomTapEnabled={true}        // Enable double tap to zoom
-                scrollEnabled={true}         // Enable pan/drag to move
-                rotateEnabled={true}         // Enable two-finger rotate
-                pitchEnabled={true}          // Enable two-finger tilt
-                toolbarEnabled={true}        // Show toolbar (Android only)
-                moveOnMarkerPress={true}     // Center map when marker is pressed
-                showsUserLocation={true}     // Show user's location
-                showsMyLocationButton={true} // Show 'center on user' button
-                showsCompass={true}          // Show compass when map is rotated
-                showsScale={true}            // Show scale bar
-                showsBuildings={true}        // Show 3D buildings
-                showsTraffic={true}
+                initialRegion={region}
                 onPoiClick={handlePoiClick} 
             />
 
@@ -123,6 +136,11 @@ const styles = StyleSheet.create({
         marginLeft: 8,
         fontSize: 16,
         color: '#666',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

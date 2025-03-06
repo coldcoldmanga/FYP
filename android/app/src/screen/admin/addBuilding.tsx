@@ -8,7 +8,8 @@ import {
     TouchableOpacity,
     ScrollView,
     Alert,
-    Dimensions
+    Dimensions,
+    ActivityIndicator
 } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -24,8 +25,9 @@ const INITIAL_REGION = {
 
 const AddBuilding = () => {
     const navigation = useNavigation<NavigationProp<any>>();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
+    const [mapRegion, setMapRegion] = useState(INITIAL_REGION);
     const [formData, setFormData] = useState({
         building_name: '',
         building_code: '',
@@ -34,6 +36,12 @@ const AddBuilding = () => {
         created_at: new Date(),
         updated_at: new Date()
     });
+
+    useEffect(() => {
+        // Set the initial region when the component mounts
+        setMapRegion(INITIAL_REGION);
+        setLoading(false);
+    }, []);
 
     const handleMapPress = (event: any) => {
         const { coordinate } = event.nativeEvent;
@@ -71,7 +79,6 @@ const AddBuilding = () => {
             return;
         }
 
-        setLoading(true);
         try {
             await addBuilding(formData);
             Alert.alert('Success', 'Building added successfully', [
@@ -85,6 +92,14 @@ const AddBuilding = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+        
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -105,18 +120,7 @@ const AddBuilding = () => {
                     <MapView
                         provider={PROVIDER_GOOGLE}
                         style={styles.map}
-                        initialRegion={{
-                            latitude: 2.2490057879268996,  
-                            longitude: 102.27706624157103,
-                            latitudeDelta: 0.001,
-                            longitudeDelta: 0.001,
-                        }}
-                        region={{
-                            latitude: 2.2490057879268996,  
-                            longitude: 102.27706624157103,
-                            latitudeDelta: 0.001,
-                            longitudeDelta: 0.001,
-                        }}
+                        initialRegion={INITIAL_REGION}
                         mapType="hybrid"
                         onPress={handleMapPress}
                         onPoiClick={handlePoiClick}
@@ -266,6 +270,11 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
