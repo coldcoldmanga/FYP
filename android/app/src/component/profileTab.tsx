@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { logout } from '../service/authServices';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUser } from '../service/firestoreServices';
 
@@ -15,10 +15,13 @@ const ProfileTab = () => {
         profile_picture: null as string | null,
       });
     const [loading, setLoading] = useState(true);
+    const isFocused = useIsFocused();
 
     useEffect(() => {
-        fetchUserProfile();
-    }, []);
+        if (isFocused) {
+            fetchUserProfile();
+        }
+    }, [isFocused]);
 
     const fetchUserProfile = async () => {
         try {
