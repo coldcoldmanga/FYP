@@ -7,7 +7,7 @@ const firestore = getFirestore(firebaseApp);
 export const addFacility = async (facility: any) => {
 
     try{
-        const facilityRef = doc(collection(firestore, 'facility'));
+        const facilityRef = doc(collection(firestore, 'facility'), facility.facility_id);
         await setDoc(facilityRef, facility);
     }catch(error){
         Alert.alert('Error', (error as Error).message)
@@ -43,7 +43,7 @@ export const getFacility = async () => {
         const facilityRef = collection(firestore, 'facility');
         const snapshot = await getDocs(facilityRef);
         const facilityData = snapshot.docs.map((doc) => ({
-            id: doc.id,
+            facility_id: doc.id,
             ...doc.data(),
         }));
         return facilityData;

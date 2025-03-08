@@ -8,158 +8,356 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  ActivityIndicator
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Picker } from '@react-native-picker/picker';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import firestore from '@react-native-firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+import { getBuilding } from '../../service/buildingServices';
+import { getFacility } from '../../service/facilityServices';
+import { getEquipment } from '../../service/equipmentServices';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addReport } from '../../service/reportServices';
+import { faultType } from '../../constant/faultType';
+import { generateReportId } from '../../util/reportIdGenerator';
 
 interface Building {
-  id: string;
-  name: string;
-  coordinate: { latitude: number; longitude: number };
+  building_id: string;
+  building_name: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
   description: string;
 }
 
-// Sample building data for testing
-const buildingData: Building[] = [
-  {
-    id: '1',
-    name: 'University Library',
-    coordinate: { latitude: 2.24963, longitude: 102.27609 },
-    description: 'Main Library of the University',
-  },
-  {
-    id: '2',
-    name: 'Science Block',
-    coordinate: { latitude: 2.25000, longitude: 102.27700 },
-    description: 'Science Department',
-  },
-  {
-    id: '3',
-    name: 'Engineering Complex',
-    coordinate: { latitude: 2.24900, longitude: 102.27500 },
-    description: 'Engineering Faculty Building',
-  },
-  // Add more buildings as needed
-];
+interface Facility {
+  facility_id: string;
+  facility_name: string;
+  building_id: string;
+}
+
+interface Equipment {
+  equipment_id: string;
+  equipment_name: string;
+  facility_id: string;
+}
 
 const SubmitReport = () => {
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [equipments, setEquipments] = useState<Equipment[]>([]);
+  const [filteredFacilities, setFilteredFacilities] = useState<Facility[]>([]);
+  const [filteredEquipments, setFilteredEquipments] = useState<Equipment[]>([]);
+  
   const [description, setDescription] = useState('');
-  const [faultType, setFaultType] = useState('Air Conditioning');
+  const [priority, setPriority] = useState('Medium');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<string>('');
+  const [selectedEquipment, setSelectedEquipment] = useState<string>('');
+  const [selectedFaultType, setSelectedFaultType] = useState<string>(faultType[0].type);
+  const priorityLevels = ['Low', 'Medium', 'High', 'Critical'];
 
-  const building_data = {
-    building_id: Number,
-    building_name: String,
-    description: String,
-    latitude: Number,
-    longitude: Number,
-    created_at: Date,
-    updated_at: Date,
-  }
+  const INITIAL_REGION = {
+    latitude: 2.2490057879268996,  
+    longitude: 102.27706624157103,
+    latitudeDelta: 0.001,
+    longitudeDelta: 0.001,
+  };
 
-  const addData = async () => {
-    if (!selectedBuilding) {
-      Alert.alert('No building selected', 'Please select a building on the map.');
-      return;
+  useEffect(() => {
+    loadBuildings();
+    loadFacilities();
+    loadEquipments();
+  }, []);
+
+  useEffect(() => {
+    if (selectedBuilding) {
+      const filtered = facilities.filter(
+        facility => facility.building_id === selectedBuilding.building_id
+      );
+      console.log(filtered);
+      setFilteredFacilities(filtered);
+      setSelectedFacility('');
+      setSelectedEquipment('');
     }
-    
+  }, [selectedBuilding, facilities]);
+
+  useEffect(() => {
+    if (selectedFacility) {
+      const filtered = equipments.filter(
+        equipment => equipment.facility_id === selectedFacility
+      );
+      setFilteredEquipments(filtered);
+      setSelectedEquipment('');
+    }
+  }, [selectedFacility, equipments]);
+
+  const loadBuildings = async () => {
     try {
-      await firestore()
-        .collection('report')
-        .doc(Date.now().toString())
-        .set({
-          buildingId: selectedBuilding.id,
-          buildingName: selectedBuilding.name,
-          latitude: selectedBuilding.coordinate.latitude,
-          longitude: selectedBuilding.coordinate.longitude,
-          description,
-          faultType,
-          timestamp: firestore.FieldValue.serverTimestamp(),
-          status: 'Pending',
-          priority: 'Medium',
-        });
-      Alert.alert('Success', 'Report submitted successfully!');
-      // Reset form
-      setDescription('');
-      setSelectedBuilding(null);
+      const buildingSnapshot = await getBuilding();
+      const buildingData = buildingSnapshot.map((doc: any) => ({
+        building_id: doc.building_id,
+        building_name: doc.building_name,
+        location: doc.location,
+        description: doc.description
+      }));
+      setBuildings(buildingData);
+      console.log(buildingData);
     } catch (error) {
-      console.error('Error adding document: ', error);
-      Alert.alert('Error', 'Failed to save report. Please try again.');
+      console.error('Error loading buildings:', error);
+      Alert.alert('Error', 'Failed to load buildings');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const loadFacilities = async () => {
+    try {
+      const facilitySnapshot = await getFacility();
+      const facilityData = facilitySnapshot.map((doc: any) => ({
+        facility_id: doc.facility_id,
+        facility_name: doc.facility_name,
+        building_id: doc.building_id
+      }));
+      setFacilities(facilityData);
+      console.log(facilityData);
+    } catch (error) {
+      console.error('Error loading facilities:', error);
+    }
+  };
+
+  const loadEquipments = async () => {
+    try {
+      const equipmentSnapshot = await getEquipment();
+      const equipmentData = equipmentSnapshot.map((doc: any) => ({
+        equipment_id: doc.equipment_id,
+        equipment_name: doc.equipment_name,
+        facility_id: doc.facility_id
+      }));
+      setEquipments(equipmentData);
+      console.log(equipmentData);
+    } catch (error) {
+      console.error('Error loading equipment:', error);
+    }
+  };
+
+  const handleBuildingSelect = (building: Building) => {
+    setSelectedBuilding(building);
+  };
+
+  const submitReport = async () => {
+    if (!selectedBuilding) {
+      Alert.alert('Error', 'Please select a building');
+      return;
+    }
+
+    if (!description.trim()) {
+      Alert.alert('Error', 'Please enter a description');
+      return;
+    }
+
+    try {
+      const userEmail = await AsyncStorage.getItem('userEmail');
+      const userID = userEmail?.split('@')[0];
+      
+      if (!userID) {
+        Alert.alert('Error', 'You must be logged in to submit a report');
+        return;
+      }
+
+      const reportId = await generateReportId(selectedFaultType, selectedFacility, new Date().getFullYear());
+
+      const reportData = {
+        report_id: reportId,
+        user_id: userID,
+        building_id: selectedBuilding.building_id,
+        facility_id: selectedFacility || null,
+        equipment_id: selectedEquipment || null,
+        fault_type: selectedFaultType,
+        description,
+        latitude: selectedBuilding.location.latitude,
+        longitude: selectedBuilding.location.longitude,
+        priority,
+        status: 'Pending',
+        submitted_at: new Date(),
+        is_deleted: false
+      };
+
+      await addReport(reportData);
+      
+      Alert.alert(
+        'Success',
+        'Report submitted successfully!',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      Alert.alert('Error', 'Failed to submit report. Please try again.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4A90E2" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          mapType="hybrid"
-          initialRegion={{
-            latitude: 2.2490057879268996,  
-            longitude: 102.27706624157103,
-            latitudeDelta: 0.001,
-            longitudeDelta: 0.001,
-          }}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
         >
-          {buildingData.map((building) => (
-            <Marker
-              key={building.id}
-              coordinate={building.coordinate}
-              title={building.name}
-              description={building.description}
-              onPress={() => setSelectedBuilding(building)}
-            >
-              {/* Custom marker design */}
-              <View style={[
-                styles.customMarker, 
-                selectedBuilding?.id === building.id ? styles.selectedMarker : null
-              ]}>
-                <Icon 
-                  name="school" 
-                  size={24} 
-                  color={selectedBuilding?.id === building.id ? '#1a2847' : '#fff'} 
-                />
-              </View>
-            </Marker>
-          ))}
-        </MapView>
+          <Icon name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Submit Report</Text>
       </View>
 
-      <ScrollView style={styles.form}>
+      <ScrollView 
+        style={styles.formContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.mapContainer}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            initialRegion={INITIAL_REGION}
+            mapType="hybrid"
+          >
+            {buildings.map((building) => (
+              <Marker
+                key={building.building_id}
+                coordinate={{
+                  latitude: building.location.latitude,
+                  longitude: building.location.longitude
+                }}
+                title={building.building_name}
+                description={building.description}
+                onPress={() => handleBuildingSelect(building)}
+              >
+                <View style={[
+                  styles.customMarker, 
+                  selectedBuilding?.building_id === building.building_id ? styles.selectedMarker : null
+                ]}>
+                  <Icon 
+                    name="location-on" 
+                    size={24} 
+                    color={selectedBuilding?.building_id === building.building_id ? '#1a2847' : '#fff'} 
+                  />
+                </View>
+              </Marker>
+            ))}
+          </MapView>
+        </View>
+
         {selectedBuilding && (
-          <View style={styles.selectedBuilding}>
-            <Text style={styles.selectedTitle}>Selected Building</Text>
-            <Text style={styles.selectedText}>
-              Name: {selectedBuilding.name}
-            </Text>
-            <Text style={styles.selectedDescription}>
-              {selectedBuilding.description}
-            </Text>
-            <Text style={styles.selectedCoordinates}>
-              Coordinates: {selectedBuilding.coordinate.latitude.toFixed(5)},{' '}
-              {selectedBuilding.coordinate.longitude.toFixed(5)}
-            </Text>
+          <View style={styles.selectedBuildingContainer}>
+            <Text style={styles.sectionTitle}>Selected Building</Text>
+            <Text style={styles.selectedBuildingName}>{selectedBuilding.building_name}</Text>
           </View>
         )}
 
-        <Text style={styles.label}>Fault Type</Text>
-        <TouchableOpacity style={styles.input}>
-          <Text style={styles.inputText}>{faultType}</Text>
-          <Icon name="chevron-down" size={20} color="#666" />
-        </TouchableOpacity>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Facility</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedFacility}
+              onValueChange={(itemValue) => setSelectedFacility(itemValue)}
+              enabled={filteredFacilities.length > 0}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select a facility" value="" />
+              {filteredFacilities.map((facility) => (
+                <Picker.Item 
+                  key={facility.facility_id} 
+                  label={facility.facility_name} 
+                  value={facility.facility_id} 
+                />
+              ))}
+            </Picker>
+          </View>
+          {filteredFacilities.length === 0 && selectedBuilding && (
+            <Text style={styles.noItemsText}>No facilities available for this building</Text>
+          )}
+        </View>
 
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          multiline
-          placeholder="Enter description"
-          value={description}
-          onChangeText={setDescription}
-        />
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Equipment</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedEquipment}
+              onValueChange={(itemValue) => setSelectedEquipment(itemValue)}
+              enabled={filteredEquipments.length > 0}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select an equipment" value="" />
+              {filteredEquipments.map((equipment) => (
+                <Picker.Item 
+                  key={equipment.equipment_id} 
+                  label={equipment.equipment_name} 
+                  value={equipment.equipment_id} 
+                />
+              ))}
+            </Picker>
+          </View>
+          {filteredEquipments.length === 0 && selectedFacility && (
+            <Text style={styles.noItemsText}>No equipment available for this facility</Text>
+          )}
+        </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={addData}>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Fault Type</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedFaultType}
+              onValueChange={(itemValue) => setSelectedFaultType(itemValue)}
+              style={styles.picker}
+            >
+              {faultType.map((type) => (
+                <Picker.Item key={type.code} label={type.type} value={type.type} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Priority</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={priority}
+              onValueChange={(itemValue) => setPriority(itemValue)}
+              style={styles.picker}
+            >
+              {priorityLevels.map((level) => (
+                <Picker.Item key={level} label={level} value={level} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Describe the issue in detail"
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        <TouchableOpacity 
+          style={styles.submitButton}
+          onPress={submitReport}
+        >
           <Text style={styles.submitButtonText}>Submit Report</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -168,58 +366,110 @@ const SubmitReport = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#fff' 
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  mapContainer: { 
-    height: 300, 
-    width: '100%', 
-    borderBottomWidth: 1, 
-    borderBottomColor: '#ddd' 
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  map: { 
-    ...StyleSheet.absoluteFillObject 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  form: { 
-    padding: 16 
+  backButton: {
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  mapContainer: {
+    height: 250,
+    marginBottom: 20,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  formContainer: {
+    padding: 16,
+  },
+  selectedBuildingContainer: {
+    backgroundColor: '#e8f4fd',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#bde0fe',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a2847',
+    marginBottom: 8,
+  },
+  selectedBuildingName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  formGroup: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    color: '#666',
     marginBottom: 8,
-    marginTop: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  inputText: {
-    color: '#333',
     fontSize: 16,
+    backgroundColor: '#fff',
   },
-  textArea: { 
-    height: 100, 
-    textAlignVertical: 'top' 
+  textArea: {
+    height: 120,
+    textAlignVertical: 'top',
+  },
+  noItemsText: {
+    color: '#999',
+    fontStyle: 'italic',
+    marginTop: 8,
   },
   submitButton: {
     backgroundColor: '#1a2847',
     padding: 16,
     borderRadius: 8,
-    marginTop: 24,
     alignItems: 'center',
-    marginBottom: 30,
+    marginTop: 20,
+    marginBottom: 40,
   },
-  submitButtonText: { 
-    color: '#fff', 
-    fontSize: 16, 
-    fontWeight: '600' 
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   customMarker: {
     backgroundColor: '#1a2847',
@@ -227,45 +477,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   selectedMarker: {
     backgroundColor: '#fff',
     borderColor: '#1a2847',
     borderWidth: 3,
-    padding: 10,
   },
-  selectedBuilding: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  selectedTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a2847',
-    marginBottom: 8,
-  },
-  selectedText: { 
-    fontSize: 16, 
-    color: '#333',
-    marginBottom: 4,
-  },
-  selectedDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    fontStyle: 'italic',
-  },
-  selectedCoordinates: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'monospace',
-  }
 });
 
 export default SubmitReport;

@@ -44,9 +44,10 @@ export const getBuilding = async () => {
         const buildingRef = collection(firestore, 'building');
         const snapshot = await getDocs(buildingRef);
         const buildingData = snapshot.docs.map((doc) => ({
-            id: doc.id,
+            building_id: doc.id,
             ...doc.data(),
         }));
+        console.log(buildingData);
         return buildingData;
     }catch(error){
         Alert.alert('Error', (error as Error).message)
@@ -58,7 +59,7 @@ export const getBuildingById = async (buildingId: string) => {
     try{
         const buildingRef = doc(firestore, 'building', buildingId);
         const snapshot = await getDoc(buildingRef);
-        return { id: snapshot.id, ...snapshot.data() };
+        return { building_id: snapshot.id, ...snapshot.data() };
     }catch(error){
         Alert.alert('Error', (error as Error).message)
         throw error;

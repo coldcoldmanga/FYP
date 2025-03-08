@@ -43,7 +43,7 @@ export const getEquipment = async () => {
         const equipmentRef = collection(firestore, 'equipment');
         const snapshot = await getDocs(equipmentRef);
         const equipmentData = snapshot.docs.map((doc) => ({
-            id: doc.id,
+            equipment_id: doc.id,
             ...doc.data(),
         }));
         return equipmentData;

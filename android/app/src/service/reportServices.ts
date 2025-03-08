@@ -6,6 +6,13 @@ const firestore = getFirestore(firebaseApp);
 
 //report
 export const addReport = async (report: any) => {
+    try{
+        const reportRef = doc(collection(firestore, 'reports'), report.report_id);
+        await setDoc(reportRef, report);
+    }catch(error){
+        Alert.alert('Error', (error as Error).message);
+        throw error;
+    }
     
 };
 
@@ -40,11 +47,52 @@ export const getReport = async () => {
         
 
         return reportSnapshot.docs.map((doc) => ({
-            id: doc.id,
+            report_id: doc.id,
             ...doc.data()
         }));
     } catch (error) {
         console.error('Get Report Error: ', error);
+        throw error;
+    }
+};
+
+export const getReportByStatus = async (status: string) => {
+    try{
+        const userEmail = await AsyncStorage.getItem('userEmail');
+        const userType = await AsyncStorage.getItem('userType');
+        let reportQuery;
+
+        if(userType === 'Admin'){
+            reportQuery = query(
+                collection(firestore, 'reports'),
+                where('status', '==', status),
+                orderBy('submitted_at', 'desc')
+            );
+        }
+        else if(userType === 'Maintenance Worker'){
+            reportQuery = query(
+                collection(firestore, 'reports'),
+                where('status', '==', status),
+                where('assigned_to', '==', userEmail?.split('@')[0]),
+                orderBy('submitted_at', 'desc')
+            );
+        }
+        else{
+            reportQuery = query(
+                collection(firestore, 'reports'),
+                where('status', '==', status),
+                where('user_id', '==', userEmail?.split('@')[0]),
+                orderBy('submitted_at', 'desc')
+            );
+        }
+        const reportSnapshot = await getDocs(reportQuery);
+
+        return reportSnapshot.docs.map((doc) => ({
+            report_id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        Alert.alert('Error', (error as Error).message);
         throw error;
     }
 };
@@ -57,4 +105,4 @@ export const updateReport = async (reportID: string, updateData: any) => {
         console.error('Update Report Error: ', error);
         throw error;
     }
-}
+};
