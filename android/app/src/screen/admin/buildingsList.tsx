@@ -134,7 +134,7 @@ const BuildingsList = () => {
             <FlatList
                 data={buildings}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.building_id}
                 contentContainerStyle={styles.listContainer}
                 ListEmptyComponent={() => (
                     loading ? null : <Text style={styles.emptyText}>No buildings found</Text>

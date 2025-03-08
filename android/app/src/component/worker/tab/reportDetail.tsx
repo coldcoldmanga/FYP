@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
-import { updateReport } from '../../../service/firestoreServices';
+import { updateReport } from '../../../service/reportServices';
 import { updateWorker } from '../../../service/userServices';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 interface ReportDetailProps {
     report: any;
@@ -17,7 +18,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(report.progress);
     const [status, setStatus] = useState(report.status);
-
+    const navigation = useNavigation<NavigationProp<any>>();
 
     const formatDate = (timestamp: any) => {
         if (!timestamp) return 'Not specified';
@@ -140,6 +141,20 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                                 {loading ? 'Updating...' : 'Update Report'}
                             </Text>
                         </TouchableOpacity>
+
+                        {report.status === 'Completed' && (
+                            <View style={styles.section}>
+                                <TouchableOpacity 
+                                    style={styles.feedbackLink} 
+                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id })}
+                                >
+                                    <Icon name="rate-review" size={16} color="#1a2847" />
+                                    <Text style={styles.feedbackLinkText}>View feedback & ratings</Text>
+                                    <Icon name="chevron-right" size={16} color="#1a2847" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
                     </ScrollView>
                 </View>
             </View>
@@ -222,6 +237,18 @@ const styles = StyleSheet.create({
     },
     updateButtonDisabled: {
         backgroundColor: '#cccccc',
+    },
+    feedbackLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    feedbackLinkText: {
+        color: '#1a2847',
+        fontSize: 14,
+        fontWeight: '500',
+        marginHorizontal: 8,
+        textDecorationLine: 'underline',
     },
 });
 

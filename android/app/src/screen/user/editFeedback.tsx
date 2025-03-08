@@ -10,7 +10,7 @@ import {
   Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { updateFeedback } from '../service/feedbackServices';
+import { updateFeedback } from '../../service/feedbackServices';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const EditFeedback = () => {

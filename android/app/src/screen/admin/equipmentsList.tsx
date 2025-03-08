@@ -148,7 +148,7 @@ const EquipmentsList = () => {
             <FlatList
                 data={equipments}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.equipment_id}
                 contentContainerStyle={styles.listContainer}
                 ListEmptyComponent={() => (
                     loading ? null : <Text style={styles.emptyText}>No equipment found</Text>

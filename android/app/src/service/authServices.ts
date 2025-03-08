@@ -1,7 +1,7 @@
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from '@react-native-firebase/auth';
 import { Alert } from 'react-native';
 import { firebaseApp } from '../config/firebase';
-import { getUser } from './firestoreServices';
+import { getUser } from './userServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 //Initialize Auth
 const auth = getAuth(firebaseApp);

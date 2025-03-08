@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getWorker } from '../../../service/userServices';
-import { updateReport } from '../../../service/firestoreServices';
+import { updateReport } from '../../../service/reportServices';
 import { updateWorker } from '../../../service/userServices';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -29,7 +30,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
     const [selectedWorker, setSelectedWorker] = useState(report.assigned_to);
     const [availableWorkers, setAvailableWorkers] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-
+    const navigation = useNavigation<NavigationProp<any>>();
     useEffect(() =>{
         if(visible){
             fetchWorkers();
@@ -159,6 +160,19 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
                                 {loading ? 'Updating...' : 'Update Assignment'}
                             </Text>
                         </TouchableOpacity>
+
+                        {report.status === 'Completed' && (
+                            <View style={styles.section}>
+                                <TouchableOpacity 
+                                    style={styles.feedbackLink} 
+                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id })}
+                                >
+                                    <Icon name="rate-review" size={16} color="#1a2847" />
+                                    <Text style={styles.feedbackLinkText}>View feedback & ratings</Text>
+                                    <Icon name="chevron-right" size={16} color="#1a2847" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
                         
                     </ScrollView>
                 </View>
@@ -248,6 +262,18 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
+    },
+    feedbackLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    feedbackLinkText: {
+        color: '#1a2847',
+        fontSize: 14,
+        fontWeight: '500',
+        marginHorizontal: 8,
+        textDecorationLine: 'underline',
     },
 });
 

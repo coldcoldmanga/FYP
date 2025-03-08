@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { logout } from '../service/authServices';
 import { NavigationProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getUser } from '../service/firestoreServices';
+import { getUser } from '../service/userServices';
 
 const ProfileTab = () => {
     const navigation = useNavigation<NavigationProp<any>>();
