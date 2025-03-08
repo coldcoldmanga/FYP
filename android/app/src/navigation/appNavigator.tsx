@@ -19,6 +19,9 @@ import EditFacility from '../component/admin/tab/editFacilityModal';
 import BuildingsList from '../screen/admin/buildingsList';
 import FacilitiesList from '../screen/admin/facilitiesList';
 import EquipmentsList from '../screen/admin/equipmentsList';
+import Feedback from '../screen/feedback';
+import AddFeedback from '../screen/addFeedback';
+import EditFeedback from '../screen/editFeedback';
 import { isLoggedIn, isSessionExpired } from '../service/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
@@ -82,7 +85,7 @@ const AppNavigator = () => {
                 <Stack.Screen name='AdminHome' component={AdminHome} options={{headerShown: false}} />
                 <Stack.Screen name='WorkerHome' component={WorkerHome} options={{headerShown: false}} />
                 <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerShown: false}} />
-                <Stack.Screen name='SubmitReport' component={SubmitReport} />
+                <Stack.Screen name='SubmitReport' component={SubmitReport} options={{headerShown: false}} />
                 <Stack.Screen name='EditProfile' component={EditProfile} options={{headerShown: false}} />
                 <Stack.Screen name='AddBuilding' component={AddBuilding} options={{headerShown: false}} />
                 <Stack.Screen name='AddEquipment' component={AddEquipment} options={{headerShown: false}} />
@@ -90,6 +93,9 @@ const AppNavigator = () => {
                 <Stack.Screen name='BuildingsList' component={BuildingsList} options={{headerShown: false}} />
                 <Stack.Screen name='FacilitiesList' component={FacilitiesList} options={{headerShown: false}} />
                 <Stack.Screen name='EquipmentsList' component={EquipmentsList} options={{headerShown: false}} />
+                <Stack.Screen name='Feedback' component={Feedback} options={{headerShown: false}} />
+                <Stack.Screen name='AddFeedback' component={AddFeedback} options={{headerShown: false}} />
+                <Stack.Screen name='EditFeedback' component={EditFeedback} options={{headerShown: false}} />
             </Stack.Navigator>
         </NavigationContainer>
     )

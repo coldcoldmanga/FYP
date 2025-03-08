@@ -4,17 +4,60 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getReport } from '../../../service/firestoreServices';
 import { Alert } from 'react-native';
 import ReportDetail from '../../../component/user/tab/reportDetail';
+import { getReportByStatus } from '../../../service/reportServices';
+import { useIsFocused } from '@react-navigation/native';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
+    const [reportFilter, setReportFilter] = useState<string>('All');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedReport, setSelectedReport] = useState<any>(null);
     const [viewReportDetail, setViewReportDetail] = useState(false);
+    const isFocused = useIsFocused();
+    const filterOptions = ['All', 'Pending', 'Assigned', 'In Progress', 'Completed'];
 
     useEffect(() => {
-        fetchReports();
-    }, []);
+        if (isFocused) {
+            switch(reportFilter){
+                case 'All':
+                    fetchReports();
+                break;
+            case 'Pending':
+                fetchReportsByStatus('Pending');
+                break;
+            case 'Assigned':
+                fetchReportsByStatus('Assigned');
+                break;
+            case 'In Progress':
+                fetchReportsByStatus('In Progress');
+                break;
+            case 'Completed':
+                fetchReportsByStatus('Completed');
+                break;
+            default:
+                    fetchReports();
+            }
+        }
+    }, [reportFilter, isFocused]);
+
+    const fetchReportsByStatus = async (status: string) => {
+        try{
+            setLoading(true);
+            const fetchedReports = await getReportByStatus(status);
+            setReports(fetchedReports);
+            setError(null);
+        } catch (error) {
+            setError('Failed to load reports');
+            Alert.alert('Error', (error as Error).message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReportFilterChange = (filter: string) => {
+        setReportFilter(filter);
+    };
 
     const fetchReports = async () => {
         try {
@@ -49,6 +92,36 @@ const ReportsTab = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
+                {/* Filter Bar */}
+                <View style={styles.filterContainer}>
+                    <Text style={styles.filterLabelText}>Filter by:</Text>
+                    <ScrollView 
+                        horizontal 
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.filterScrollContent}
+                        style={styles.filterScroll}
+                    >
+                        {filterOptions.map((filter) => (
+                            <TouchableOpacity
+                                key={filter}
+                                style={[
+                                    styles.filterButton,
+                                    reportFilter === filter && styles.filterButtonActive
+                                ]}
+                                onPress={() => handleReportFilterChange(filter)}
+                            >
+                                <Text 
+                                    style={[
+                                        styles.filterButtonText,
+                                        reportFilter === filter && styles.filterButtonTextActive
+                                    ]}
+                                >
+                                    {filter}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
                 {/* Reports List */}
                 {loading ? (
                 <View style={styles.centerContainer}>
@@ -75,13 +148,13 @@ const ReportsTab = () => {
                     showsVerticalScrollIndicator={false}
                 >
                     {reports.map((report) => (
-                        <TouchableOpacity key={report.id} style={styles.reportCard} onPress={() => handleReportPress(report)}>
+                        <TouchableOpacity key={report.report_id} style={styles.reportCard} onPress={() => handleReportPress(report)}>
                             <View style={styles.reportHeader}>
                                 <View style={styles.reportIcon}>
                                     <Icon name="report-problem" size={24} color="#1a2847" />
                                 </View>
                                 <View style={styles.reportContent}>
-                                    <Text style={styles.reportTitle}>{report.fault_id || 'Unknown Issue'}</Text>
+                                    <Text style={styles.reportTitle}>{report.fault_type || 'Unknown Issue'}</Text>
                                     <View style={styles.locationContainer}>
                                         <Icon name="location-on" size={16} color="#666" />
                                         <Text style={styles.reportLocation}>{report.building_id + ' - ' + report.facility_id || 'Unknown Location'}</Text>
@@ -134,7 +207,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F5F7FA',
-        paddingTop: 16,
+        paddingTop: 8,
     },
     centerContainer: {
         flex: 1,
@@ -164,7 +237,8 @@ const styles = StyleSheet.create({
     },
     reportsListContent: {
         paddingHorizontal: 16,
-        paddingBottom: 100, // Extra padding for bottom nav
+        paddingTop: 0,
+        paddingBottom: 100,
     },
     reportCard: {
         backgroundColor: '#FFF',
@@ -241,6 +315,52 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#999',
         fontStyle: 'italic',
+    },
+    filterContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        alignItems: 'center',
+        
+    },
+    filterScrollContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    filterScroll: {
+        flex: 0,
+    },
+    filterButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        height: 28,
+        borderRadius: 14,
+        marginLeft: 6,
+        marginRight: 6,
+        backgroundColor: '#F0F4FF',
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    filterButtonActive: {
+        backgroundColor: '#1a2847',
+        borderColor: '#1a2847',
+    },
+    filterButtonText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#1a2847',
+        lineHeight: 14,
+    },
+    filterButtonTextActive: {
+        color: '#FFF',
+    },
+    filterLabelText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#1a2847',
+        marginRight: 8,
     },
 });
 
