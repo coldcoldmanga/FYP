@@ -34,7 +34,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
     const handleUpdateReport = async () => {
         try {
             setLoading(true);
-            await updateReport(report.id, {
+            await updateReport(report.report_id, {
                 status: status,
                 progress: progress,
                 updated_at: new Date()

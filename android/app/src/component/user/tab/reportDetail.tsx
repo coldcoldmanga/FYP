@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 interface ReportDetailProps {
     report: any;
@@ -21,6 +22,8 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
         });
     };
 
+    const navigation = useNavigation<NavigationProp<any>>();
+
     return (
         <Modal
             visible={visible}
@@ -35,7 +38,7 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
                     </TouchableOpacity>
 
                     <ScrollView>
-                        <Text style={styles.title}>{report.fault_id}</Text>
+                        <Text style={styles.title}>{report.fault_type}</Text>
 
                         {report.updated_at && (
                             <Text style={styles.lastUpdated}>
@@ -69,6 +72,26 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Assigned To</Text>
                                 <Text style={styles.sectionContent}>{report.assigned_to}</Text>
+                            </View>
+                        )}
+
+                        {report.progress && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Progress</Text>
+                                <Text style={styles.sectionContent}>{report.progress}</Text>
+                            </View>
+                        )}
+
+                        {report.status === 'Completed' && (
+                            <View style={styles.section}>
+                                <TouchableOpacity 
+                                    style={styles.feedbackLink} 
+                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id })}
+                                >
+                                    <Icon name="rate-review" size={16} color="#1a2847" />
+                                    <Text style={styles.feedbackLinkText}>View feedback & ratings</Text>
+                                    <Icon name="chevron-right" size={16} color="#1a2847" />
+                                </TouchableOpacity>
                             </View>
                         )}
                     </ScrollView>
@@ -131,6 +154,18 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         marginTop: -16,
         marginBottom: 20,
+    },
+    feedbackLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    feedbackLinkText: {
+        color: '#1a2847',
+        fontSize: 14,
+        fontWeight: '500',
+        marginHorizontal: 8,
+        textDecorationLine: 'underline',
     },
 });
 

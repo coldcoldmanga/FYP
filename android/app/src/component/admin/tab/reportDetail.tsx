@@ -53,7 +53,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
 
         setLoading(true);
         try{
-            await updateReport(report.id, {assigned_to: selectedWorker, status: 'Assigned', updated_at: new Date()});
+            await updateReport(report.report_id, {assigned_to: selectedWorker, status: 'Assigned', updated_at: new Date()});
             await updateWorker(selectedWorker, 'Assigned');
             await fetchWorkers();
            
@@ -86,7 +86,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
                     </TouchableOpacity>
 
                     <ScrollView>
-                        <Text style={styles.title}>{report.fault_id}</Text>
+                        <Text style={styles.title}>{report.fault_type}</Text>
 
                         {report.updated_at && (
                             <Text style={styles.lastUpdated}>
@@ -123,7 +123,14 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
                             </View>
                         )}
 
-<View style={styles.section}>
+                        {report.progress && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Progress</Text>
+                                <Text style={styles.sectionContent}>{report.progress}</Text>
+                            </View>
+                        )}
+
+                        <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Assign Worker</Text>
                             <View style={styles.pickerContainer}>
                                 <Picker
