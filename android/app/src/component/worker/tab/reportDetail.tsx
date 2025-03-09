@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import { updateReport } from '../../../service/reportServices';
 import { updateWorker } from '../../../service/userServices';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-
+import { getReportImages } from '../../../service/attachmentServices';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -18,7 +18,14 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(report.progress);
     const [status, setStatus] = useState(report.status);
+    const [attachments, setAttachments] = useState<any[]>([]);
     const navigation = useNavigation<NavigationProp<any>>();
+
+    useEffect(() => {
+        if(visible){
+            fetchReportImages(report.report_id);
+        }
+    }, [visible]);
 
     const formatDate = (timestamp: any) => {
         if (!timestamp) return 'Not specified';
@@ -31,6 +38,18 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
             minute: '2-digit'
         });
     };
+
+    const fetchReportImages = async (report_id: string) => {
+        try{
+            setLoading(true);
+            const fetchedAttachments = await getReportImages(report_id);
+            setAttachments(fetchedAttachments);
+        }catch(error){
+            console.error('Error fetching attachments:', error);
+        }finally{
+            setLoading(false);
+        }
+    }
 
     const handleUpdateReport = async () => {
         try {
@@ -91,6 +110,29 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                             <Text style={styles.sectionTitle}>Description</Text>
                             <Text style={styles.sectionContent}>{report.description}</Text>
                         </View>
+
+                        {attachments.length > 0 && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Attachments</Text>
+                                <View style={styles.imagesContainer}>
+                                    {attachments.map((attachment, index) => (
+                                        <TouchableOpacity 
+                                            key={index} 
+                                            style={styles.imageWrapper}
+                                            onPress={() => {
+                                                // Optional: Navigate to full-screen image viewer
+                                            }}
+                                        >
+                                            <Image 
+                                                source={{ uri: attachment.url }} 
+                                                style={styles.image}
+                                                resizeMode="cover"
+                                            />
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Submitted At</Text>
@@ -249,6 +291,23 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginHorizontal: 8,
         textDecorationLine: 'underline',
+    },
+    imagesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 8,
+    },
+    imageWrapper: {
+        width: '30%',
+        aspectRatio: 1,
+        margin: '1.5%',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
     },
 });
 

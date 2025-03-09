@@ -13,6 +13,7 @@ const ProfileTab = () => {
         email: '',
         phone_number: '',
         profile_picture: null as string | null,
+        user_type: '',
       });
     const [loading, setLoading] = useState(true);
     const isFocused = useIsFocused();
@@ -32,6 +33,7 @@ const ProfileTab = () => {
                 email: userData?.email || userEmail,
                 phone_number: userData?.phone_number || '',
                 profile_picture: userData?.profile_picture || null,
+                user_type: userData?.user_type || '',
             });
         } catch (error) {
             console.error('Error fetching user profile: ', error);
@@ -59,12 +61,7 @@ const ProfileTab = () => {
             subtitle: 'Update your personal details',
             action: () => navigation.navigate('EditProfile')
         },
-        // {
-        //     icon: 'notifications-none',
-        //     title: 'Notifications',
-        //     subtitle: 'Manage your notification preferences',
-        //     action: () => console.log('Notifications pressed')
-        // },
+    
         {
             icon: 'password',
             title: 'Change Password',
@@ -110,7 +107,7 @@ const ProfileTab = () => {
                 <View style={styles.infoCard}>
                     <Icon name="badge" size={20} color="#1a2847" />
                     <View style={styles.infoContent}>
-                        <Text style={styles.infoLabel}>Student ID</Text>
+                        <Text style={styles.infoLabel}> {profileData.user_type === 'Admin' ? 'Admin ID' : profileData.user_type === 'Maitenance Worker' ? 'Worker ID' : 'Student ID'}</Text>
                         <Text style={styles.infoValue}>{profileData.email.split('@')[0]}</Text>
                     </View>
                 </View>

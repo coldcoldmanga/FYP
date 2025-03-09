@@ -8,7 +8,10 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  PermissionsAndroid,
+  Platform,
+  Image
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -21,7 +24,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addReport } from '../../service/reportServices';
 import { faultType } from '../../constant/faultType';
 import { generateReportId } from '../../util/reportIdGenerator';
-
+import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
+import { uploadImage } from '../../service/cloudinaryServices';
+import { addAttachment } from '../../service/attachmentServices';
 interface Building {
   building_id: string;
   building_name: string;
@@ -60,6 +65,8 @@ const SubmitReport = () => {
   const [selectedEquipment, setSelectedEquipment] = useState<string>('');
   const [selectedFaultType, setSelectedFaultType] = useState<string>(faultType[0].type);
   const priorityLevels = ['Low', 'Medium', 'High', 'Critical'];
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const INITIAL_REGION = {
     latitude: 2.2490057879268996,  
@@ -145,6 +152,115 @@ const SubmitReport = () => {
     }
   };
 
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: "Camera Permission",
+            message: "App needs camera permission to take pictures",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK"
+          }
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else {
+      return true; // iOS handles permissions differently
+    }
+  };
+
+  const pickImage = async () => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 1200,
+      maxWidth: 1200,
+      quality: 0.8,
+    };
+
+    try {
+      const result = await launchImageLibrary(options as ImageLibraryOptions);
+      
+      if (result.didCancel) {
+        return;
+      }
+      
+      if (result.errorCode) {
+        Alert.alert('Error', result.errorMessage || 'Unknown error occurred');
+        return;
+      }
+      
+      if (result.assets && result.assets.length > 0) {
+        // Limit to 3 images
+        if (attachments.length >= 3) {
+          Alert.alert('Limit Reached', 'You can only upload up to 3 images');
+          return;
+        }
+        
+        setAttachments([...attachments, result.assets[0].uri]);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
+
+  const takePhoto = async () => {
+    const hasPermission = await requestCameraPermission();
+    
+    if (!hasPermission) {
+      Alert.alert('Permission Required', 'Please allow access to your camera');
+      return;
+    }
+
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 1200,
+      maxWidth: 1200,
+      quality: 0.8,
+    };
+
+    try {
+      const result = await launchCamera(options as CameraOptions);
+      
+      if (result.didCancel) {
+        return;
+      }
+      
+      if (result.errorCode) {
+        Alert.alert('Error', result.errorMessage || 'Unknown error occurred');
+        return;
+      }
+      
+      if (result.assets && result.assets.length > 0) {
+        // Limit to 3 images
+        if (attachments.length >= 3) {
+          Alert.alert('Limit Reached', 'You can only upload up to 3 images');
+          return;
+        }
+        
+        setAttachments([...attachments, result.assets[0].uri]);
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      Alert.alert('Error', 'Failed to take photo');
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newAttachments = [...attachments];
+    newAttachments.splice(index, 1);
+    setAttachments(newAttachments);
+  };
+  
+
   const handleBuildingSelect = (building: Building) => {
     setSelectedBuilding(building);
   };
@@ -161,6 +277,7 @@ const SubmitReport = () => {
     }
 
     try {
+      setUploading(true);
       const userEmail = await AsyncStorage.getItem('userEmail');
       const userID = userEmail?.split('@')[0];
       
@@ -170,6 +287,23 @@ const SubmitReport = () => {
       }
 
       const reportId = await generateReportId(selectedFaultType, selectedFacility, new Date().getFullYear());
+
+      let attachmentsData = [];
+      if(attachments.length > 0){
+        for (const imageUri of attachments){
+          try{
+            const cloudinaryURL = await uploadImage(imageUri);
+            attachmentsData.push({
+              url: cloudinaryURL,
+              type: 'image',
+              uploaded_at: new Date()
+            });
+          }catch(error){
+            console.error('Error uploading image:', error);
+            Alert.alert('Error', 'Failed to upload image. Please try again.');
+          }
+        }
+      }
 
       const reportData = {
         report_id: reportId,
@@ -188,6 +322,11 @@ const SubmitReport = () => {
       };
 
       await addReport(reportData);
+      if(attachmentsData.length > 0){
+        for(const attachment of attachmentsData){
+          await addAttachment(reportId, attachment);
+        }
+      }
       
       Alert.alert(
         'Success',
@@ -197,6 +336,8 @@ const SubmitReport = () => {
     } catch (error) {
       console.error('Error submitting report:', error);
       Alert.alert('Error', 'Failed to submit report. Please try again.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -354,6 +495,46 @@ const SubmitReport = () => {
           />
         </View>
 
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Upload Images (Optional, Max 3)</Text>
+          <View style={styles.imageButtonsContainer}>
+            <TouchableOpacity 
+              style={styles.imageButton} 
+              onPress={pickImage}
+              disabled={uploading}
+            >
+              <Icon name="photo-library" size={24} color="#fff" />
+              <Text style={styles.imageButtonText}>Gallery</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.imageButton} 
+              onPress={takePhoto}
+              disabled={uploading}
+            >
+              <Icon name="camera-alt" size={24} color="#fff" />
+              <Text style={styles.imageButtonText}>Camera</Text>
+            </TouchableOpacity>
+          </View>
+
+          {attachments.length > 0 && (
+            <View style={styles.imagesContainer}>
+              {attachments.map((uri, index) => (
+                <View key={index} style={styles.imageWrapper}>
+                  <Image source={{ uri }} style={styles.previewImage} />
+                  <TouchableOpacity 
+                    style={styles.removeImageButton}
+                    onPress={() => removeImage(index)}
+                    disabled={uploading}
+                  >
+                    <Icon name="close" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
         <TouchableOpacity 
           style={styles.submitButton}
           onPress={submitReport}
@@ -482,6 +663,57 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderColor: '#1a2847',
     borderWidth: 3,
+  },
+  imageButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+  },
+  imageButton: {
+    backgroundColor: '#1a2847',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '45%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  imageButtonText: {
+    color: '#fff',
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  imagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  imageWrapper: {
+    width: '30%',
+    aspectRatio: 1,
+    margin: '1.5%',
+    position: 'relative',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#999',
   },
 });
 

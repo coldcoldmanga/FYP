@@ -6,6 +6,7 @@ import { updateReport } from '../../../service/reportServices';
 import { updateWorker } from '../../../service/userServices';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { getReportImages } from '../../../service/attachmentServices';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -29,6 +30,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
 
     const [selectedWorker, setSelectedWorker] = useState(report.assigned_to);
     const [availableWorkers, setAvailableWorkers] = useState<any[]>([]);
+    const [attachments, setAttachments] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation<NavigationProp<any>>();
     useEffect(() =>{
@@ -37,12 +39,30 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
         }
     }, [visible]);
 
+    useEffect(() => {
+        if(report){
+            fetchReportImages(report.report_id);
+        }
+    }, [report]);
+
     const fetchWorkers = async () => {
         try{
             const workers = await getWorker();
             setAvailableWorkers(workers);
         }catch(error){
             console.error('Error fetching workers:', error);
+        }
+    }
+
+    const fetchReportImages = async (report_id: string) => {
+        try{
+            setLoading(true);
+            const fetchedAttachments = await getReportImages(report_id);
+            setAttachments(fetchedAttachments);
+        }catch(error){
+            console.error('Error fetching attachments:', error);
+        }finally{
+            setLoading(false);
         }
     }
 
@@ -274,6 +294,23 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginHorizontal: 8,
         textDecorationLine: 'underline',
+    },
+    imagesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 8,
+    },
+    imageWrapper: {
+        width: '30%',
+        aspectRatio: 1,
+        margin: '1.5%',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
     },
 });
 

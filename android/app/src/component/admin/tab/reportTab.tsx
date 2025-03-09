@@ -7,6 +7,7 @@ import { useIsFocused } from '@react-navigation/native';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
+    const [attachments, setAttachments] = useState<Array<any>>([]);
     const [reportFilter, setReportFilter] = useState<string>('All');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -71,6 +72,8 @@ const ReportsTab = () => {
             setLoading(false);
         }
     };
+
+
 
     const handleReportPress = (report: any) => {
         setSelectedReport(report);
