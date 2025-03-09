@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getWorker } from '../../../service/userServices';
 import { updateReport } from '../../../service/reportServices';
@@ -131,6 +131,29 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
                             <Text style={styles.sectionTitle}>Description</Text>
                             <Text style={styles.sectionContent}>{report.description}</Text>
                         </View>
+
+                        {attachments.length > 0 && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Attachments</Text>
+                                <View style={styles.imagesContainer}>
+                                    {attachments.map((attachment, index) => (
+                                        <TouchableOpacity 
+                                            key={index} 
+                                            style={styles.imageWrapper}
+                                            onPress={() => {
+                                                // Optional: Navigate to full-screen image viewer
+                                            }}
+                                        >
+                                            <Image 
+                                                source={{ uri: attachment.url }} 
+                                                style={styles.image}
+                                                resizeMode="cover"
+                                            />
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Submitted At</Text>
