@@ -1,6 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, writeBatch, orderBy, deleteDoc, addDoc } from '@react-native-firebase/firestore';
+import { doc, updateDoc, collection, getDocs, getFirestore, addDoc } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 const firestore = getFirestore(firebaseApp);
 
