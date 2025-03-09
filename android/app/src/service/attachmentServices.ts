@@ -1,5 +1,5 @@
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, writeBatch, orderBy, deleteDoc, getDoc } from '@react-native-firebase/firestore';
+import { setDoc, doc, collection, getDocs, getFirestore } from '@react-native-firebase/firestore';
 
 const firestore = getFirestore(firebaseApp);
 
@@ -29,10 +29,10 @@ export const getAttachments = async (report_id:string) => {
     }
 }
 
-export const getReportImages = async (report_id:string) => {
+export const getReportMedia = async (report_id:string) => {
     try{
         const attachments = await getAttachments(report_id);
-        const images = attachments.filter((attachment: any) => attachment.type === 'image');
+        const images = attachments.filter((attachment: any) => attachment.type === 'image' || attachment.type === 'video');
         return images;
     }catch(error){
         console.error('Error getting report images:', error);

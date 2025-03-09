@@ -25,7 +25,7 @@ import { addReport } from '../../service/reportServices';
 import { faultType } from '../../constant/faultType';
 import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
-import { uploadImage } from '../../service/cloudinaryServices';
+import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
 interface Building {
   building_id: string;
@@ -175,13 +175,15 @@ const SubmitReport = () => {
     }
   };
 
-  const pickImage = async () => {
+  const pickMedia = async (type: 'photo' | 'video' | 'mixed') => {
     const options = {
-      mediaType: 'photo',
+      mediaType: type,
       includeBase64: false,
       maxHeight: 1200,
       maxWidth: 1200,
       quality: 0.8,
+      videoQuality: 'medium', // For videos
+      durationLimit: 30, // Limit video length to 30 seconds
     };
 
     try {
@@ -197,34 +199,56 @@ const SubmitReport = () => {
       }
       
       if (result.assets && result.assets.length > 0) {
-        // Limit to 3 images
+        // Limit to 3 attachments total
         if (attachments.length >= 3) {
-          Alert.alert('Limit Reached', 'You can only upload up to 3 images');
+          Alert.alert('Limit Reached', 'You can only upload up to 3 attachments');
           return;
         }
         
-        setAttachments([...attachments, result.assets[0].uri]);
+        const asset = result.assets[0];
+        const isVideo = asset.type?.startsWith('video/');
+        
+        setAttachments([...attachments, {
+          uri: asset.uri,
+          type: isVideo ? 'video' : 'image',
+          name: asset.fileName || 'media'
+        }]);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      console.error('Error picking media:', error);
+      Alert.alert('Error', 'Failed to pick media');
     }
   };
 
-  const takePhoto = async () => {
-    const hasPermission = await requestCameraPermission();
-    
-    if (!hasPermission) {
-      Alert.alert('Permission Required', 'Please allow access to your camera');
-      return;
+  const recordVideo = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: "Camera Permission",
+            message: "App needs camera permission to record videos",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK"
+          }
+        );
+        
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission Denied', 'Camera permission is required to record videos');
+          return;
+        }
+      } catch (err) {
+        console.warn(err);
+        return;
+      }
     }
 
     const options = {
-      mediaType: 'photo',
+      mediaType: 'video' as const,
       includeBase64: false,
-      maxHeight: 1200,
-      maxWidth: 1200,
-      quality: 0.8,
+      videoQuality: 'medium' as const,
+      durationLimit: 30,
     };
 
     try {
@@ -240,21 +264,24 @@ const SubmitReport = () => {
       }
       
       if (result.assets && result.assets.length > 0) {
-        // Limit to 3 images
         if (attachments.length >= 3) {
-          Alert.alert('Limit Reached', 'You can only upload up to 3 images');
+          Alert.alert('Limit Reached', 'You can only upload up to 3 attachments');
           return;
         }
         
-        setAttachments([...attachments, result.assets[0].uri]);
+        setAttachments([...attachments, {
+          uri: result.assets[0].uri,
+          type: 'video',
+          name: result.assets[0].fileName || 'video'
+        }]);
       }
     } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
+      console.error('Error recording video:', error);
+      Alert.alert('Error', 'Failed to record video');
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeAttachment = (index: number) => {
     const newAttachments = [...attachments];
     newAttachments.splice(index, 1);
     setAttachments(newAttachments);
@@ -290,17 +317,23 @@ const SubmitReport = () => {
 
       let attachmentsData = [];
       if(attachments.length > 0){
-        for (const imageUri of attachments){
+        for (const attachment of attachments){
           try{
-            const cloudinaryURL = await uploadImage(imageUri);
+            let cloudinaryURL;
+            if (attachment.type === 'video') {
+              cloudinaryURL = await uploadVideo(attachment.uri);
+            } else {
+              cloudinaryURL = await uploadImage(attachment.uri);
+            }
+            
             attachmentsData.push({
               url: cloudinaryURL,
-              type: 'image',
+              type: attachment.type,
               uploaded_at: new Date()
             });
           }catch(error){
-            console.error('Error uploading image:', error);
-            Alert.alert('Error', 'Failed to upload image. Please try again.');
+            console.error(`Error uploading ${attachment.type}:`, error);
+            Alert.alert('Error', `Failed to upload ${attachment.type}. Please try again.`);
           }
         }
       }
@@ -496,20 +529,29 @@ const SubmitReport = () => {
         </View>
 
         <View style={styles.formGroup}>
-          <Text style={styles.label}>Upload Images (Optional, Max 3)</Text>
+          <Text style={styles.label}>Upload Media (Optional, Max 3)</Text>
           <View style={styles.imageButtonsContainer}>
             <TouchableOpacity 
               style={styles.imageButton} 
-              onPress={pickImage}
+              onPress={() => pickMedia('photo')}
               disabled={uploading}
             >
               <Icon name="photo-library" size={24} color="#fff" />
-              <Text style={styles.imageButtonText}>Gallery</Text>
+              <Text style={styles.imageButtonText}>Photos</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
               style={styles.imageButton} 
-              onPress={takePhoto}
+              onPress={() => pickMedia('video')}
+              disabled={uploading}
+            >
+              <Icon name="videocam" size={24} color="#fff" />
+              <Text style={styles.imageButtonText}>Videos</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.imageButton} 
+              onPress={recordVideo}
               disabled={uploading}
             >
               <Icon name="camera-alt" size={24} color="#fff" />
@@ -519,12 +561,19 @@ const SubmitReport = () => {
 
           {attachments.length > 0 && (
             <View style={styles.imagesContainer}>
-              {attachments.map((uri, index) => (
+              {attachments.map((attachment, index) => (
                 <View key={index} style={styles.imageWrapper}>
-                  <Image source={{ uri }} style={styles.previewImage} />
+                  {attachment.type === 'video' ? (
+                    <View style={styles.videoPreview}>
+                      <Icon name="videocam" size={30} color="#1a2847" />
+                      <Text style={styles.videoText}>Video</Text>
+                    </View>
+                  ) : (
+                    <Image source={{ uri: attachment.uri }} style={styles.previewImage} />
+                  )}
                   <TouchableOpacity 
                     style={styles.removeImageButton}
-                    onPress={() => removeImage(index)}
+                    onPress={() => removeAttachment(index)}
                     disabled={uploading}
                   >
                     <Icon name="close" size={20} color="#fff" />
@@ -666,7 +715,7 @@ const styles = StyleSheet.create({
   },
   imageButtonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     marginVertical: 10,
   },
   imageButton: {
@@ -674,7 +723,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
-    width: '45%',
+    width: '30%',
     flexDirection: 'row',
     justifyContent: 'center',
   },
@@ -714,6 +763,21 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#999',
+  },
+  videoPreview: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#e1e1e1',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  videoText: {
+    marginTop: 5,
+    color: '#1a2847',
+    fontWeight: '500',
   },
 });
 

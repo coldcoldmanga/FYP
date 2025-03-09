@@ -6,7 +6,8 @@ import { updateReport } from '../../../service/reportServices';
 import { updateWorker } from '../../../service/userServices';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { getReportImages } from '../../../service/attachmentServices';
+import { getReportMedia } from '../../../service/attachmentServices';
+import { formatDate } from '../../../util/formatDate';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -15,18 +16,6 @@ interface ReportDetailProps {
 }
 
 const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps) => {
-
-    const formatDate = (timestamp: any) => {
-        if (!timestamp) return 'Not specified';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
 
     const [selectedWorker, setSelectedWorker] = useState(report.assigned_to);
     const [availableWorkers, setAvailableWorkers] = useState<any[]>([]);
@@ -41,7 +30,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
 
     useEffect(() => {
         if(report){
-            fetchReportImages(report.report_id);
+            fetchReportMedia(report.report_id);
         }
     }, [report]);
 
@@ -54,10 +43,10 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
         }
     }
 
-    const fetchReportImages = async (report_id: string) => {
+    const fetchReportMedia = async (report_id: string) => {
         try{
             setLoading(true);
-            const fetchedAttachments = await getReportImages(report_id);
+            const fetchedAttachments = await getReportMedia(report_id);
             setAttachments(fetchedAttachments);
         }catch(error){
             console.error('Error fetching attachments:', error);

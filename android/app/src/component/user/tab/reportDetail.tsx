@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Video from 'react-native-video';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { getReportImages } from '../../../service/attachmentServices';
+import { getReportMedia } from '../../../service/attachmentServices';
+import { formatDate } from '../../../util/formatDate';
 
 interface ReportDetailProps {
     report: any;
@@ -16,27 +18,14 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
 
     useEffect(() => {
         if(visible){
-            fetchReportImages(report.report_id);
+            fetchReportMedia(report.report_id);
         }
     }, [visible]);
 
-    const formatDate = (timestamp: any) => {
-        if (!timestamp) return 'Not specified';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-
-    const fetchReportImages = async (report_id: string) => {
+    const fetchReportMedia = async (report_id: string) => {
         try{
             setLoading(true);
-            const fetchedAttachments = await getReportImages(report_id);
+            const fetchedAttachments = await getReportMedia(report_id);
             setAttachments(fetchedAttachments);
         }catch(error){
             console.error('Error fetching attachments:', error);
@@ -98,11 +87,19 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
                                                 // Optional: Navigate to full-screen image viewer
                                             }}
                                         >
-                                            <Image 
-                                                source={{ uri: attachment.url }} 
-                                                style={styles.image}
-                                                resizeMode="cover"
-                                            />
+                                            {attachment.type === 'image' ? (
+                                                <Image 
+                                                    source={{ uri: attachment.url }} 
+                                                    style={styles.image}
+                                                    resizeMode="cover"
+                                                />
+                                            ) : (
+                                                <Video
+                                                    source={{ uri: attachment.url }}
+                                                    style={styles.image}
+                                                    resizeMode="cover"
+                                                />
+                                            )}
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -214,12 +211,6 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginHorizontal: 8,
         textDecorationLine: 'underline',
-    },
-    attachmentItem: {
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
     },
     imagesContainer: {
         flexDirection: 'row',
