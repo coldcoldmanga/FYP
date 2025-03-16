@@ -1,6 +1,7 @@
 // ./src/config/firebase.js
 import { initializeApp } from '@react-native-firebase/app';
 
+
 const firebaseConfig = {
   apiKey: 'AIzaSyB_mJRvKQFwj3-szbCrgjV7NL1Iipq5Apk',
   authDomain: 'fyp-facility-helpdesk.firebaseapp.com',
@@ -12,5 +13,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
+
 
 export { firebaseApp };
