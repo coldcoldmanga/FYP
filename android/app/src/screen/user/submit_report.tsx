@@ -27,6 +27,7 @@ import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
 import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
+import { updateNewReport_Admin, getUserToken } from '../../service/onesignalServices';
 interface Building {
   building_id: string;
   building_name: string;
@@ -355,6 +356,8 @@ const SubmitReport = () => {
       };
 
       await addReport(reportData);
+      await updateNewReport_Admin(userID, reportData.fault_type, reportData.report_id);
+
       if(attachmentsData.length > 0){
         for(const attachment of attachmentsData){
           await addAttachment(reportId, attachment);

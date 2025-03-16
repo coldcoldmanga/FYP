@@ -16,6 +16,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { signUp } from '../service/authServices';
 import { Picker } from '@react-native-picker/picker';
 import { addUser, getUser } from '../service/userServices';
+import { assignUserRoleTag, getUserToken } from '../service/onesignalServices';
 
 const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [fullName, setFullName] = useState('');
@@ -42,8 +43,12 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
     try{
         await signUp(email, password);
-        await addUser(fullName, email, phoneNumber, userType, new Date(), new Date(), null, 'active', 0);
+        await assignUserRoleTag(userType);
+        const playerID = await getUserToken();
+
+        await addUser(fullName, email, phoneNumber, userType, playerID, new Date(), new Date(), null, 'active', 0);
         
+       
         const user = await getUser(email);
         Alert.alert('Welcome ' + user.fullname, 'Your account has been created successfully!');
         navigation.navigate('Login');

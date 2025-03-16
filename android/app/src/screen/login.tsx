@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { login } from '../service/authServices';
-import { updateLastLogin } from '../service/userServices';
+import { updateLastLogin, updateUserToken } from '../service/userServices';
 const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
   
   const [email, setEmail] = useState('');
@@ -31,6 +31,7 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
     try {
       const user = await login(email, password);
       await updateLastLogin(email); //update user lastLogin
+      await updateUserToken(email, user.player_id)
       if(user.user_type === 'Student' || user.user_type === 'Staff'){
        
         navigation.reset({

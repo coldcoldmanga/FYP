@@ -3,10 +3,11 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput,
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import { updateReport } from '../../../service/reportServices';
-import { updateWorker } from '../../../service/userServices';
+import { getUserTracking, updateWorker } from '../../../service/userServices';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
+import { updateReportStatus_Admin, updateReportStatus_User } from '../../../service/onesignalServices';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -21,6 +22,12 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
     const [status, setStatus] = useState(report.status);
     const [attachments, setAttachments] = useState<any[]>([]);
     const navigation = useNavigation<NavigationProp<any>>();
+
+    // useEffect(()=>{
+    //     setStatus(report.status);
+    //     setProgress(report.progress);
+    //     setAttachments(report.attachments);
+    // }, [report])
 
     useEffect(() => {
         if(visible){
@@ -48,6 +55,18 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                 progress: progress,
                 updated_at: new Date()
             });
+
+            const playerID = [report.user_id];
+            // const userIDs = await getUserTracking(report.report_id);
+
+            // if(userIDs.length > 0){
+            //     for(const userID of userIDs){
+            //         playerID.push(userID);
+            //     }
+            // }
+
+            await updateReportStatus_Admin(report.report_id, status, report.assigned_to)
+            await updateReportStatus_User(report.report_id, status, playerID)
 
             if(status === 'Completed'){
                 await updateWorker(report.assigned_to, status);
@@ -82,7 +101,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                     </TouchableOpacity>
 
                     <ScrollView>
-                        <Text style={styles.title}>{report.fault_id}</Text>
+                        <Text style={styles.title}>{report.fault_type}</Text>
 
                         {report.updated_at && (
                             <Text style={styles.lastUpdated}>

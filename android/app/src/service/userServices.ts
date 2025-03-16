@@ -1,9 +1,9 @@
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, increment } from '@react-native-firebase/firestore';
+import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, increment, collectionGroup, getDoc } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 const firestore = getFirestore(firebaseApp);
 
-export const addUser = async (fullname:string, email:string, phoneNumber:string, userType:string, createdAt:Date, updatedAt:Date, lastLogin:any, status:string, active_task:number) => {
+export const addUser = async (fullname:string, email:string, phoneNumber:string, userType:string, playerID:string|null, createdAt:Date, updatedAt:Date, lastLogin:any, status:string, active_task:number) => {
     try{
         const docID = email.split('@')[0];
 
@@ -13,6 +13,7 @@ export const addUser = async (fullname:string, email:string, phoneNumber:string,
                 email,
                 phone_number: phoneNumber,
                 user_type: userType,
+                player_id: playerID,
                 created_at: createdAt,
                 updated_at: updatedAt,
                 active_task,
@@ -26,6 +27,7 @@ export const addUser = async (fullname:string, email:string, phoneNumber:string,
             email,
             phone_number: phoneNumber,
             user_type: userType,
+            player_id: playerID,
             created_at: createdAt,
             updated_at: updatedAt,
             last_login: lastLogin,
@@ -98,6 +100,20 @@ export const getWorker = async () => {
     }
 }
 
+export const getUserPlayerID = async (userID:string) => {
+    try{
+        const userDoc = await getDoc(doc(firestore, 'user', userID));
+        if(userDoc.exists){
+            return userDoc.data()?.player_id;
+        }else{
+            return null;
+        }
+    }catch(error){
+        console.error('Get User Player ID Error: ', error);
+        throw error;
+    }
+}
+
 export const updateWorker = async (workerID: string, status:string) => {
     try{
         const workerRef = doc(firestore, 'user', workerID);
@@ -108,6 +124,34 @@ export const updateWorker = async (workerID: string, status:string) => {
         }
     }catch(error){
         console.error('Update Worker Error: ', error);
+        throw error;
+    }
+}
+
+export const updateUserToken = async (email:string, token:string|null) => {
+    try{
+        const userRef = query(collection(firestore, 'user'), where('email', '==', email));
+        const userSnapshot = await getDocs(userRef);
+        await updateDoc(userSnapshot.docs[0].ref, {player_id: token});
+    }catch(error){
+        console.error('Update User Token Error: ', error);
+        throw error;
+    }
+}
+
+export const getUserTracking = async (reportID: string) => {
+    try{
+        const trackQuery = query(collectionGroup(firestore, 'user_track'), where('report_id', '==', reportID));
+        const trackSnapshot = await getDocs(trackQuery);
+
+        const userIDs = trackSnapshot.docs.map((doc) => {
+            const pathParts = doc.ref.path.split('/');
+            return pathParts[1]; 
+        });
+
+        return userIDs;
+    }catch(error){
+        console.error('Get User Tracking Error: ', error);
         throw error;
     }
 }
