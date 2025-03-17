@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput,
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import { updateReport } from '../../../service/reportServices';
-import { getUserTracking, updateWorker } from '../../../service/userServices';
+import { getUserPlayerID, getUserTracking, updateWorker } from '../../../service/userServices';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
@@ -56,15 +56,14 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                 updated_at: new Date()
             });
 
-            const playerID = [report.user_id];
-            // const userIDs = await getUserTracking(report.report_id);
-
-            // if(userIDs.length > 0){
-            //     for(const userID of userIDs){
-            //         playerID.push(userID);
-            //     }
-            // }
-
+            const reportUserPlayerID = await getUserPlayerID(report.user_id);
+            const trackingUserPlayerID = await getUserTracking(report.report_id);
+            let playerID = [reportUserPlayerID];        
+            if(trackingUserPlayerID.length > 0){
+                for(const userID of trackingUserPlayerID){
+                    playerID.push(userID);
+                }
+            }
             await updateReportStatus_Admin(report.report_id, status, report.assigned_to)
             await updateReportStatus_User(report.report_id, status, playerID)
 

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, orderBy } from '@react-native-firebase/firestore';
+import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, orderBy, getDoc } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 const firestore = getFirestore(firebaseApp);
 
@@ -17,6 +17,21 @@ export const addReport = async (report: any) => {
 };
 
 export const getReport = async () => {
+    try {
+        const reportQuery = query(collection(firestore, 'reports'), orderBy('submitted_at', 'desc'));
+        const reportSnapshot = await getDocs(reportQuery);
+        return reportSnapshot.docs.map((doc) => ({
+            report_id: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error('Get Report Error: ', error);
+        throw error;
+
+    }
+}
+
+export const getReportByUser = async () => {
     try{
         const userEmail = await AsyncStorage.getItem('userEmail');
         const userType = await AsyncStorage.getItem('userType');
@@ -106,3 +121,14 @@ export const updateReport = async (reportID: string, updateData: any) => {
         throw error;
     }
 };
+
+export const checkIsReporter = async (reportID:string) => {
+    try {
+        const reportRef = doc(firestore, 'reports', reportID);
+        const reportSnapshot = await getDoc(reportRef);
+        return reportSnapshot.data()?.user_id;
+    } catch (error) {
+        console.error('Error checking if user is reporter: ', error);
+        throw error;
+    }
+}

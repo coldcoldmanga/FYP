@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Modal, StyleSheet, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import MapView, { Callout, Marker, PoiClickEvent, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getReport } from '../service/reportServices';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkIsReporter, getReport } from '../service/reportServices';
 import { useIsFocused } from '@react-navigation/native';
 import getPriorityColor from '../util/priorityStyling';
+import TrackingButton from './trackingButton';
 
 interface BuildingGroup {
     buildingId: string;
@@ -26,6 +28,8 @@ const Map = () => {
     const [region, setRegion] = useState<Region>(INITIAL_REGION);
     const [reports, setReports] = useState<any[]>([]);
     const [selectedReport, setSelectedReport] = useState<any>(null);
+    const [isStudent, setIsStudent] = useState(false);
+    const [isReporter, setIsReporter] = useState(false);
     const isFocused = useIsFocused();
     
     const [buildingGroups, setBuildingGroups] = useState<BuildingGroup[]>([]);
@@ -54,6 +58,29 @@ const Map = () => {
         }
     };
 
+    const checkUserType = async () => {
+        try {
+            const userType = await AsyncStorage.getItem('userType');
+            if(userType){
+                if(userType === 'Student'){
+                    setIsStudent(true);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking user type: ', error);
+        }
+    }
+
+    const checkIsReporter = async (report_user_id:string) => {
+        const userEmail = await AsyncStorage.getItem('userEmail');
+        if(userEmail){
+           const userID = userEmail.split('@')[0];
+           if(report_user_id === userID){
+            setIsReporter(true);
+           }
+        }
+    }
+
     const handlePoiClick = (event: PoiClickEvent) => {
         const poi = event.nativeEvent;
         setSelectedPoi(poi);
@@ -62,6 +89,8 @@ const Map = () => {
 
     const handleReportPress = (report: any) => {
         setSelectedReport(report);
+        checkUserType();
+        checkIsReporter(report.user_id);
         setSelectedPoi(null);
     }
 
@@ -98,6 +127,9 @@ const Map = () => {
     const handleBuildingPress = (building: BuildingGroup) => {
         setSelectedBuilding(building);
         setSelectedReport(null);
+        setIsStudent(false);
+        setIsReporter(false);
+
     };
 
     if (loading) {
@@ -201,6 +233,7 @@ const Map = () => {
                         {selectedReport && (
                             <>
                                 <Text style={styles.title}>{selectedReport.fault_type}</Text>
+                                
                                 <View style={styles.statusContainer}>
                                     <Text style={[
                                         styles.statusBadge,
@@ -211,6 +244,7 @@ const Map = () => {
                                     <Text style={styles.statusBadge2}>
                                         {selectedReport.status}
                                     </Text>
+                                    
                                 </View>
                                 
                                 <View style={styles.infoRow}>
@@ -232,6 +266,13 @@ const Map = () => {
                                     <Text style={styles.infoText}>
                                         Submitted: {new Date(selectedReport.submitted_at?.toDate()).toLocaleString()}
                                     </Text>
+                                </View>
+                                <View style={styles.infoRow}>
+                                {(isStudent) && (!isReporter) &&  (
+                                        <TrackingButton 
+                                        reportID={selectedReport.report_id}
+                                        />
+                                    )}
                                 </View>
                             </>
                         )}

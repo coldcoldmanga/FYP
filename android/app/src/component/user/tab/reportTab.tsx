@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getReport } from '../../../service/reportServices';
+import { getReportByUser } from '../../../service/reportServices';
 import { Alert } from 'react-native';
 import ReportDetail from '../../../component/user/tab/reportDetail';
 import { getReportByStatus } from '../../../service/reportServices';
@@ -62,7 +62,7 @@ const ReportsTab = () => {
     const fetchReports = async () => {
         try {
             setLoading(true);
-            const fetchedReports = await getReport();
+            const fetchedReports = await getReportByUser();
             setReports(fetchedReports);
             setError(null);
         } catch (error) {

@@ -139,18 +139,20 @@ export const updateUserToken = async (email:string, token:string|null) => {
     }
 }
 
-export const getUserTracking = async (reportID: string) => {
-    try{
-        const trackQuery = query(collectionGroup(firestore, 'user_track'), where('report_id', '==', reportID));
-        const trackSnapshot = await getDocs(trackQuery);
+export const getUserTracking = async (reportID:string) => {
+    try {
+        let playerID = [];
+        const userTrackQuery = query(collection(firestore, 'user_track'), where('report_id', '==', reportID));
+        const userTrackSnapshot = await getDocs(userTrackQuery);
+        
+        for(const user of userTrackSnapshot.docs){
+            const userRef = doc(firestore, 'user', user.data().user_id);
+            const userSnapshot = await getDoc(userRef);
+            playerID.push(userSnapshot.data()?.player_id);
+        }
+        return playerID.filter((id) => id !== null);
 
-        const userIDs = trackSnapshot.docs.map((doc) => {
-            const pathParts = doc.ref.path.split('/');
-            return pathParts[1]; 
-        });
-
-        return userIDs;
-    }catch(error){
+    } catch (error) {
         console.error('Get User Tracking Error: ', error);
         throw error;
     }
