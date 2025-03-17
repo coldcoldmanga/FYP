@@ -7,7 +7,9 @@ import { getUserPlayerID, getUserTracking, updateWorker } from '../../../service
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
-import { updateReportStatus_Admin, updateReportStatus_User } from '../../../service/onesignalServices';
+import { updateReportStatusToAdmin, updateReportStatusToUser } from '../../../service/onesignalServices';
+import { addNotification } from '../../../service/notificationServices';
+import { getUserTrackingList } from '../../../service/trackingService';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -58,14 +60,26 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
 
             const reportUserPlayerID = await getUserPlayerID(report.user_id);
             const trackingUserPlayerID = await getUserTracking(report.report_id);
+            let targetUserIDs = [report.user_id];
+            const userIDs = await getUserTrackingList(report.report_id);
+            if(userIDs.length > 0){
+                targetUserIDs = [...targetUserIDs, ...userIDs];
+            }
+
             let playerID = [reportUserPlayerID];        
             if(trackingUserPlayerID.length > 0){
                 for(const userID of trackingUserPlayerID){
                     playerID.push(userID);
                 }
             }
-            await updateReportStatus_Admin(report.report_id, status, report.assigned_to)
-            await updateReportStatus_User(report.report_id, status, playerID)
+            //push notification to admin and user
+            await updateReportStatusToAdmin(report.report_id, status, report.assigned_to)
+            await updateReportStatusToUser(report.report_id, status, playerID)
+
+            //update the notification of admin and user in firestore
+            await addNotification(`Report ${report.report_id} Updated`, `The report ${report.report_id} has been updated to ${status} by ${report.assigned_to}`, [], "Admin");
+            await addNotification(`Report ${report.report_id} Updated`, `The report ${report.report_id} has been updated to ${status}`, targetUserIDs, "");
+            
 
             if(status === 'Completed'){
                 await updateWorker(report.assigned_to, status);

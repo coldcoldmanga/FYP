@@ -27,7 +27,8 @@ import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
 import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
-import { updateNewReport_Admin, getUserToken } from '../../service/onesignalServices';
+import { updateNewReportToAdmin } from '../../service/onesignalServices';
+import { addNotification } from '../../service/notificationServices';
 interface Building {
   building_id: string;
   building_name: string;
@@ -356,7 +357,10 @@ const SubmitReport = () => {
       };
 
       await addReport(reportData);
-      await updateNewReport_Admin(userID, reportData.fault_type, reportData.report_id);
+      //push notification to admin
+      await updateNewReportToAdmin(userID, reportData.fault_type, reportData.report_id);
+      //update the notification of admin in firestore
+      await addNotification(`New Report Submitted`, `A new report has been submitted by ${userID}`, [], "Admin");
 
       if(attachmentsData.length > 0){
         for(const attachment of attachmentsData){

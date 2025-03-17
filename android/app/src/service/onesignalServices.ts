@@ -3,6 +3,7 @@ import { ONESIGNAL_APP_API, ONESIGNAL_NOTIFICATION_API, ONESIGNAL_APP_ID } from 
 import { getUser, updateUserToken } from "./userServices";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { addNotification } from "./notificationServices";
 
 export const assignUserRoleTag = async (user_role: string) => {
     try {
@@ -74,7 +75,7 @@ export const sendNotification = async (message: string, title: string, userRole:
     }
 }
 
-export const updateNewReport_Admin = async (userID: string, faultType: string, reportID: string) => {
+export const updateNewReportToAdmin = async (userID: string, faultType: string, reportID: string) => {
 
     try {
         const title = `New Report: ${reportID}`;
@@ -88,7 +89,7 @@ export const updateNewReport_Admin = async (userID: string, faultType: string, r
 
 }
 
-export const updateReportStatus_Admin = async (reportID: string, status: string, workerID: string) => {
+export const updateReportStatusToAdmin = async (reportID: string, status: string, workerID: string) => {
     try {
         const title = `${reportID}: Report Status Updated`;
         const message = `The report status has been updated to ${status} by ${workerID}.`;
@@ -101,7 +102,7 @@ export const updateReportStatus_Admin = async (reportID: string, status: string,
 }
 
 
-export const updateReportStatus_User = async (reportID: string, status: string, playerID: string[]) => {
+export const updateReportStatusToUser = async (reportID: string, status: string, playerID: string[]) => {
     try {
         const title = `${reportID}: Report Status Updated`;
         const message = `The report status has been updated to ${status}.`;
@@ -114,7 +115,7 @@ export const updateReportStatus_User = async (reportID: string, status: string, 
 
 }
 
-export const updateAssignedTask_Worker = async (playerID: string[], reportID: string) => {
+export const updateAssignedTaskToWorker = async (playerID: string[], reportID: string) => {
     try {
         const title = `New Task Assigned: ${reportID}`;
         const message = `You have been assigned a new task.`;
@@ -127,7 +128,7 @@ export const updateAssignedTask_Worker = async (playerID: string[], reportID: st
 
 }
 
-export const updateTaskStatus_Worker = async (playerID: string[], reportID: string, status: string) => {
+export const updateTaskStatusToWorker = async (playerID: string[], reportID: string, status: string) => {
     try {
         const title = `${reportID}: Case Closed`;
         const message = `The task has been closed.`;

@@ -9,6 +9,7 @@ const auth = getAuth(firebaseApp);
 const LOGGED_IN = 'isLoggedIn';
 const USER_TYPE = 'userType';
 const USER_EMAIL = 'userEmail';
+const PLAYER_ID = 'playerID';
 
 export const signUp = async (email:string, password:string) => {
     try {
@@ -30,10 +31,12 @@ export const login = async (email:string, password:string) => {
         await AsyncStorage.setItem(LOGGED_IN, 'true');
         await AsyncStorage.setItem(USER_TYPE, user.user_type);
         await AsyncStorage.setItem(USER_EMAIL, email);
+        await AsyncStorage.setItem(PLAYER_ID, user.player_id);
 
         console.log(await AsyncStorage.getItem(USER_EMAIL));
-        console.log(await AsyncStorage.getItem('userType'));
+        console.log(await AsyncStorage.getItem(USER_TYPE));
         console.log(await AsyncStorage.getItem(LOGGED_IN));
+        console.log(await AsyncStorage.getItem(PLAYER_ID));
 
         return user;
 

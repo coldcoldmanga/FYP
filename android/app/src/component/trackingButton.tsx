@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getTracking, addTracking, deleteTracking } from '../service/trackingService';
+import { getTrackingStatus, addTracking, deleteTracking } from '../service/trackingService';
 
 interface TrackingButtonProps {
     reportID: string;
@@ -23,7 +23,7 @@ const TrackingButton = ({reportID}: TrackingButtonProps) => {
             const userEmail = await AsyncStorage.getItem('userEmail');
             if(userEmail){
                 const userID = userEmail.split('@')[0];
-                const isTracking = await getTracking(userID, reportID);
+                const isTracking = await getTrackingStatus(userID, reportID);
                 setIsTracking(isTracking);
                 setLoading(false);
             }

@@ -8,7 +8,8 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
-import { updateAssignedTask_Worker } from '../../../service/onesignalServices';
+import { updateAssignedTaskToWorker } from '../../../service/onesignalServices';
+import { addNotification } from '../../../service/notificationServices';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -68,8 +69,8 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
             await updateWorker(selectedWorker, 'Assigned');
             await fetchWorkers();
             const playerID = await getUserPlayerID(selectedWorker);
-            console.log(playerID);
-            await updateAssignedTask_Worker([playerID], report.report_id);
+            await updateAssignedTaskToWorker([playerID], report.report_id);
+            await addNotification(`You have been assigned a new report`, `The report ${report.report_id} has been assigned to you`, [selectedWorker], "");
            
             Alert.alert('Success', 'Report updated successfully', [
                 {text: 'OK', onPress: () => {

@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Dime
 import { NavigationProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Map from '../../map';
+import Notification from './notification';
 
 const { width, height } = Dimensions.get('window');
 
 const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [showNotification, setShowNotification] = useState(false);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -30,10 +32,15 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
                 </View>
                 
                 {/* Notification Icon */}
-                <TouchableOpacity style={styles.notificationButton}>
+                <TouchableOpacity style={styles.notificationButton} onPress={() => setShowNotification(true)}>
                     <Icon name="notifications" size={24} color="#1a2847" />
                 </TouchableOpacity>
             </View>
+
+            <Notification 
+                visible={showNotification} 
+                onClose={() => setShowNotification(false)} 
+            />
             
         </View>
         </SafeAreaView>

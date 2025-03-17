@@ -30,7 +30,7 @@ export const addTracking = async (userID: string, reportID:string) => {
 
 }
 
-export const getTracking = async (userID:string, reportID:string) => {
+export const getTrackingStatus = async (userID:string, reportID:string) => {
 
     try{
         const trackRef = collection(firestore, 'user_track');
@@ -52,6 +52,20 @@ export const getUserTotalTracking = async (userID:string) => {
         return trackSnapshot.docs.length;
     } catch (error) {
         console.error("Failed to get user total tracking: ", error);
+        throw error;
+    }
+}
+
+export const getUserTrackingList = async (reportID:string) => {
+    try {
+        const trackRef = collection(firestore, 'user_track');
+        const trackQuery = query(trackRef, where('report_id', '==', reportID));
+        const trackSnapshot = await getDocs(trackQuery);
+        
+        const userIDs = trackSnapshot.docs.map((doc) => doc.data().user_id);
+        return userIDs;
+    } catch (error) {
+        console.error('Error getting user tracking list: ', error);
         throw error;
     }
 }
