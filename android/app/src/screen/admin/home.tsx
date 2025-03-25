@@ -6,7 +6,7 @@ import ProfileTab from '../../component/profileTab';
 import ReportTab from '../../component/admin/tab/reportTab';
 import AdminBottomNavBar from '../../component/adminBottomNavBar';
 import FacilityTab from '../../component/admin/tab/facilityTab';
-
+import AnalyticsDashboard from '../../component/admin/tab/analyticTab';
 const AdminHome = ({navigation}: {navigation: NavigationProp<any>}) => {
 
     console.log('AdminHome');
@@ -23,6 +23,8 @@ const AdminHome = ({navigation}: {navigation: NavigationProp<any>}) => {
                 return <ReportTab />;
             case 'Facility':
                 return <FacilityTab />;
+            case 'Analytic':
+                return <AnalyticsDashboard />;
             default:
                 return <HomeTab navigation={navigation} />;
         }

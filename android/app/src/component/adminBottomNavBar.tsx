@@ -53,6 +53,20 @@ const AdminBottomNavBar = ({ activeTab, setActiveTab}: AdminBottomNavBarProps) =
 
             <TouchableOpacity 
                 style={styles.navItem} 
+                onPress={() => setActiveTab('Analytic')}
+            >
+                <Icon 
+                    name="stats-chart" 
+                    size={24} 
+                    color={activeTab === 'Analytic' ? '#4A90E2' : '#666'} 
+                />
+                <Text style={[styles.navText, activeTab === 'Analytic' && styles.activeNavText]}>
+                    Analytic
+                </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+                style={styles.navItem} 
                 onPress={() => setActiveTab('Profile')}
             >
                 <Icon 
