@@ -23,11 +23,10 @@ const AiSummary: React.FC<AiSummaryProps> = ({ reports, startDate, endDate, isLo
     try {
       setGenerating(true);
       
-      // This is a placeholder for your actual AI service call
-      // You would replace this with your actual API call to generate the summary
+      //To simulate the API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Sample AI-generated summary (replace with actual API response)
+      // Sample AI-generated summary (replace with actual API response later)
       const dateRange = startDate && endDate 
         ? `${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`
         : "the selected period";

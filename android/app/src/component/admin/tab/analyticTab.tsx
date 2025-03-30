@@ -39,15 +39,16 @@ const AnalyticTab = () => {
                 setReports(filteredReports);
                 
                 // If AI tab is active, generate summary
-                if (activeTab === 'ai') {
-                    generateAiSummary(filteredReports);
-                }
-            } else {
-                setReports(reportData);
-                if (activeTab === 'ai') {
-                    generateAiSummary(reportData);
-                }
-            }
+                // if (activeTab === 'ai') {
+                //     generateAiSummary(filteredReports);
+                // }
+            } 
+            // else {
+            //     setReports(reportData);
+            //     if (activeTab === 'ai') {
+            //         generateAiSummary(reportData);
+            //     }
+            // }
 
         } catch (error) {
             console.error("Error fetching report data:", error);
@@ -56,57 +57,57 @@ const AnalyticTab = () => {
         }
     };
 
-    const generateAiSummary = async (reportData: any[]) => {
-        try {
-            setAiLoading(true);
-            // This is a placeholder - you'll need to implement your actual AI service call
-            // For now, we'll simulate an AI response with a timeout
-            setTimeout(() => {
-                const totalReports = reportData.length;
-                const pendingReports = reportData.filter(r => r.status === 'Pending').length;
-                const completedReports = reportData.filter(r => r.status === 'Completed').length;
+//     const generateAiSummary = async (reportData: any[]) => {
+//         try {
+//             setAiLoading(true);
+//             // This is a placeholder - you'll need to implement your actual AI service call
+//             // For now, we'll simulate an AI response with a timeout
+//             setTimeout(() => {
+//                 const totalReports = reportData.length;
+//                 const pendingReports = reportData.filter(r => r.status === 'Pending').length;
+//                 const completedReports = reportData.filter(r => r.status === 'Completed').length;
                 
-                // Most common fault types
-                const faultTypeCounts: Record<string, number> = {};
-                reportData.forEach(report => {
-                    faultTypeCounts[report.fault_type] = (faultTypeCounts[report.fault_type] || 0) + 1;
-                });
+//                 // Most common fault types
+//                 const faultTypeCounts: Record<string, number> = {};
+//                 reportData.forEach(report => {
+//                     faultTypeCounts[report.fault_type] = (faultTypeCounts[report.fault_type] || 0) + 1;
+//                 });
                 
-                const sortedFaultTypes = Object.entries(faultTypeCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([type, count]) => `${type} (${count})`);
+//                 const sortedFaultTypes = Object.entries(faultTypeCounts)
+//                     .sort((a, b) => b[1] - a[1])
+//                     .slice(0, 3)
+//                     .map(([type, count]) => `${type} (${count})`);
                 
-                // Generate summary text
-                const summary = `
-# Facility Maintenance Report Analysis
+//                 // Generate summary text
+//                 const summary = `
+// # Facility Maintenance Report Analysis
 
-## Overview
-During the selected period, there were **${totalReports} total reports** submitted. 
-${completedReports} reports (${Math.round(completedReports/totalReports*100)}%) have been completed, 
-while ${pendingReports} (${Math.round(pendingReports/totalReports*100)}%) are still pending.
+// ## Overview
+// During the selected period, there were **${totalReports} total reports** submitted. 
+// ${completedReports} reports (${Math.round(completedReports/totalReports*100)}%) have been completed, 
+// while ${pendingReports} (${Math.round(pendingReports/totalReports*100)}%) are still pending.
 
-## Key Insights
-* The most common issues reported were: ${sortedFaultTypes.join(', ')}.
-* On average, it took ${(reportData.reduce((sum, r) => sum + (r.response_time || 3), 0) / totalReports).toFixed(1)} days to respond to reports.
-* ${reportData.filter(r => r.priority === 'High').length} reports were marked as high priority.
+// ## Key Insights
+// * The most common issues reported were: ${sortedFaultTypes.join(', ')}.
+// * On average, it took ${(reportData.reduce((sum, r) => sum + (r.response_time || 3), 0) / totalReports).toFixed(1)} days to respond to reports.
+// * ${reportData.filter(r => r.priority === 'High').length} reports were marked as high priority.
 
-## Recommendations
-* Consider allocating more resources to address ${sortedFaultTypes[0]} issues, as they represent the most common problems.
-* Implement a faster response system for high-priority issues.
-* Review the maintenance schedule for areas with recurring problems.
-                `;
+// ## Recommendations
+// * Consider allocating more resources to address ${sortedFaultTypes[0]} issues, as they represent the most common problems.
+// * Implement a faster response system for high-priority issues.
+// * Review the maintenance schedule for areas with recurring problems.
+//                 `;
                 
-                setAiSummary(summary);
-                setAiLoading(false);
-            }, 1500);
-        } catch (error) {
-            console.error("Error generating AI summary:", error);
-            setAiSummary("Failed to generate AI summary. Please try again later.");
-        } finally {
-            setAiLoading(false);
-        }
-    };
+//                 setAiSummary(summary);
+//                 setAiLoading(false);
+//             }, 1500);
+//         } catch (error) {
+//             console.error("Error generating AI summary:", error);
+//             setAiSummary("Failed to generate AI summary. Please try again later.");
+//         } finally {
+//             setAiLoading(false);
+//         }
+//     };
 
     const getFaultTypeData = () => {
         const faultTypeCounts: Record<string, number> = {};
@@ -407,7 +408,7 @@ while ${pendingReports} (${Math.round(pendingReports/totalReports*100)}%) are st
                         <Text style={styles.aiTitle}>AI Insights</Text>
                     </View>
                     
-                    <View style={styles.generateButtonContainer}>
+                    {/* <View style={styles.generateButtonContainer}>
                         <TouchableOpacity
                             style={styles.generateButton}
                             onPress={() => generateAiSummary(reports)}
@@ -415,7 +416,7 @@ while ${pendingReports} (${Math.round(pendingReports/totalReports*100)}%) are st
                             <Icon name="refresh" size={16} color="#fff" />
                             <Text style={styles.generateButtonText}>Regenerate Analysis</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                     
                     <ScrollView style={styles.aiContent}>
                         {aiSummary.split('\n').map((line, index) => {
