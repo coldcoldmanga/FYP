@@ -41,8 +41,10 @@ const BuildingsList = () => {
         }
     };
 
+
+
     const handleEdit = (buildingId: string) => {
-        setSelectedBuilding(buildings.find(building => building.id === buildingId));
+        setSelectedBuilding(buildings.find(building => building.building_id === buildingId));
         setIsEditModalVisible(true);
     };
 
@@ -92,15 +94,15 @@ const BuildingsList = () => {
         >
             <View style={styles.buildingInfo}>
                 <Text style={styles.buildingName}>{item.building_name}</Text>
-                {item.building_code && (
-                    <Text style={styles.buildingCode}>{item.building_code}</Text>
+                {item.building_id && (
+                    <Text style={styles.buildingCode}>{item.building_id}</Text>
                 )}
             </View>
             <View style={styles.actions}>
                 <TouchableOpacity 
                     onPress={(e) => {
                         e.stopPropagation(); // Prevent triggering the card's onPress
-                        handleEdit(item.id);
+                        handleEdit(item.building_id);
                     }}
                     style={styles.actionButton}
                 >
@@ -109,7 +111,7 @@ const BuildingsList = () => {
                 <TouchableOpacity 
                     onPress={(e) => {
                         e.stopPropagation(); // Prevent triggering the card's onPress
-                        handleDelete(item.id);
+                        handleDelete(item.building_id);
                     }}
                     style={styles.actionButton}
                 >

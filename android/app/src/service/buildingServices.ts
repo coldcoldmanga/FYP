@@ -6,7 +6,7 @@ const firestore = getFirestore(firebaseApp);
 export const addBuilding = async (building:any) => {
 
     try{
-        const buildingID = building.building_code;
+        const buildingID = building.building_id;
         const buildinigRef = doc(collection(firestore, 'building'), buildingID);
         await setDoc(buildinigRef, building);
     }catch(error){

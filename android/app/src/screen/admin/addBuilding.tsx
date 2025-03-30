@@ -30,7 +30,7 @@ const AddBuilding = () => {
     const [mapRegion, setMapRegion] = useState(INITIAL_REGION);
     const [formData, setFormData] = useState({
         building_name: '',
-        building_code: '',
+        building_id: '',
         description: '',
         location: null as { latitude: number, longitude: number } | null,
         created_at: new Date(),
@@ -148,8 +148,8 @@ const AddBuilding = () => {
                     <Text style={styles.label}>Building Code</Text>
                     <TextInput
                         style={styles.input}
-                        value={formData.building_code}
-                        onChangeText={(text) => setFormData({...formData, building_code: text})}
+                        value={formData.building_id}
+                        onChangeText={(text) => setFormData({...formData, building_id: text})}
                         placeholder="Enter building code"
                     />
                 </View>
