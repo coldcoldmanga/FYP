@@ -29,6 +29,7 @@ import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
 import { updateNewReportToAdmin } from '../../service/onesignalServices';
 import { addNotification } from '../../service/notificationServices';
+import { equipmentType } from '../../constant/equipmentType';
 interface Building {
   building_id: string;
   building_name: string;
@@ -458,7 +459,7 @@ const SubmitReport = () => {
               {filteredFacilities.map((facility) => (
                 <Picker.Item 
                   key={facility.facility_id} 
-                  label={facility.facility_name} 
+                  label={facility.facility_id} 
                   value={facility.facility_id} 
                 />
               ))}
@@ -466,30 +467,6 @@ const SubmitReport = () => {
           </View>
           {filteredFacilities.length === 0 && selectedBuilding && (
             <Text style={styles.noItemsText}>No facilities available for this building</Text>
-          )}
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Equipment</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedEquipment}
-              onValueChange={(itemValue) => setSelectedEquipment(itemValue)}
-              enabled={filteredEquipments.length > 0}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select an equipment" value="" />
-              {filteredEquipments.map((equipment) => (
-                <Picker.Item 
-                  key={equipment.equipment_id} 
-                  label={equipment.equipment_name} 
-                  value={equipment.equipment_id} 
-                />
-              ))}
-            </Picker>
-          </View>
-          {filteredEquipments.length === 0 && selectedFacility && (
-            <Text style={styles.noItemsText}>No equipment available for this facility</Text>
           )}
         </View>
 
@@ -507,6 +484,31 @@ const SubmitReport = () => {
             </Picker>
           </View>
         </View>
+
+        {selectedFaultType && (
+          <View style={styles.formGroup}>
+          <Text style={styles.label}>Equipment</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedEquipment}
+              onValueChange={(itemValue) => setSelectedEquipment(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select an equipment" value="" />
+              {equipmentType.filter((equipment) => equipment.type === selectedFaultType).map((equipment) => (
+                <Picker.Item 
+                  key={equipment.equipment} 
+                  label={equipment.equipment} 
+                  value={equipment.equipment} 
+                />
+              ))}
+            </Picker>
+          </View>
+          {/* {filteredEquipments.length === 0 && selectedFacility && (
+            <Text style={styles.noItemsText}>No equipment available for this facility</Text>
+          )} */}
+        </View>
+        )}
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Priority</Text>
