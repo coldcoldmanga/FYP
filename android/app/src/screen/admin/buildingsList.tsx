@@ -6,7 +6,8 @@ import {
     SafeAreaView, 
     FlatList,
     TouchableOpacity,
-    Alert
+    Alert,
+    TextInput
 } from 'react-native';
 import { NavigationProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -14,13 +15,20 @@ import { getBuilding, deleteBuilding } from '../../service/buildingServices';
 import EditBuildingModal from '../../component/admin/tab/editBuildingModal';
 import BuildingDetail from '../../component/admin/tab/buildingDetail';
 
+type Building = {
+    building_id:string;
+    [key:string]:any;
+}
+
 const BuildingsList = () => {
     const navigation = useNavigation<NavigationProp<any>>();
-    const [buildings, setBuildings] = useState<any[]>([]);
+    const [buildings, setBuildings] = useState<Building[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedBuilding, setSelectedBuilding] = useState<any | null>(null);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isBuildingDetailVisible, setIsBuildingDetailVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [filteredBuildings, setFilteredBuildings] = useState<Building[]>([]);
     const isFocused = useIsFocused();
 
     useEffect(() => {
@@ -33,6 +41,7 @@ const BuildingsList = () => {
         try {
             const data = await getBuilding();
             setBuildings(data);
+            setFilteredBuildings(data);
         } catch (error) {
             console.error('Error loading buildings:', error);
             Alert.alert('Error', 'Failed to load buildings');
@@ -41,7 +50,15 @@ const BuildingsList = () => {
         }
     };
 
-
+    const handleSearch = (buildingName:string) => {
+        setSearchQuery(buildingName);
+        if(buildingName){
+            const filtered = buildings.filter((building) => building.building_name.toLowerCase().includes(buildingName.toLowerCase()));
+            setFilteredBuildings(filtered);
+        }else{
+            setFilteredBuildings(buildings);
+        }
+    }
 
     const handleEdit = (buildingId: string) => {
         setSelectedBuilding(buildings.find(building => building.building_id === buildingId));
@@ -133,8 +150,17 @@ const BuildingsList = () => {
                 <Text style={styles.headerTitle}>Buildings</Text>
             </View>
 
+            <View style={styles.searchContainer}>
+            <TextInput  
+                    placeholder="Search building by building name"
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={handleSearch}
+                />
+            </View>
+
             <FlatList
-                data={buildings}
+                data={filteredBuildings}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.building_id}
                 contentContainerStyle={styles.listContainer}
@@ -243,6 +269,22 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 16,
         marginTop: 24,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    searchInput: {
+        flex: 1,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 20,
+        marginRight: 10,
     },
 });
 
