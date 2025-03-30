@@ -46,7 +46,6 @@ export const getBuilding = async () => {
             building_id: doc.id,
             ...doc.data(),
         }));
-        console.log(buildingData);
         return buildingData;
     }catch(error){
         Alert.alert('Error', (error as Error).message)

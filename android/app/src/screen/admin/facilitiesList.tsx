@@ -6,33 +6,88 @@ import {
     SafeAreaView, 
     FlatList,
     TouchableOpacity,
-    Alert
+    Alert,
+    TextInput,
+    Modal
 } from 'react-native';
 import { NavigationProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getFacility, deleteFacility } from '../../service/facilityServices';
 import EditFacilityModal from '../../component/admin/tab/editFacilityModal';
 import FacilityDetail from '../../component/admin/tab/facilityDetail';
+import { getBuilding } from '../../service/buildingServices';
+import { Picker } from '@react-native-picker/picker';
+
+
+type Building = {
+    building_id:string;
+    [key:string]:any;
+}
 
 const FacilitiesList = () => {
     const navigation = useNavigation<NavigationProp<any>>();
     const [facilities, setFacilities] = useState<any[]>([]);
+    const [filteredFacilities, setFilteredFacilities] = useState<any[]>([]);
+    const [buildings, setBuildings] = useState<any[]>([])
     const [loading, setLoading] = useState(true);
     const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isFacilityDetailVisible, setIsFacilityDetailVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+    const [filteredBuilding, setFilteredBuilding] = useState<string>("");
     const isFocused = useIsFocused();
 
     useEffect(() => {
         if (isFocused) {
+            loadBuildings();
             loadFacilities();
         }
     }, [isFocused]);
+    
+    const handleSearch = (text:string) => {
+        setSearchQuery(text);
+        if(filteredBuilding){
+            const filtered = filteredFacilities.filter((facility) => facility.facility_id.toLowerCase().includes(text.toLowerCase()));
+            setFilteredFacilities(filtered);
+        }else{
+            const filtered = facilities.filter((facility) => facility.facility_id.toLowerCase().includes(text.toLowerCase()));
+            setFilteredFacilities(filtered);
+        }
+    }
+
+    const resetFilters = () => {
+        setFilteredBuilding("");
+        setFilteredFacilities(facilities);
+        if (searchQuery) {
+            const searchFiltered = facilities.filter((facility) => 
+                facility.facility_id.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredFacilities(searchFiltered);
+        }
+    };
+
+    const handleFilter = (buildingID: string) => {
+        setFilteredBuilding(buildingID);
+        setIsFilterModalVisible(false);
+        
+        if (buildingID) {
+            const filtered = facilities.filter((facility) => 
+                facility.building_id === buildingID && 
+                (searchQuery ? facility.facility_id.toLowerCase().includes(searchQuery.toLowerCase()) : true)
+            );
+            setFilteredFacilities(filtered);
+        } else {
+            resetFilters();
+        }
+    };
 
     const loadFacilities = async () => {
         try {
+            setLoading(true);
             const data = await getFacility();
             setFacilities(data);
+            setFilteredFacilities(data);
         } catch (error) {
             console.error('Error loading facilities:', error);
             Alert.alert('Error', 'Failed to load facilities');
@@ -41,8 +96,21 @@ const FacilitiesList = () => {
         }
     };
 
+    const loadBuildings = async () => {
+        try {
+            setLoading(true);
+            const data = await getBuilding();
+            setBuildings(data);
+            
+        } catch (error) {
+            console.error('Error Loading Buildings:', error);
+        }finally{
+            setLoading(false);
+        }
+    }
+
     const handleEdit = (facilityId: string) => {
-        setSelectedFacility(facilities.find(facility => facility.id === facilityId));
+        setSelectedFacility(facilities.find(facility => facility.facility_id === facilityId));
         setIsEditModalVisible(true);
     };
 
@@ -91,10 +159,10 @@ const FacilitiesList = () => {
             style={styles.facilityCard}
         >
             <View style={styles.facilityInfo}>
-                <Text style={styles.facilityName}>{item.facility_name}</Text>
+                <Text style={styles.facilityName}>{item.facility_id}</Text>
                 <View style={styles.detailsRow}>
                     {item.facility_type && (
-                        <Text style={styles.facilityType}>{item.facility_type}</Text>
+                        <Text style={styles.facilityType}>{item.facility_name}</Text>
                     )}
                     {item.building_name && (
                         <Text style={styles.buildingName}>in {item.building_name}</Text>
@@ -105,7 +173,7 @@ const FacilitiesList = () => {
                 <TouchableOpacity 
                     onPress={(e) => {
                         e.stopPropagation(); // Prevent triggering the card's onPress
-                        handleEdit(item.id);
+                        handleEdit(item.facility_id);
                     }}
                     style={styles.actionButton}
                 >
@@ -114,7 +182,7 @@ const FacilitiesList = () => {
                 <TouchableOpacity 
                     onPress={(e) => {
                         e.stopPropagation(); // Prevent triggering the card's onPress
-                        handleDelete(item.id);
+                        handleDelete(item.facility_id);
                     }}
                     style={styles.actionButton}
                 >
@@ -125,6 +193,7 @@ const FacilitiesList = () => {
     );
 
     return (
+        
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity 
@@ -136,8 +205,46 @@ const FacilitiesList = () => {
                 <Text style={styles.headerTitle}>Facilities</Text>
             </View>
 
+            <View style={styles.searchContainer}>
+                <TextInput  
+                    placeholder="Search facilities by Facility ID"
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={handleSearch}
+                />
+
+                <TouchableOpacity 
+                    style={[
+                        styles.filterButton, 
+                        filteredBuilding ? styles.activeFilterButton : null
+                    ]} 
+                    onPress={() => setIsFilterModalVisible(true)}
+                >
+                    <Icon name="filter-list" size={24} color="#FFF" />
+                </TouchableOpacity>
+                
+                {filteredBuilding ? (
+                    <TouchableOpacity 
+                        style={styles.resetButton}
+                        onPress={resetFilters}
+                    >
+                        <Icon name="clear" size={20} color="#FFF" />
+                    </TouchableOpacity>
+                ) : null}
+
+            </View>
+           
+            {filteredBuilding ? (
+                <View style={styles.selectedFilterContainer}>
+                    <Icon name="place" size={16} color="#4A90E2" />
+                    <Text style={styles.selectedFilterText}>
+                        Filtered by: {buildings.find(b => b.building_id === filteredBuilding)?.building_id || filteredBuilding}
+                    </Text>
+                </View>
+            ) : null}  
+    
             <FlatList
-                data={facilities}
+                data={filteredFacilities}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.facility_id}
                 contentContainerStyle={styles.listContainer}
@@ -165,6 +272,47 @@ const FacilitiesList = () => {
                 facility={selectedFacility}
                 onClose={handleDetailClose}
             />
+
+            {/* Filter Modal */}
+            <Modal
+                visible={isFilterModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsFilterModalVisible(false)}
+            >
+                <TouchableOpacity 
+                    style={styles.modalOverlay} 
+                    activeOpacity={1} 
+                    onPress={() => setIsFilterModalVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <TouchableOpacity activeOpacity={1} onPress={e => e.stopPropagation()}>
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Filter by Building</Text>
+                                    <TouchableOpacity onPress={() => setIsFilterModalVisible(false)}>
+                                        <Icon name="close" size={24} color="#333" />
+                                    </TouchableOpacity>
+                                </View>
+                                <Picker 
+                                    style={styles.picker} 
+                                    selectedValue={filteredBuilding} 
+                                    onValueChange={(value) => handleFilter(value)}
+                                >
+                                    <Picker.Item label="All Buildings" value="" />
+                                    {buildings.map((building) => (
+                                        <Picker.Item 
+                                            key={building.building_id}
+                                            label={building.building_id}
+                                            value={building.building_id}
+                                        />
+                                    ))}
+                                </Picker>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -250,6 +398,100 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 16,
         marginTop: 24,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    searchInput: {
+        flex: 1,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    filterButton: {
+        padding: 10,
+        backgroundColor: '#4A90E2',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 44,
+        height: 44,
+    },
+    picker: {
+        width: '100%',
+        height: 50,
+    },
+    selectedFilterContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#E3F2FD',
+        padding: 8,
+        paddingHorizontal: 16,
+        marginHorizontal: 16,
+        marginTop: 8,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#BBDEFB',
+    },
+    selectedFilterText: {
+        color: '#1976D2',
+        marginLeft: 8,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        overflow: 'hidden',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    modalContent: {
+        padding: 16,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+        paddingBottom: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    activeFilterButton: {
+        backgroundColor: '#2E7D32',
+    },
+    resetButton: {
+        padding: 8,
+        backgroundColor: '#FF5722',
+        borderRadius: 15,
+        marginLeft: 8,
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

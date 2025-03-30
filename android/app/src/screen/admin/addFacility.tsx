@@ -14,6 +14,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { addFacility } from '../../service/facilityServices';
 import { getBuilding } from '../../service/buildingServices';
+import { facilityType } from '../../constant/facilityType';
 
 const AddFacility = () => {
     const navigation = useNavigation<NavigationProp<any>>();
@@ -118,9 +119,9 @@ const AddFacility = () => {
                             <Picker.Item label="Select a building" value="" />
                             {buildings.map((building) => (
                                 <Picker.Item 
-                                    key={building.id}
+                                    key={building.building_id}
                                     label={building.building_name}
-                                    value={building.id}
+                                    value={building.building_id}
                                 />
                             ))}
                         </Picker>
@@ -136,15 +137,10 @@ const AddFacility = () => {
                                 setFormData({...formData, facility_type: itemValue})
                             }
                         >
-                            <Picker.Item label="Classroom" value="Classroom" />
-                            <Picker.Item label="Laboratory" value="Laboratory" />
-                            <Picker.Item label="Office" value="Office" />
-                            <Picker.Item label="Meeting Room" value="Meeting Room" />
-                            <Picker.Item label="Lecture Hall" value="Lecture Hall" />
-                            <Picker.Item label="Library" value="Library" />
-                            <Picker.Item label="Cafeteria" value="Cafeteria" />
-                            <Picker.Item label="Auditorium" value="Auditorium" />
-                            <Picker.Item label="Other" value="Other" />
+                            {facilityType.map((item) => (
+                                <Picker.Item key={item.code} label={item.type} value={item.type} />
+                            ))}
+                            
                         </Picker>
                     </View>
                 </View>

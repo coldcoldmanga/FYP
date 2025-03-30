@@ -10,17 +10,11 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { updateFacility } from '../../../service/facilityServices';
+import { facilityType } from '../../../constant/facilityType';
 
 interface FacilityDetailModalProps {
     visible: boolean;
-    facility: {
-        id: string;
-        facility_name: string;
-        facility_type?: string;
-        description?: string;
-        status?: string;
-        building_name?: string;
-    } | null;
+    facility: any;
     onClose: () => void;
     onUpdate: () => void;
 }
@@ -46,14 +40,14 @@ const EditFacilityModal = ({ visible, facility, onClose, onUpdate }: FacilityDet
     }, [facility]);
 
     const handleUpdate = async () => {
-        if (!facility?.id || !formData.facility_name.trim()) {
+        if (!facility?.facility_id || !formData.facility_name.trim()) {
             Alert.alert('Error', 'Facility name is required');
             return;
         }
 
         setLoading(true);
         try {
-            await updateFacility(facility.id, {
+            await updateFacility(facility.facility_id, {
                 ...formData,
                 updated_at: new Date()
             });
@@ -79,9 +73,9 @@ const EditFacilityModal = ({ visible, facility, onClose, onUpdate }: FacilityDet
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Edit Facility</Text>
 
-                    {facility?.building_name && (
+                    {facility?.building_id && (
                         <Text style={styles.buildingName}>
-                            in {facility.building_name}
+                            {facility.facility_id} in {facility.building_id}
                         </Text>
                     )}
 
@@ -97,12 +91,15 @@ const EditFacilityModal = ({ visible, facility, onClose, onUpdate }: FacilityDet
 
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>Facility Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={formData.facility_type}
-                            onChangeText={(text) => setFormData({...formData, facility_type: text})}
-                            placeholder="Enter facility type"
-                        />
+                        <Picker
+                            selectedValue={formData.facility_type}
+                            onValueChange={(value) => setFormData({...formData, facility_type: value})}
+                            style={styles.picker}
+                        >
+                            {facilityType.map((item) => (
+                                <Picker.Item key={item.code} label={item.type} value={item.type} />
+                            ))}
+                        </Picker>
                     </View>
 
                     <View style={styles.formGroup}>
@@ -207,6 +204,10 @@ const styles = StyleSheet.create({
     },
     picker: {
         height: 50,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
     },
     buttonContainer: {
         flexDirection: 'row',

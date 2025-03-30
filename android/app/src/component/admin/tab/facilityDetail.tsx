@@ -45,7 +45,7 @@ const FacilityDetail = ({ facility, visible, onClose }: FacilityDetailProps) => 
 
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Building</Text>
-                            <Text style={styles.sectionContent}>{facility?.building_name || 'Not associated'}</Text>
+                            <Text style={styles.sectionContent}>{facility?.building_id || 'Not associated'}</Text>
                         </View>
 
                         <View style={styles.section}>

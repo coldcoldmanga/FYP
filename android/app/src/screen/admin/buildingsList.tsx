@@ -141,6 +141,8 @@ const BuildingsList = () => {
                 )}
             />
 
+            <View style={styles.bottomSpacer}/>
+
             {/* FAB for adding new building */}
             <TouchableOpacity 
                 style={styles.fab}
@@ -180,6 +182,9 @@ const styles = StyleSheet.create({
     },
     backButton: {
         marginRight: 16,
+    },
+    bottomSpacer: {
+        height: 20,
     },
     headerTitle: {
         fontSize: 20,
