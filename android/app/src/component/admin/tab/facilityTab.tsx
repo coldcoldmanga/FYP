@@ -58,7 +58,7 @@ const FacilityTab = () => {
                 </TouchableOpacity>
                 
                 {/* Equipment Block */}
-                <TouchableOpacity 
+                {/* <TouchableOpacity 
                     style={styles.navBlock}
                     onPress={navigateToEquipment}
                 >
@@ -72,7 +72,7 @@ const FacilityTab = () => {
                         </Text>
                     </View>
                     <Icon name="chevron-right" size={24} color="#1a2847" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         </SafeAreaView>
     );

@@ -1,193 +1,164 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import axios from "axios";
+import Markdown from 'react-native-markdown-display';
+import moment from 'moment';
 
-interface AiSummaryProps {
-  reports: any[];
-  startDate: Date | null;
-  endDate: Date | null;
-  isLoading: boolean;
-}
-
-const AiSummary: React.FC<AiSummaryProps> = ({ reports, startDate, endDate, isLoading }) => {
+const AiSummary = () => {
   const [summary, setSummary] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
-  
-  useEffect(() => {
-    if (reports.length > 0 && !summary) {
-      generateSummary();
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [activeFilter, setActiveFilter] = useState<string>("");
+
+  const dateFilters = [
+    { label: "Last 7 Days", value: "last7days" },
+    { label: "Last 30 Days", value: "last30days" },
+    { label: "This Month", value: "thisMonth" },
+    { label: "Last Month", value: "lastMonth" },
+  ];
+
+  const handleDateFilter = (filterValue: string) => {
+    setActiveFilter(filterValue);
+    const now = moment();
+    let start, end;
+
+    switch (filterValue) {
+      case "last7days":
+        start = now.clone().subtract(7, 'days').startOf('day');
+        end = now.clone().endOf('day');
+        break;
+      case "last30days":
+        start = now.clone().subtract(30, 'days').startOf('day');
+        end = now.clone().endOf('day');
+        break;
+      case "thisMonth":
+        start = now.clone().startOf('month');
+        end = now.clone().endOf('month');
+        break;
+      case "lastMonth":
+        start = now.clone().subtract(1, 'month').startOf('month');
+        end = now.clone().subtract(1, 'month').endOf('month');
+        break;
+      default:
+        return;
     }
-  }, [reports]);
+
+    setStartDate(start.format('YYYY-MM-DD'));
+    setEndDate(end.format('YYYY-MM-DD'));
+  };
 
   const generateSummary = async () => {
+
+    if (!startDate || !endDate) {
+      setError("Please select start and end dates");
+      return;
+    }
+
+    setGenerating(true);
+    setError("");
+
     try {
-      setGenerating(true);
-      
-      //To simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Sample AI-generated summary (replace with actual API response later)
-      const dateRange = startDate && endDate 
-        ? `${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`
-        : "the selected period";
-        
-      const aiGeneratedSummary = `
-# Fault Report Analysis Summary
+      const response = await axios.post("http://172.25.96.1:3000/analyzeReport", {
+        startDate: startDate,
+        endDate: endDate
+      });
 
-## Overview
-During ${dateRange}, a total of **${reports.length} reports** were submitted. 
-
-## Key Insights
-* **Most Common Issue**: ${getMostCommonIssue(reports)}
-* **Average Response Time**: ${getAverageResponseTime(reports)} days
-* **Completion Rate**: ${getCompletionRate(reports)}%
-
-## Trends
-The data shows ${getTrend(reports)} in report volume compared to previous periods. ${getLocationInsight(reports)}
-
-## Recommendations
-Based on the analysis:
-1. ${getRecommendation1(reports)}
-2. ${getRecommendation2(reports)}
-3. Consider implementing preventive maintenance for recurring issues.
-      `;
-      
-      setSummary(aiGeneratedSummary);
+      if (response && response.data && response.data.success) {
+        setSummary(response.data.data);
+      } else {
+        setError("No summary data available");
+      }
     } catch (error) {
-      console.error("Error generating AI summary:", error);
-      setSummary("Failed to generate summary. Please try again.");
-    } finally {
+      setError(error as string);
+      console.error("Error generating summary:", error);
+      
+    }finally{
       setGenerating(false);
     }
   };
 
-  // Helper functions to analyze report data
-  const getMostCommonIssue = (reports: any[]) => {
-    const issueTypes: {[key: string]: number} = {};
-    reports.forEach(report => {
-      const type = report.fault_type || "Unknown";
-      issueTypes[type] = (issueTypes[type] || 0) + 1;
-    });
-    
-    let maxCount = 0;
-    let mostCommon = "Unknown";
-    
-    Object.entries(issueTypes).forEach(([type, count]) => {
-      if (count > maxCount) {
-        maxCount = count;
-        mostCommon = type;
-      }
-    });
-    
-    return mostCommon;
-  };
-  
-  const getAverageResponseTime = (reports: any[]) => {
-    const responseTimes = reports
-      .filter(r => r.response_time)
-      .map(r => r.response_time);
-      
-    if (responseTimes.length === 0) return "N/A";
-    
-    const avg = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-    return avg.toFixed(1);
-  };
-  
-  const getCompletionRate = (reports: any[]) => {
-    const completed = reports.filter(r => r.status === "Completed").length;
-    return Math.round((completed / reports.length) * 100);
-  };
-  
-  const getTrend = (reports: any[]) => {
-    // This would normally compare to historical data
-    // For now, we'll return a placeholder
-    return "a steady increase";
-  };
-  
-  const getLocationInsight = (reports: any[]) => {
-    // Analyze location data
-    // For now, return a placeholder
-    return "Building A has the highest concentration of reports.";
-  };
-  
-  const getRecommendation1 = (reports: any[]) => {
-    const mostCommon = getMostCommonIssue(reports);
-    return `Allocate additional resources to address ${mostCommon} issues.`;
-  };
-  
-  const getRecommendation2 = (reports: any[]) => {
-    return "Review response protocols to improve average response time.";
-  };
-
-  const renderSummary = () => {
-    if (!summary) return null;
-    
-    // Parse the markdown-like format
-    const lines = summary.split('\n');
-    
-    return lines.map((line, index) => {
-      if (line.startsWith('# ')) {
-        return <Text key={index} style={styles.h1}>{line.substring(2)}</Text>;
-      } else if (line.startsWith('## ')) {
-        return <Text key={index} style={styles.h2}>{line.substring(3)}</Text>;
-      } else if (line.startsWith('* ')) {
-        return (
-          <View key={index} style={styles.bulletPoint}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.text}>{line.substring(2)}</Text>
-          </View>
-        );
-      } else if (line.match(/^\d+\. /)) {
-        return (
-          <View key={index} style={styles.bulletPoint}>
-            <Text style={styles.bullet}>{line.match(/^\d+/)?.[0]}.</Text>
-            <Text style={styles.text}>{line.replace(/^\d+\. /, '')}</Text>
-          </View>
-        );
-      } else if (line.trim() === '') {
-        return <View key={index} style={styles.spacer} />;
-      } else {
-        return <Text key={index} style={styles.text}>{line}</Text>;
-      }
-    });
-  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.title}>AI Insights</Text>
-          
-          <TouchableOpacity 
-            style={styles.generateButton}
-            onPress={generateSummary}
-            disabled={generating || reports.length === 0}
-          >
-            <Icon name="refresh" size={16} color="#fff" />
-            <Text style={styles.generateButtonText}>
-              {generating ? "Generating..." : "Regenerate"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#1a2847" style={styles.loader} />
-        ) : reports.length === 0 ? (
-          <View style={styles.noDataContainer}>
-            <Icon name="analytics" size={48} color="#ccc" />
-            <Text style={styles.noDataText}>No data available for analysis</Text>
-          </View>
-        ) : generating ? (
-          <View style={styles.generatingContainer}>
-            <ActivityIndicator size="small" color="#1a2847" />
-            <Text style={styles.generatingText}>Analyzing report data...</Text>
-          </View>
-        ) : (
-          <ScrollView style={styles.summaryContainer}>
-            {renderSummary()}
-          </ScrollView>
-        )}
+      <View style={styles.header}>
+        <Icon name="analytics" size={24} color="#4a90e2" />
+        <Text style={styles.headerText}>AI Analysis Report</Text>
       </View>
+
+      <View style={styles.filterContainer}>
+        <Text style={styles.filterTitle}>Quick Filters</Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+        >
+          {dateFilters.map((filter) => (
+            <TouchableOpacity
+              key={filter.value}
+              style={[
+                styles.filterButton,
+                activeFilter === filter.value && styles.filterButtonActive
+              ]}
+              onPress={() => handleDateFilter(filter.value)}
+            >
+              <Text style={[
+                styles.filterButtonText,
+                activeFilter === filter.value && styles.filterButtonTextActive
+              ]}>
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {(startDate && endDate) && (
+        <View style={styles.dateInfo}>
+          <Icon name="date-range" size={16} color="#666" style={styles.dateIcon} />
+          <Text style={styles.dateText}>
+            {startDate} - {endDate}
+          </Text>
+        </View>
+      )}
+
+      <TouchableOpacity 
+        style={[
+          styles.generateButton,
+          generating && styles.generateButtonDisabled
+        ]} 
+        onPress={generateSummary}
+        disabled={generating}
+      >
+        <Icon name="auto-awesome" size={20} color="white" style={styles.buttonIcon} />
+        <Text style={styles.buttonText}>Generate Summary</Text>
+      </TouchableOpacity>
+      
+      {generating && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4a90e2" />
+          <Text style={styles.loadingText}>Analyzing your data...</Text>
+        </View>
+      )}
+      
+      {error && (
+        <View style={styles.errorContainer}>
+          <Icon name="error-outline" size={20} color="#d8000c" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+      
+      {!generating && summary && (
+        <ScrollView style={styles.summaryContainer}>
+          <View style={styles.summaryHeader}>
+            <Icon name="description" size={20} color="#4a90e2" />
+            <Text style={styles.summaryTitle}>Summary Report</Text>
+          </View>
+          <Markdown style={markdownStyles}>{summary}</Markdown>
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -195,97 +166,158 @@ Based on the analysis:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
     padding: 20,
-    shadowColor: "#000",
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#e0e0e0',
-    marginBottom: 16
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "600",
-    color: "#333"
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: 10,
+    color: '#333',
+  },
+  filterContainer: {
+    marginBottom: 20,
+  },
+  filterTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  filterScroll: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  filterButtonActive: {
+    backgroundColor: '#4a90e2',
+    borderColor: '#4a90e2',
+  },
+  filterButtonText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  filterButtonTextActive: {
+    color: '#ffffff',
+  },
+  dateInfo: {
+    backgroundColor: '#f5f5f5',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateIcon: {
+    marginRight: 8,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#666',
   },
   generateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1a2847',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    backgroundColor: '#4a90e2',
+    padding: 15,
     borderRadius: 8,
-  },
-  generateButtonText: {
-    color: '#fff',
-    marginLeft: 6,
-    fontSize: 14,
-  },
-  summaryContainer: {
-    maxHeight: 500,
-  },
-  h1: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1a2847',
-    marginVertical: 12,
-  },
-  h2: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a2847',
-    marginVertical: 10,
-  },
-  text: {
-    fontSize: 15,
-    color: '#333',
-    lineHeight: 22,
-    marginBottom: 8,
-  },
-  bulletPoint: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    paddingRight: 10,
-  },
-  bullet: {
-    fontSize: 15,
-    color: '#1a2847',
-    marginRight: 8,
-    width: 15,
-  },
-  spacer: {
-    height: 8,
-  },
-  loader: {
-    marginVertical: 50,
-  },
-  noDataContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 30,
-  },
-  noDataText: {
-    marginTop: 10,
-    color: "#666",
-  },
-  generatingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 30,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  generatingText: {
-    marginLeft: 10,
-    color: "#666",
+  generateButtonDisabled: {
+    backgroundColor: '#a0c4e7',
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    marginVertical: 30,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    marginVertical: 20,
+    padding: 15,
+    backgroundColor: '#ffecec',
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#d8000c',
+    marginLeft: 8,
+  },
+  summaryContainer: {
+    marginTop: 20,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
   },
 });
+
+const markdownStyles = {
+  body: {
+    padding: 15,
+    color: '#444',
+  },
+  heading1: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  paragraph: {
+    fontSize: 15,
+    lineHeight: 24,
+    marginBottom: 12,
+  },
+};
 
 export default AiSummary;

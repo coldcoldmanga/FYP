@@ -33,6 +33,8 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
 
     useEffect(() => {
         if(visible){
+            setStatus(report.status);
+            setProgress(report.progress);
             fetchReportMedia(report.report_id);
         }
     }, [visible]);
@@ -105,7 +107,11 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
             visible={visible}
             transparent={true}
             animationType="slide"
-            onRequestClose={onClose}
+            onRequestClose={() => {
+                onClose();
+                setStatus("");
+                setProgress("");
+            }}
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
@@ -165,7 +171,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                             <Text style={styles.sectionTitle}>Update Status</Text>
                             <View style={styles.pickerContainer}>
                                 <Picker
-                                    selectedValue={status}
+                                    selectedValue={report.status}
                                     onValueChange={(itemValue) => setStatus(itemValue)}
                                     style={styles.picker}
                                 >
@@ -198,7 +204,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                                 styles.updateButtonDisabled
                             ]}
                             onPress={handleUpdateReport}
-                            disabled={loading || (status === report.status && progress === report.progress)}
+                            disabled={loading || (status === report.status && progress === report.progress) || (status === "" && progress === "") }
                         >
                             <Text style={styles.updateButtonText}>
                                 {loading ? 'Updating...' : 'Update Report'}

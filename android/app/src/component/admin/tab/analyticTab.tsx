@@ -9,15 +9,15 @@ import AiSummary from "./AiSummary";
 const AnalyticTab = () => {
     const [loading, setLoading] = useState(true);
     const [reports, setReports] = useState<any[]>([]);
-    const [startDate, setStartDate] = useState<any>(null);
-    const [endDate, setEndDate] = useState<any>(null);
+    const [startDate, setStartDate] = useState<any>(new Date(new Date().setDate(new Date().getDate() - 7))); // get the date of seven days ago based on today's date
+    const [endDate, setEndDate] = useState<any>(new Date());
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [selectedView, setSelectedView] = useState('week');
     const [activeTab, setActiveTab] = useState('charts');
     const [aiSummary, setAiSummary] = useState('');
     const [aiLoading, setAiLoading] = useState(false);
-    const [activeView, setActiveView] = useState('analytics'); // 'analytics' or 'ai'
+    const [activeView, setActiveView] = useState('analytics');
 
     useEffect(() => {
         if(startDate && endDate) {
@@ -38,17 +38,7 @@ const AnalyticTab = () => {
                 });
                 setReports(filteredReports);
                 
-                // If AI tab is active, generate summary
-                // if (activeTab === 'ai') {
-                //     generateAiSummary(filteredReports);
-                // }
             } 
-            // else {
-            //     setReports(reportData);
-            //     if (activeTab === 'ai') {
-            //         generateAiSummary(reportData);
-            //     }
-            // }
 
         } catch (error) {
             console.error("Error fetching report data:", error);
@@ -56,58 +46,6 @@ const AnalyticTab = () => {
             setLoading(false);
         }
     };
-
-//     const generateAiSummary = async (reportData: any[]) => {
-//         try {
-//             setAiLoading(true);
-//             // This is a placeholder - you'll need to implement your actual AI service call
-//             // For now, we'll simulate an AI response with a timeout
-//             setTimeout(() => {
-//                 const totalReports = reportData.length;
-//                 const pendingReports = reportData.filter(r => r.status === 'Pending').length;
-//                 const completedReports = reportData.filter(r => r.status === 'Completed').length;
-                
-//                 // Most common fault types
-//                 const faultTypeCounts: Record<string, number> = {};
-//                 reportData.forEach(report => {
-//                     faultTypeCounts[report.fault_type] = (faultTypeCounts[report.fault_type] || 0) + 1;
-//                 });
-                
-//                 const sortedFaultTypes = Object.entries(faultTypeCounts)
-//                     .sort((a, b) => b[1] - a[1])
-//                     .slice(0, 3)
-//                     .map(([type, count]) => `${type} (${count})`);
-                
-//                 // Generate summary text
-//                 const summary = `
-// # Facility Maintenance Report Analysis
-
-// ## Overview
-// During the selected period, there were **${totalReports} total reports** submitted. 
-// ${completedReports} reports (${Math.round(completedReports/totalReports*100)}%) have been completed, 
-// while ${pendingReports} (${Math.round(pendingReports/totalReports*100)}%) are still pending.
-
-// ## Key Insights
-// * The most common issues reported were: ${sortedFaultTypes.join(', ')}.
-// * On average, it took ${(reportData.reduce((sum, r) => sum + (r.response_time || 3), 0) / totalReports).toFixed(1)} days to respond to reports.
-// * ${reportData.filter(r => r.priority === 'High').length} reports were marked as high priority.
-
-// ## Recommendations
-// * Consider allocating more resources to address ${sortedFaultTypes[0]} issues, as they represent the most common problems.
-// * Implement a faster response system for high-priority issues.
-// * Review the maintenance schedule for areas with recurring problems.
-//                 `;
-                
-//                 setAiSummary(summary);
-//                 setAiLoading(false);
-//             }, 1500);
-//         } catch (error) {
-//             console.error("Error generating AI summary:", error);
-//             setAiSummary("Failed to generate AI summary. Please try again later.");
-//         } finally {
-//             setAiLoading(false);
-//         }
-//     };
 
     const getFaultTypeData = () => {
         const faultTypeCounts: Record<string, number> = {};
@@ -386,62 +324,6 @@ const AnalyticTab = () => {
         );
     };
 
-    const renderAiSummaryTab = () => {
-        if (loading || aiLoading) {
-            return <ActivityIndicator size="large" color="#1a2847" style={styles.loader} />;
-        }
-        
-        if (reports.length === 0) {
-            return (
-                <View style={styles.noDataContainer}>
-                    <Icon name="analytics" size={48} color="#ccc" />
-                    <Text style={styles.noDataText}>No data available for AI analysis</Text>
-                </View>
-            );
-        }
-        
-        return (
-            <View style={styles.aiContainer}>
-                <View style={styles.aiCard}>
-                    <View style={styles.aiHeaderRow}>
-                        <Icon name="psychology" size={24} color="#1a2847" />
-                        <Text style={styles.aiTitle}>AI Insights</Text>
-                    </View>
-                    
-                    {/* <View style={styles.generateButtonContainer}>
-                        <TouchableOpacity
-                            style={styles.generateButton}
-                            onPress={() => generateAiSummary(reports)}
-                        >
-                            <Icon name="refresh" size={16} color="#fff" />
-                            <Text style={styles.generateButtonText}>Regenerate Analysis</Text>
-                        </TouchableOpacity>
-                    </View> */}
-                    
-                    <ScrollView style={styles.aiContent}>
-                        {aiSummary.split('\n').map((line, index) => {
-                            if (line.startsWith('# ')) {
-                                return <Text key={index} style={styles.aiHeaderH1}>{line.substring(2)}</Text>;
-                            } else if (line.startsWith('## ')) {
-                                return <Text key={index} style={styles.aiHeaderH2}>{line.substring(3)}</Text>;
-                            } else if (line.startsWith('* ')) {
-                                return (
-                                    <View key={index} style={styles.bulletPoint}>
-                                        <Text style={styles.bullet}>•</Text>
-                                        <Text style={styles.aiText}>{line.substring(2)}</Text>
-                                    </View>
-                                );
-                            } else if (line.trim() === '') {
-                                return <View key={index} style={styles.spacer} />;
-                            } else {
-                                return <Text key={index} style={styles.aiText}>{line}</Text>;
-                            }
-                        })}
-                    </ScrollView>
-                </View>
-            </View>
-        );
-    };
 
     return (
         <ScrollView 
@@ -769,7 +651,7 @@ const AnalyticTab = () => {
                 </>
             ) : (
                 // This will be replaced with the AiSummary component
-                <AiSummary reports={reports} startDate={startDate} endDate={endDate} isLoading={loading} />
+                <AiSummary />
             )}
 
             {/* Add a spacer at the bottom */}

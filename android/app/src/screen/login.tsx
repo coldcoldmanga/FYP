@@ -8,7 +8,6 @@ import {
   Alert,
   Image,
   SafeAreaView,
-  Button,
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { login } from '../service/authServices';

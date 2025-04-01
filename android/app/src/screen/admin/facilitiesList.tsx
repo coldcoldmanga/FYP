@@ -39,7 +39,7 @@ const FacilitiesList = () => {
     const isFocused = useIsFocused();
 
     useEffect(() => {
-        if (isFocused) {
+        if (isFocused && filteredBuilding == "") {
             loadBuildings();
             loadFacilities();
         }

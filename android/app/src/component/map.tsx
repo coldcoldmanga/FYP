@@ -266,7 +266,16 @@ const Map = () => {
                                     <Text style={styles.infoText}>
                                         Submitted: {new Date(selectedReport.submitted_at?.toDate()).toLocaleString()}
                                     </Text>
+                                    
                                 </View>
+
+                                <View style={styles.infoRow}>
+                                    <Icon name="access-time" size={20} color="#666" />
+                                    <Text style={styles.infoText}>
+                                        Last Updated: {new Date(selectedReport.updated_at?.toDate()).toLocaleString()}
+                                    </Text>
+                                </View>
+
                                 <View style={styles.infoRow}>
                                 {(isStudent) && (!isReporter) &&  (
                                         <TrackingButton 
