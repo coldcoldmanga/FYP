@@ -32,7 +32,7 @@ const StarRating = ({ rating }: { rating: number }) => {
 const Feedback = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const route = useRoute();
-  const { reportId } = route.params as { reportId: string };
+  const { reportId, faultType } = route.params as { reportId: string, faultType:string };
   const [userEmail, setUserEmail] = useState<string | null>('');
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,7 @@ const Feedback = () => {
         setUserEmail(email || '');
         
         try {
-          const feedbackData = await getFeedback(reportId);
+          const feedbackData = await getFeedback(faultType);
           setFeedbacks(feedbackData);
           
           const userIdFromEmail = email ? email.split('@')[0] : '';
@@ -58,7 +58,6 @@ const Feedback = () => {
             feedback.user_id === userIdFromEmail
           );
           setHasUserSubmittedFeedback(userHasFeedback);
-          console.log(userHasFeedback);
 
           setError(null);
         } catch (error) {
@@ -74,7 +73,7 @@ const Feedback = () => {
       return () => {
         
       };
-    }, [reportId])
+    }, [faultType])
   );
   
   const calculateAverageRating = () => {
@@ -108,13 +107,14 @@ const Feedback = () => {
   };
   
   const renderFeedbackItem = ({ item }: { item: any }) => {
-    // Check if current user is the author (you would implement this logic)
     
-    const isAuthor = item.user_id == userEmail?.split('@')[0]; // Replace with actual auth logic
+    const isAuthor = item.user_id == userEmail?.split('@')[0];
     return (
       <View style={styles.feedbackCard}>
         <View style={styles.feedbackHeader}>
-          <Text style={styles.userName}>{item.userName || 'Anonymous'}</Text>
+          <View style={styles.userInfoContainer}>
+          <Text style={styles.userName}>{item.user_id || 'Anonymous'}</Text>
+          <Text style={styles.reportIdText}>Report: {item.report_id}</Text>
           <View style={styles.feedbackHeaderRight}>
             <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
             {isAuthor && (
@@ -125,6 +125,7 @@ const Feedback = () => {
                 <Icon name="edit" size={16} color="#666" />
               </TouchableOpacity>
             )}
+            </View>
           </View>
         </View>
         
@@ -358,6 +359,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 8,
     textAlign: 'right',
+  },
+  userInfoContainer: {
+    flex: 1,
+  },
+  reportIdText: {
+    fontSize: 12,
+    color: '#666666',
+    marginTop: 2,
   },
 });
 
