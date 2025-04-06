@@ -27,9 +27,10 @@ import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
 import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
-import { updateNewReportToAdmin } from '../../service/onesignalServices';
+// import { updateNewReportToAdmin } from '../../service/onesignalServices';
 import { addNotification } from '../../service/notificationServices';
 import { equipmentType } from '../../constant/equipmentType';
+import axios from 'axios';
 interface Building {
   building_id: string;
   building_name: string;
@@ -295,6 +296,40 @@ const SubmitReport = () => {
     setSelectedBuilding(building);
   };
 
+  const uploadAttachment = async (uri:string, mediaType: 'image' | 'video') => {
+    try {
+      const formData = new FormData();
+
+      //add the file
+      const fileNameParts = uri.split('/');
+      const fileName = fileNameParts[fileNameParts.length - 1];
+
+      formData.append('file', {
+        uri: uri,
+        type: mediaType === 'image' ? 'image/jpeg' : 'video/mp4',
+        name: fileName
+      });
+
+      formData.append('mediaType', mediaType);
+
+      const response = await axios.post("http://172.25.96.1:3000/uploadAttachment", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if(response.status === 200 && response.data && response.data.url){
+        return response.data.url;
+      }else{
+        throw new Error('Failed to upload media');
+      }
+      
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      throw error;
+    }
+  }
+
   const submitReport = async () => {
     if (!selectedBuilding) {
       Alert.alert('Error', 'Please select a building');
@@ -323,11 +358,7 @@ const SubmitReport = () => {
         for (const attachment of attachments){
           try{
             let cloudinaryURL;
-            if (attachment.type === 'video') {
-              cloudinaryURL = await uploadVideo(attachment.uri);
-            } else {
-              cloudinaryURL = await uploadImage(attachment.uri);
-            }
+            cloudinaryURL = await uploadAttachment(attachment.uri, attachment.type);
             
             attachmentsData.push({
               url: cloudinaryURL,
@@ -359,7 +390,16 @@ const SubmitReport = () => {
 
       await addReport(reportData);
       //push notification to admin
-      await updateNewReportToAdmin(userID, reportData.fault_type, reportData.report_id);
+      await axios.post("http://172.25.96.1:3000/updateNewReportToAdmin", {
+        userID: userID,
+        faultType: reportData.fault_type,
+        reportID: reportData.report_id
+      })
+
+
+      // await updateNewReportToAdmin(userID, reportData.fault_type, reportData.report_id);
+
+
       //update the notification of admin in firestore
       await addNotification(`New Report Submitted`, `A new report has been submitted by ${userID}`, [], "Admin");
 
@@ -495,13 +535,13 @@ const SubmitReport = () => {
               style={styles.picker}
             >
               <Picker.Item label="Select an equipment" value="" />
-              {equipmentType.filter((equipment) => equipment.type === selectedFaultType).map((equipment) => (
+              {equipmentType.filter((equipment) => equipment.type === selectedFaultType).map((equipment) => equipment.equipment.map((equipment) => (
                 <Picker.Item 
-                  key={equipment.equipment} 
-                  label={equipment.equipment} 
-                  value={equipment.equipment} 
+                  key={equipment} 
+                  label={equipment} 
+                  value={equipment} 
                 />
-              ))}
+              )))}
             </Picker>
           </View>
           {/* {filteredEquipments.length === 0 && selectedFacility && (

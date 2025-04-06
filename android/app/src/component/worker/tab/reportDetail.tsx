@@ -7,9 +7,10 @@ import { getUserPlayerID, getUserTracking, updateWorker } from '../../../service
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
-import { updateReportStatusToAdmin, updateReportStatusToUser } from '../../../service/onesignalServices';
+// import { updateReportStatusToAdmin, updateReportStatusToUser } from '../../../service/onesignalServices';
 import { addNotification } from '../../../service/notificationServices';
 import { getUserTrackingList } from '../../../service/trackingService';
+import axios from 'axios';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -75,8 +76,21 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                 }
             }
             //push notification to admin and user
-            await updateReportStatusToAdmin(report.report_id, status, report.assigned_to)
-            await updateReportStatusToUser(report.report_id, status, playerID)
+            await axios.post("http://172.25.96.1/updateReportStatusToAdmin", {
+                reportID: report.report_id,
+                status: status,
+                workerID: report.assigned_to
+            })
+
+            await axios.post("http://172.25.96.1/updateReportStatusToUser",{
+                reportID: report.report_id,
+                status: status,
+                playerID: playerID
+            })
+
+
+            // await updateReportStatusToAdmin(report.report_id, status, report.assigned_to) to be removed later
+            // await updateReportStatusToUser(report.report_id, status, playerID) to be removed later
 
             //update the notification of admin and user in firestore
             await addNotification(`Report ${report.report_id} Updated`, `The report ${report.report_id} has been updated to ${status} by ${report.assigned_to}`, [], "Admin");
