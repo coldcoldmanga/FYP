@@ -50,7 +50,10 @@ const SummaryHistory = () => {
   };
 
   const renderSummaryItem = ({ item }: { item: any }) => {
-    const createdDate = moment(item.created_at?.toDate ? item.created_at.toDate() : item.created_at).format('MMM DD, YYYY • h:mm A');
+    const header = [...item.summary_content.matchAll(/\*\*(.*?)\*\*/g)].map(m => m[1]);
+    const title = header[0];
+    const date = header[1];
+    const createdDate = moment(item.created_at?.toDate ? item.created_at.toDate() : item.created_at).format('MMM DD, YYYY - h:mm A');
     const isExpanded = expandedId === item.summary_id;
     
     return (
@@ -59,7 +62,7 @@ const SummaryHistory = () => {
         onPress={() => toggleExpand(item.summary_id)}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.summaryTitle}>{item.title || 'AI Summary Report'}</Text>
+          <Text style={styles.summaryTitle}>{title || 'AI Summary Report'}</Text>
           <Icon 
             name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
             size={24} 
@@ -70,7 +73,7 @@ const SummaryHistory = () => {
         <View style={styles.dateContainer}>
           <Icon name="date-range" size={14} color="#666" style={styles.dateIcon} />
           <Text style={styles.dateRange}>
-            {moment(item.start_date).format('MMM DD')} - {moment(item.end_date).format('MMM DD, YYYY')}
+            {createdDate}
           </Text>
         </View>
 
@@ -80,10 +83,6 @@ const SummaryHistory = () => {
           ): (
             <Text style={styles.summaryContentText} numberOfLines={2} ellipsizeMode='tail'>{item.summary_content}</Text>
           )}
-        </View>
-
-        <View style={styles.cardFooter}>
-          <Text style={styles.timeStamp}>{createdDate}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -153,6 +152,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingBottom: 10,
   },
   summaryTitle: {
     fontSize: 16,

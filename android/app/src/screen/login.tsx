@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import { login } from '../service/authServices';
-import { updateLastLogin, updateUserToken } from '../service/userServices';
+import { updateLastLogin, updateUserToken, updateLoginError, getUser, lockAccount, resetLockout } from '../service/userServices';
+import { Timestamp } from '@react-native-firebase/firestore';
 const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
   
   const [email, setEmail] = useState('');
@@ -28,9 +29,23 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
         return;
     }
     try {
+      const userIsLocked = await getUser(email);
+      if(userIsLocked.login_attempt_error >= 3){
+        await lockAccount(email.split("@")[0], Timestamp.fromDate(new Date(Date.now() + 1000 * 60 * 15)));
+        Alert.alert('Error', 'Your account is suspended for 15 minutes due to multiple failed login attempts. Please try again later.');
+        return;
+      }
+      if(userIsLocked.lockout_until && userIsLocked.lockout_until.toDate() > new Date()){
+        Alert.alert('Error', 'Your account is locked for 15 minutes due to multiple failed login attempts. Please try again later.');
+        return;
+      }
+      
+
       const user = await login(email, password);
-      await updateLastLogin(email); //update user lastLogin
-      await updateUserToken(email, user.player_id)
+      if(user){
+        await updateLastLogin(email); //update user lastLogin
+        await updateUserToken(email, user.player_id)
+        await resetLockout(email.split("@")[0]);
       if(user.user_type === 'Student' || user.user_type === 'Staff'){
        
         navigation.reset({
@@ -48,7 +63,10 @@ const Login = ({navigation}: {navigation: NavigationProp<any>}) => {
             routes: [{name: 'AdminHome'}]
         })
       }
-    
+    }else{
+      await updateLoginError(email.split("@")[0]);
+    }
+
     } catch (error) {
       console.error('Login Error: ', error);
       Alert.alert('Error', (error as Error).message);

@@ -26,10 +26,11 @@ export const login = async (email:string, password:string) => {
     try{
 
         await signInWithEmailAndPassword(auth, email, password);
+        
         const user = await getUser(email);
 
         await AsyncStorage.setItem(LOGGED_IN, 'true');
-        await AsyncStorage.setItem(USER_TYPE, user.user_type);
+        await AsyncStorage.setItem(USER_TYPE, (user.user_type));
         await AsyncStorage.setItem(USER_EMAIL, email);
         await AsyncStorage.setItem(PLAYER_ID, user.player_id);
 
@@ -41,9 +42,9 @@ export const login = async (email:string, password:string) => {
         return user;
 
     } catch (error) {
-        Alert.alert('Error', (error as Error).message);
-        console.error('Login Error: ', error);
-        throw error;
+        console.log('Error', (error as Error).message);
+        Alert.alert("Error", "Invalid email or password");
+        return null;
     }
 };
 

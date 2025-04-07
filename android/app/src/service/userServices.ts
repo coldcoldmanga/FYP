@@ -1,5 +1,5 @@
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, increment, collectionGroup, getDoc } from '@react-native-firebase/firestore';
+import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, increment, collectionGroup, getDoc, Timestamp } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 const firestore = getFirestore(firebaseApp);
 
@@ -19,6 +19,8 @@ export const addUser = async (fullname:string, email:string, phoneNumber:string,
                 active_task,
                 status,
                 last_login: lastLogin,
+                login_attempt_error: 0,
+                lockout_until: null,
             });
         }else{
 
@@ -154,6 +156,38 @@ export const getUserTracking = async (reportID:string) => {
 
     } catch (error) {
         console.error('Get User Tracking Error: ', error);
+        throw error;
+    }
+}
+
+export const updateLoginError = async (userID: string) => {
+    try {
+        const userRef = doc(firestore, 'user', userID);
+        await updateDoc(userRef, {login_attempt_error: increment(1)});
+        
+    } catch (error) {
+        console.error('Failed to update login error: ', error);
+        throw error;
+    }
+
+}
+
+export const lockAccount = async (userID: string, lockoutUntil: Timestamp) => {
+    try {
+        const userRef = doc(firestore, 'user', userID);
+        await updateDoc(userRef, {lockout_until: lockoutUntil});
+    } catch (error) {
+        console.log('Lock Account Error: ', error);
+        throw error;
+    }
+}
+
+export const resetLockout = async (userID: string) => {
+    try {
+        const userRef = doc(firestore, 'user', userID);
+        await updateDoc(userRef, {login_attempt_error: 0, lockout_until: null});
+    } catch (error) {
+        console.log('Reset Lockout Error: ', error);
         throw error;
     }
 }
