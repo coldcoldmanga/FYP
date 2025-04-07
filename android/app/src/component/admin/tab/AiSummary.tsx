@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import axios from "axios";
 import Markdown from 'react-native-markdown-display';
 import moment from 'moment';
 
-const AiSummary = () => {
+const AiSummary = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [summary, setSummary] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [activeFilter, setActiveFilter] = useState<string>("");
+  const [showStartPicker, setShowStartPicker] = useState<boolean>(false);
+  const [showEndPicker, setShowEndPicker] = useState<boolean>(false);
 
   const dateFilters = [
     { label: "Last 7 Days", value: "last7days" },
     { label: "Last 30 Days", value: "last30days" },
     { label: "This Month", value: "thisMonth" },
     { label: "Last Month", value: "lastMonth" },
+    { label: "Custom Date", value: "customDate" },
   ];
 
   const handleDateFilter = (filterValue: string) => {
@@ -42,13 +47,32 @@ const AiSummary = () => {
         start = now.clone().subtract(1, 'month').startOf('month');
         end = now.clone().subtract(1, 'month').endOf('month');
         break;
+      case "customDate":{
+        setShowStartPicker(true);
+        break;
+      }
       default:
         return;
     }
 
-    setStartDate(start.format('YYYY-MM-DD'));
-    setEndDate(end.format('YYYY-MM-DD'));
+    setStartDate(start?.toDate().toLocaleDateString() || "");
+    setEndDate(end?.toDate().toLocaleDateString() || "");
   };
+
+  const onStartDateChange = (event:any, selectedDate?:Date) => {
+    if(selectedDate){
+      setShowStartPicker(false);
+      setStartDate(selectedDate.toLocaleDateString());
+      setShowEndPicker(true);
+    }
+  }
+
+  const onEndDateChange = (event:any, selectedDate?:Date) => {
+    if(selectedDate){
+      setShowEndPicker(false);
+      setEndDate(selectedDate.toLocaleDateString());
+    }
+  }
 
   const generateSummary = async () => {
 
@@ -86,6 +110,9 @@ const AiSummary = () => {
       <View style={styles.header}>
         <Icon name="analytics" size={24} color="#4a90e2" />
         <Text style={styles.headerText}>AI Analysis Report</Text>
+        <TouchableOpacity style={styles.historyButton} onPress={() => navigation.navigate("Summary History")}>
+          <Icon name="history" size={24} color="fff" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.filterContainer}>
@@ -113,6 +140,27 @@ const AiSummary = () => {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {showStartPicker && (
+                            <DateTimePicker
+                                value={startDate? new Date(startDate) : new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={onStartDateChange}
+                                maximumDate={new Date()}
+                            />
+                        )}
+                        
+                        {showEndPicker && (
+                            <DateTimePicker
+                                value={endDate? new Date(endDate) : new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={onEndDateChange}
+                                minimumDate={startDate? new Date(startDate) : undefined}
+                                maximumDate={new Date()}
+                            />
+                        )}
       </View>
 
       {(startDate && endDate) && (
@@ -240,10 +288,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#4a90e2',
     padding: 15,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'e0e0e0',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -299,6 +348,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginLeft: 8,
+  },
+  historyButton: {
+    marginLeft: 'auto', 
+    width: 40,          
+    height: 40,         
+    borderWidth: 1.5,     
+    borderColor: 'e0e0e0',
+    borderRadius: 8,    
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
 });
 
