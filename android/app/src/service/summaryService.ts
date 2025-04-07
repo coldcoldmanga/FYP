@@ -1,14 +1,15 @@
-import { getDocs, collection, getFirestore } from "@react-native-firebase/firestore";
+import { getDocs, collection, getFirestore, orderBy, query } from "@react-native-firebase/firestore";
 import { firebaseApp } from "../config/firebase";
 
 const firestore = getFirestore(firebaseApp);
 
 export const getSummary = async () => {
     try {
-        const summaryRef = collection(firestore, 'summaries').orderBy('created_at', 'desc');
-        const snapshot = await getDocs(summaryRef);
+        const summaryRef = collection(firestore, 'summaries')
+        const summaryQuery = query(summaryRef, orderBy('created_at', 'desc'));
+        const snapshot = await getDocs(summaryQuery);
         const data = snapshot.docs.map((doc) => ({
-            doc_id: doc.id,
+            summary_id: doc.id,
             ...doc.data()
         }));
         return data;

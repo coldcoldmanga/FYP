@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Dimensions } from "react-native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { PieChart, LineChart } from "react-native-chart-kit";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -7,6 +8,7 @@ import { getReport } from "../../../service/reportServices";
 import AiSummary from "./AiSummary";
 
 const AnalyticTab = () => {
+    const navigation = useNavigation<NavigationProp<any>>();
     const [loading, setLoading] = useState(true);
     const [reports, setReports] = useState<any[]>([]);
     const [startDate, setStartDate] = useState<any>(new Date(new Date().setDate(new Date().getDate() - 7))); // get the date of seven days ago based on today's date
@@ -14,9 +16,6 @@ const AnalyticTab = () => {
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [selectedView, setSelectedView] = useState('week');
-    const [activeTab, setActiveTab] = useState('charts');
-    const [aiSummary, setAiSummary] = useState('');
-    const [aiLoading, setAiLoading] = useState(false);
     const [activeView, setActiveView] = useState('analytics');
 
     useEffect(() => {
@@ -651,7 +650,7 @@ const AnalyticTab = () => {
                 </>
             ) : (
                 // This will be replaced with the AiSummary component
-                <AiSummary />
+                <AiSummary navigation={navigation} />
             )}
 
             {/* Add a spacer at the bottom */}
