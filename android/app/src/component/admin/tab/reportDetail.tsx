@@ -71,7 +71,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
             await fetchWorkers();
             const playerID = await getUserPlayerID(selectedWorker);
 
-            await axios.post("http://172.25.96.1/updateAssignedTaskToWorker", {
+            await axios.post("http://10.193.30.180:3000/updateAssignedTaskToWorker", {
                 playerID: playerID,
                 reportID: report.report_id
             })

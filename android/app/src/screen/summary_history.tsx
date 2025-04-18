@@ -9,10 +9,11 @@ import {
   Modal,
   ActivityIndicator,
   Dimensions,
-  ScrollView
+  ScrollView,
+  Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getSummary } from '../service/summaryService';
+import { getSummary, deleteSummary } from '../service/summaryService';
 import moment from 'moment';
 import Markdown from 'react-native-markdown-display';
 import { useFocusEffect } from '@react-navigation/native';
@@ -49,6 +50,30 @@ const SummaryHistory = () => {
     setExpandedId(expandedId === summaryId ? null : summaryId);
   };
 
+  const handleDelete = (summaryId: string) => {
+    Alert.alert(
+        'Confirm Delete',
+        'Are you sure you want to delete this summary?',
+        [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                    try {
+                        await deleteSummary(summaryId);
+                        loadSummaries();
+                        Alert.alert('Success', 'Summary deleted successfully');
+                    } catch (error) {
+                        console.error('Error deleting summary:', error);
+                        Alert.alert('Error', 'Failed to delete summary');
+                    }
+                }
+            }
+        ]
+    );
+};
+
   const renderSummaryItem = ({ item }: { item: any }) => {
     const header = [...item.summary_content.matchAll(/\*\*(.*?)\*\*/g)].map(m => m[1]);
     const title = header[0];
@@ -62,12 +87,27 @@ const SummaryHistory = () => {
         onPress={() => toggleExpand(item.summary_id)}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.summaryTitle}>{title || 'AI Summary Report'}</Text>
-          <Icon 
-            name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
-            size={24} 
-            color="#666" 
-          />
+          <View style={styles.headerLeft}>
+            <Text style={styles.summaryTitle}>{title || 'AI Summary Report'}</Text>
+          </View>
+          
+          <View style={styles.headerRight}>
+            <TouchableOpacity 
+              onPress={(e) => {
+                e.stopPropagation(); // Prevent triggering the card's onPress
+                handleDelete(item.summary_id);
+              }}
+              style={styles.deleteButton}
+            >
+              <Icon name="delete" size={24} color="#FF4444" />
+            </TouchableOpacity>
+            
+            <Icon 
+              name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+              size={24} 
+              color="#666" 
+            />
+          </View>
         </View>
 
         <View style={styles.dateContainer}>
@@ -155,6 +195,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     paddingBottom: 10,
+  },
+  headerLeft: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8, // Space between delete and expand icons
+  },
+  deleteButton: {
+    padding: 4, // Add some padding for better touch target
   },
   summaryTitle: {
     fontSize: 16,

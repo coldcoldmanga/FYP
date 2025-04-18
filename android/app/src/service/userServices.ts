@@ -191,3 +191,16 @@ export const resetLockout = async (userID: string) => {
         throw error;
     }
 }
+
+export const getWorkerBySpecialization = async (specialization: string) => {
+    try {
+        const workerQuery = query(collection(firestore, 'user'), where('user_type', '==', "Maintenance Worker"), where('specialize', 'array-contains-any', [specialization]));
+        const workerSnapshot = await getDocs(workerQuery);
+        return workerSnapshot.docs.map((doc) => ({
+            worker_id: doc.id,
+            ...doc.data(),
+        }));
+    } catch (error) {
+        console.error('Get Worker By Specialization Error: ', error);
+    }
+}

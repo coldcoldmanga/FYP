@@ -1,4 +1,4 @@
-import { getDocs, collection, getFirestore, orderBy, query } from "@react-native-firebase/firestore";
+import { getDocs, collection, getFirestore, orderBy, query, deleteDoc, doc } from "@react-native-firebase/firestore";
 import { firebaseApp } from "../config/firebase";
 
 const firestore = getFirestore(firebaseApp);
@@ -18,3 +18,16 @@ export const getSummary = async () => {
         throw error;
     }
 }
+
+export const deleteSummary = async(summary_id: string) => {
+    try {
+        const summaryRef = doc(firestore, 'summaries', summary_id);
+        await deleteDoc(summaryRef);
+
+    } catch (error) {
+        console.error("Error deleting summary: ", error);
+        throw error;
+    }
+}
+
+

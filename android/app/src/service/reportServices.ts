@@ -132,3 +132,14 @@ export const checkIsReporter = async (reportID:string) => {
         throw error;
     }
 }
+
+export const assignTaskToWorker = async (reportID: string, workerID: string) => {
+    try {
+        const reportRef = doc(firestore, 'reports', reportID);
+        await updateDoc(reportRef, { assigned_to: workerID, status: 'Assigned', updated_at: new Date()});
+        
+    } catch (error) {
+        console.error('Assign Task To Worker Error: ', error);
+        throw error;
+    }
+}

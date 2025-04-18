@@ -11,6 +11,7 @@ import { formatDate } from '../../../util/formatDate';
 import { addNotification } from '../../../service/notificationServices';
 import { getUserTrackingList } from '../../../service/trackingService';
 import axios from 'axios';
+import { faultType } from '../../../constant/faultType';
 interface ReportDetailProps {
     report: any;
     visible: boolean;
@@ -25,12 +26,6 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
     const [status, setStatus] = useState(report.status);
     const [attachments, setAttachments] = useState<any[]>([]);
     const navigation = useNavigation<NavigationProp<any>>();
-
-    // useEffect(()=>{
-    //     setStatus(report.status);
-    //     setProgress(report.progress);
-    //     setAttachments(report.attachments);
-    // }, [report])
 
     useEffect(() => {
         if(visible){
@@ -76,21 +71,17 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                 }
             }
             //push notification to admin and user
-            await axios.post("http://172.25.96.1/updateReportStatusToAdmin", {
+            await axios.post("http://10.193.30.180:3000/updateReportStatusToAdmin", {
                 reportID: report.report_id,
                 status: status,
                 workerID: report.assigned_to
             })
 
-            await axios.post("http://172.25.96.1/updateReportStatusToUser",{
+            await axios.post("http://10.193.30.180:3000/updateReportStatusToUser",{
                 reportID: report.report_id,
                 status: status,
                 playerID: playerID
             })
-
-
-            // await updateReportStatusToAdmin(report.report_id, status, report.assigned_to) to be removed later
-            // await updateReportStatusToUser(report.report_id, status, playerID) to be removed later
 
             //update the notification of admin and user in firestore
             await addNotification(`Report ${report.report_id} Updated`, `The report ${report.report_id} has been updated to ${status} by ${report.assigned_to}`, [], "Admin");
@@ -229,7 +220,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                             <View style={styles.section}>
                                 <TouchableOpacity 
                                     style={styles.feedbackLink} 
-                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id })}
+                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id, faultType: report.fault_type })}
                                 >
                                     <Icon name="rate-review" size={16} color="#1a2847" />
                                     <Text style={styles.feedbackLinkText}>View feedback & ratings</Text>

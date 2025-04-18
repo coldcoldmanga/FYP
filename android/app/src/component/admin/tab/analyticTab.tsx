@@ -132,6 +132,36 @@ const AnalyticTab = () => {
         return data;
     };
 
+    const getFacilityData = () => {
+        const facilityCounts: Record<string, number> = {};
+        
+        reports.forEach(report => {
+            const facility = report.facility_id;
+            facilityCounts[facility] = (facilityCounts[facility] || 0) + 1;
+        });
+    
+        // Convert to format needed for pie chart
+        const data = Object.entries(facilityCounts)
+            .sort(([, a], [, b]) => b - a) // Sort by count in descending order
+            .slice(0, 5) // Take only top 5 buildings
+            .map(([key, value], index) => {
+                const colors = [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#2FDF84', '#FF6B6B'
+                ];
+                
+                return {
+                    name: key,
+                    population: value,
+                    color: colors[index % colors.length],
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 12
+                };
+            });
+    
+        return data;
+    };
+
     const renderSummaryCards = () => {
         const totalReports = reports.length;
         const completedReports = reports.filter(report => report.status === 'Completed').length;
@@ -180,147 +210,6 @@ const AnalyticTab = () => {
         if (selectedDate) {
             setEndDate(selectedDate);
         }
-    };
-
-    const renderChartsTab = () => {
-        if (loading) {
-            return <ActivityIndicator size="large" color="#1a2847" style={styles.loader} />;
-        }
-        
-        return (
-            <>
-                {renderSummaryCards()}
-                
-                <View style={styles.chartSection}>
-                    <Text style={styles.chartTitle}>Fault Type Distribution</Text>
-                    {reports.length > 0 ? (
-                        <View>
-                            <View style={styles.chartWrapper}>
-                                <PieChart
-                                    data={getFaultTypeData()}
-                                    width={Dimensions.get("window").width - 80}
-                                    height={200}
-                                    chartConfig={{
-                                        backgroundGradientFrom: "#fff",
-                                        backgroundGradientTo: "#fff",
-                                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                    }}
-                                    accessor="population"
-                                    backgroundColor="transparent"
-                                    paddingLeft="15"
-                                    absolute
-                                    hasLegend={false}
-                                    center={[0, 0]}
-                                    avoidFalseZero={true}
-                            
-                                />
-                            </View>
-                            
-                            <View style={styles.legendGrid}>
-                                {getFaultTypeData().map((item, index) => (
-                                    <View key={index} style={styles.legendItem}>
-                                        <View style={styles.legendHeader}>
-                                            <View style={[styles.legendColor, { backgroundColor: item.color }]} />
-                                            <Text style={styles.legendText}>{item.name}</Text>
-                                        </View>
-                                        <Text style={styles.legendPercent}>
-                                            {Math.round((item.population / reports.length) * 100)}%
-                                        </Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    ) : (
-                        <View style={styles.noDataContainer}>
-                            <Icon name="bar-chart" size={48} color="#ccc" />
-                            <Text style={styles.noDataText}>No data available</Text>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.chartSection}>
-                    <Text style={styles.chartTitle}>Reports Over Time</Text>
-                    {reports.length > 0 ? (
-                        <LineChart
-                            data={getMonthlyReportData()}
-                            width={Dimensions.get("window").width - 40}
-                            height={220}
-                            chartConfig={{
-                                backgroundColor: "#fff",
-                                backgroundGradientFrom: "#fff",
-                                backgroundGradientTo: "#fff",
-                                decimalPlaces: 0,
-                                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                style: {
-                                    borderRadius: 16
-                                },
-                                propsForDots: {
-                                    r: "6",
-                                    strokeWidth: "2",
-                                    stroke: "#1a2847"
-                                }
-                            }}
-                            bezier
-                            style={{
-                                marginVertical: 8,
-                                borderRadius: 16
-                            }}
-                        />
-                    ) : (
-                        <View style={styles.noDataContainer}>
-                            <Icon name="trending-up" size={48} color="#ccc" />
-                            <Text style={styles.noDataText}>No data available</Text>
-                        </View>
-                    )}
-                </View>
-
-                <View style={styles.chartSection}>
-                    <Text style={styles.chartTitle}>Status Distribution</Text>
-                    {reports.length > 0 ? (
-                        <View style={styles.statusChartContainer}>
-                            <PieChart
-                                data={getStatusData()}
-                                width={Dimensions.get("window").width - 80}
-                                height={200}
-                                chartConfig={{
-                                    backgroundGradientFrom: "#fff",
-                                    backgroundGradientTo: "#fff",
-                                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                }}
-                                accessor="population"
-                                backgroundColor="transparent"
-                                paddingLeft="15"
-                                absolute
-                                hasLegend={false}
-                                center={[(Dimensions.get("window").width - 80) / 5, 0]}
-                                avoidFalseZero={true}
-                                
-                            />
-                            
-                            <View style={styles.legendContainer}>
-                                {getStatusData().map((item, index) => (
-                                    <View key={index} style={styles.legendRow}>
-                                        <View style={styles.legendLeft}>
-                                            <View style={[styles.legendColor, { backgroundColor: item.color }]} />
-                                            <Text style={styles.legendText}>{item.name}</Text>
-                                        </View>
-                                        <Text style={styles.legendPercent}>
-                                            {Math.round((item.population / reports.length) * 100)}%
-                                        </Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    ) : (
-                        <View style={styles.noDataContainer}>
-                            <Icon name="pie-chart" size={48} color="#ccc" />
-                            <Text style={styles.noDataText}>No data available</Text>
-                        </View>
-                    )}
-                </View>
-            </>
-        );
     };
 
 
@@ -511,55 +400,58 @@ const AnalyticTab = () => {
                                         <Text style={styles.summaryLabel}>Avg. Response (days)</Text>
                                     </View>
                                 </View>
-
-                                <View style={styles.chartSection}>
-                                    {reports.length > 0 ? (
-                                        <>
-                                            <View style={styles.chartWrapper}>
-                                                <PieChart
-                                                    data={getFaultTypeData()}
-                                                    width={Dimensions.get("window").width - 80}
-                                                    height={200}
-                                                    chartConfig={{
-                                                        backgroundGradientFrom: "#fff",
-                                                        backgroundGradientTo: "#fff",
-                                                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                                                    }}
-                                                    accessor="population"
-                                                    backgroundColor="transparent"
-                                                    paddingLeft="15"
-                                                    absolute
-                                                    hasLegend={false}
-                                                    center={[(Dimensions.get("window").width - 80) / 5, 0]}
-                                                    avoidFalseZero={true}
-                                                    
-                                                />
-                                            </View>
-                                            
-                                            <View style={styles.legendGrid}>
-                                                {getFaultTypeData().map((item, index) => (
-                                                    <View key={index} style={styles.legendItem}>
-                                                        <View style={styles.legendHeader}>
-                                                            <View style={[styles.legendColor, { backgroundColor: item.color }]} />
-                                                            <Text style={styles.legendText}>{item.name}</Text>
-                                                        </View>
-                                                        <Text style={styles.legendPercent}>
-                                                            {Math.round((item.population / reports.length) * 100)}%
-                                                        </Text>
-                                                    </View>
-                                                ))}
-                                            </View>
-                                        </>
-                                    ) : (
-                                        <View style={styles.noDataContainer}>
-                                            <Icon name="bar-chart" size={48} color="#ccc" />
-                                            <Text style={styles.noDataText}>No data available</Text>
-                                        </View>
-                                    )}
-                                </View>
                             </>
                         )}
                     </View>
+
+                    {/* Fault Type Distribution Card */}
+                    {!loading && (
+                        <View style={styles.card}>
+                            <Text style={styles.sectionTitle}>Fault Type Distribution</Text>
+                            {reports.length > 0 ? (
+                                <>
+                                    <View style={styles.chartWrapper}>
+                                        <PieChart
+                                            data={getFaultTypeData()}
+                                            width={Dimensions.get("window").width - 80}
+                                            height={200}
+                                            chartConfig={{
+                                                backgroundGradientFrom: "#fff",
+                                                backgroundGradientTo: "#fff",
+                                                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                            }}
+                                            accessor="population"
+                                            backgroundColor="transparent"
+                                            paddingLeft="15"
+                                            absolute
+                                            hasLegend={false}
+                                            center={[(Dimensions.get("window").width - 80) / 5, 0]}
+                                            avoidFalseZero={true}
+                                        />
+                                    </View>
+                                    
+                                    <View style={styles.legendGrid}>
+                                        {getFaultTypeData().map((item, index) => (
+                                            <View key={index} style={styles.legendItem}>
+                                                <View style={styles.legendHeader}>
+                                                    <View style={[styles.legendColor, { backgroundColor: item.color }]} />
+                                                    <Text style={styles.legendText}>{item.name}</Text>
+                                                </View>
+                                                <Text style={styles.legendPercent}>
+                                                    {Math.round((item.population / reports.length) * 100)}%
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                </>
+                            ) : (
+                                <View style={styles.noDataContainer}>
+                                    <Icon name="bar-chart" size={48} color="#ccc" />
+                                    <Text style={styles.noDataText}>No data available</Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
 
                     {/* Reports Over Time Card */}
                     {!loading && (
@@ -642,6 +534,53 @@ const AnalyticTab = () => {
                             ) : (
                                 <View style={styles.noDataContainer}>
                                     <Icon name="pie-chart" size={48} color="#ccc" />
+                                    <Text style={styles.noDataText}>No data available</Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Frequently Reported Building Card */}
+                    {!loading && (
+                        <View style={styles.card}>
+                            <Text style={styles.sectionTitle}>Frequently Reported Facility</Text>
+                            {reports.length > 0 ? (
+                                <View style={styles.statusChartContainer}>
+                                    <PieChart
+                                        data={getFacilityData()}
+                                        width={Dimensions.get("window").width - 80}
+                                        height={200}
+                                        chartConfig={{
+                                            backgroundGradientFrom: "#fff",
+                                            backgroundGradientTo: "#fff",
+                                            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                                        }}
+                                        accessor="population"
+                                        backgroundColor="transparent"
+                                        paddingLeft="15"
+                                        absolute
+                                        hasLegend={false}
+                                        center={[(Dimensions.get("window").width - 80) / 5, 0]}
+                                        avoidFalseZero={true}
+                                    />
+                                    
+                                    <View style={styles.legendContainer}>
+                                        {getFacilityData().map((item, index) => (
+                                            <View key={index} style={styles.legendRow}>
+                                                <View style={styles.legendLeft}>
+                                                    <View style={[styles.legendColor, { backgroundColor: item.color }]} />
+                                                    <Text style={styles.legendText}>{item.name}</Text>
+                                                </View>
+                                                <Text style={styles.legendPercent}>
+                                                    {Math.round((item.population / reports.length) * 100)}%
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                </View>
+                            ) : (
+                                <View style={styles.noDataContainer}>
+                                    <Icon name="location-city" size={48} color="#ccc" />
                                     <Text style={styles.noDataText}>No data available</Text>
                                 </View>
                             )}

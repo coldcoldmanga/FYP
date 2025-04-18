@@ -129,7 +129,7 @@ const ReportDetail = ({ report, visible, onClose }: ReportDetailProps) => {
                             <View style={styles.section}>
                                 <TouchableOpacity 
                                     style={styles.feedbackLink} 
-                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id })}
+                                    onPress={() => navigation.navigate('Feedback', { reportId: report.report_id, faultType: report.fault_type })}
                                 >
                                     <Icon name="rate-review" size={16} color="#1a2847" />
                                     <Text style={styles.feedbackLinkText}>View feedback & ratings</Text>

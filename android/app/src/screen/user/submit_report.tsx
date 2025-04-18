@@ -27,10 +27,13 @@ import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
 import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
-// import { updateNewReportToAdmin } from '../../service/onesignalServices';
+import { getWorkerBySpecialization, updateWorker } from '../../service/userServices';
+import { assignTaskToWorker } from '../../service/reportServices';
+import { getWorkerID } from '../../util/getWorkerID';
 import { addNotification } from '../../service/notificationServices';
 import { equipmentType } from '../../constant/equipmentType';
 import axios from 'axios';
+import { getSpecialization } from '../../util/faultyTypeToGeneral';
 interface Building {
   building_id: string;
   building_name: string;
@@ -312,7 +315,7 @@ const SubmitReport = () => {
 
       formData.append('mediaType', mediaType);
 
-      const response = await axios.post("http://172.25.96.1:3000/uploadAttachment", formData, {
+      const response = await axios.post("http://10.193.30.180:3000/uploadAttachment", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -389,16 +392,13 @@ const SubmitReport = () => {
       };
 
       await addReport(reportData);
+
       //push notification to admin
-      await axios.post("http://172.25.96.1:3000/updateNewReportToAdmin", {
+      await axios.post("http://10.193.30.180:3000/updateNewReportToAdmin", {
         userID: userID,
         faultType: reportData.fault_type,
         reportID: reportData.report_id
       })
-
-
-      // await updateNewReportToAdmin(userID, reportData.fault_type, reportData.report_id);
-
 
       //update the notification of admin in firestore
       await addNotification(`New Report Submitted`, `A new report has been submitted by ${userID}`, [], "Admin");
@@ -408,6 +408,30 @@ const SubmitReport = () => {
           await addAttachment(reportId, attachment);
         }
       }
+
+      try {
+         //assign task to worker based on the fault type
+      const specialization = getSpecialization(reportData.fault_type);
+      console.log("Print Specialization: " + specialization);
+
+      if(specialization){
+        const workers = await getWorkerBySpecialization(specialization);
+        if(workers && workers.length > 0){
+          const workerID = await getWorkerID(workers); // the worker with the least active task
+          await assignTaskToWorker(reportId, workerID);
+          await updateWorker(workerID, "Assigned");
+          await addNotification(`New Task Assigned`, `You have been assigned a new task.`, [workerID], "");
+        }else{
+          console.log("No workers found");
+        }
+      }else{
+          console.log("No specialization found");
+        }
+      } catch (error) {
+        console.log("Error assigning task to worker: " + error);
+      }
+
+     
       
       Alert.alert(
         'Success',
@@ -544,9 +568,6 @@ const SubmitReport = () => {
               )))}
             </Picker>
           </View>
-          {/* {filteredEquipments.length === 0 && selectedFacility && (
-            <Text style={styles.noItemsText}>No equipment available for this facility</Text>
-          )} */}
         </View>
         )}
 
