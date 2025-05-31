@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
+import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getReport, getReportByStatus } from '../../../service/reportServices';
 import ReportDetail from '../../../component/admin/tab/reportDetail';
 import { useIsFocused } from '@react-navigation/native';
+import { cacheManager } from '../../../util/cacheHelper';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
@@ -48,8 +49,19 @@ const ReportsTab = () => {
     const fetchReports = async () => {
         try {
             setLoading(true);
-            const fetchedReports = await getReport();
-            setReports(fetchedReports);
+            
+            // Create a unique cache key for all admin reports
+            const cacheKey = 'admin_reports_all';
+            
+            // Define the fetch function to be used if cache is invalid
+            const fetchData = async () => {
+                return await getReport();
+            };
+            
+            // Get from cache or fetch new data
+            const reportData = await cacheManager.getOrFetch(cacheKey, fetchData);
+            
+            setReports(reportData);
             setError(null);
         } catch (error) {
             setError('Failed to load reports');
@@ -60,10 +72,21 @@ const ReportsTab = () => {
     };
 
     const fetchReportsByStatus = async (status: string) => {
-        try{
+        try {
             setLoading(true);
-            const fetchedReports = await getReportByStatus(status);
-            setReports(fetchedReports);
+            
+            // Create a unique cache key for admin reports by status
+            const cacheKey = `admin_reports_status_${status}`;
+            
+            // Define the fetch function to be used if cache is invalid
+            const fetchData = async () => {
+                return await getReportByStatus(status);
+            };
+            
+            // Get from cache or fetch new data
+            const reportData = await cacheManager.getOrFetch(cacheKey, fetchData);
+            
+            setReports(reportData);
             setError(null);
         } catch (error) {
             setError('Failed to load reports');
@@ -73,7 +96,17 @@ const ReportsTab = () => {
         }
     };
 
-
+    // Function to refresh reports and bypass cache
+    const refreshReports = () => {
+        // Invalidate cache based on current filter
+        if (reportFilter === 'All') {
+            cacheManager.invalidate('admin_reports_all');
+            fetchReports();
+        } else {
+            cacheManager.invalidate(`admin_reports_status_${reportFilter}`);
+            fetchReportsByStatus(reportFilter);
+        }
+    };
 
     const handleReportPress = (report: any) => {
         setSelectedReport(report);
@@ -135,7 +168,7 @@ const ReportsTab = () => {
                 <View style={styles.centerContainer}>
                     <Icon name="error-outline" size={48} color="#c62828" />
                     <Text style={styles.messageText}>{error}</Text>
-                    <TouchableOpacity style={styles.retryButton} onPress={fetchReports}>
+                    <TouchableOpacity style={styles.retryButton} onPress={refreshReports}>
                         <Text style={styles.retryButtonText}>Retry</Text>
                     </TouchableOpacity>
                 </View>
@@ -149,6 +182,13 @@ const ReportsTab = () => {
                     style={styles.reportsList}
                     contentContainerStyle={styles.reportsListContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={loading}
+                            onRefresh={refreshReports}
+                            colors={['#1a2847']}
+                        />
+                    }
                 >
                     {reports.map((report) => (
                         <TouchableOpacity key={report.report_id} style={styles.reportCard} onPress={() => handleReportPress(report)}>
@@ -198,7 +238,14 @@ const ReportsTab = () => {
                     report={selectedReport}
                     visible={viewReportDetail}
                     onClose={() => setViewReportDetail(false)}
-                    onUpdate={fetchReports}
+                    onUpdate={() => {
+                        // Invalidate all caches when a report is updated
+                        cacheManager.invalidate('admin_reports_all');
+                        filterOptions.forEach(filter => 
+                            cacheManager.invalidate(`admin_reports_status_${filter}`)
+                        );
+                        fetchReports();
+                    }}
                 />
             )}
 

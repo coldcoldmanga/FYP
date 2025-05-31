@@ -14,7 +14,17 @@ import {
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MapView, { Marker, LatLng, PROVIDER_GOOGLE } from 'react-native-maps';
-import { addBuilding } from '../../service/buildingServices';
+import { addBuilding, getBuilding } from '../../service/buildingServices';
+
+interface Building {
+    building_id: string;
+    building_name: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    description: string;
+  }
 
 const INITIAL_REGION = {
     latitude: 2.2490057879268996,  
@@ -25,6 +35,7 @@ const INITIAL_REGION = {
 
 const AddBuilding = () => {
     const navigation = useNavigation<NavigationProp<any>>();
+    const[buildings, setBuildings] = useState<Building[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
     const [mapRegion, setMapRegion] = useState(INITIAL_REGION);
@@ -37,9 +48,29 @@ const AddBuilding = () => {
         updated_at: new Date()
     });
 
+    const loadBuildings = async () => {
+        try {
+          const buildingSnapshot = await getBuilding();
+          const buildingData = buildingSnapshot.map((doc: any) => ({
+            building_id: doc.building_id,
+            building_name: doc.building_name,
+            location: doc.location,
+            description: doc.description
+          }));
+          setBuildings(buildingData);
+          console.log(buildingData);
+        } catch (error) {
+          console.error('Error loading buildings:', error);
+          Alert.alert('Error', 'Failed to load buildings');
+        } finally {
+          setLoading(false);
+        }
+      };
+
     useEffect(() => {
         // Set the initial region when the component mounts
         setMapRegion(INITIAL_REGION);
+        loadBuildings();
         setLoading(false);
     }, []);
 
@@ -69,15 +100,17 @@ const AddBuilding = () => {
     };
 
     const handleSubmit = async () => {
-        if (!formData.building_name.trim()) {
+        if(!formData.building_name.trim()) {
             Alert.alert('Error', 'Building name is required');
             return;
         }
 
-        if (!formData.location) {
+        if(!formData.location) {
             Alert.alert('Error', 'Please select a location on the map');
             return;
         }
+
+        
 
         try {
             await addBuilding(formData);

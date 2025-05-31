@@ -143,3 +143,36 @@ export const assignTaskToWorker = async (reportID: string, workerID: string) => 
         throw error;
     }
 }
+
+export const getUserTrackingReport = async (userID: string) => {
+    try {
+        const userTrackQuery = query(collection(firestore, 'user_track'), where('user_id', '==', userID), orderBy('created_at', 'desc'));
+        const userTrackSnapshot = await getDocs(userTrackQuery);
+
+        const reportIDs = userTrackSnapshot.docs.map((doc) => doc.data().report_id);
+
+        if(reportIDs.length === 0){
+            return [];
+        }
+
+        const report = []
+
+        for(const reportID of reportIDs){
+            const reportRef = doc(firestore, 'reports', reportID);
+            const reportSnapshot = await getDoc(reportRef);
+
+            if (reportSnapshot.exists){
+                report.push({
+                    report_id: reportID,
+                    ...reportSnapshot.data()
+                });
+            }
+        }
+
+        return report;
+        
+    } catch (error) {
+        console.error('Error getting user tracked reports:', error)
+        throw error;
+    }
+}

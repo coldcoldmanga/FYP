@@ -7,6 +7,11 @@ export const addBuilding = async (building:any) => {
 
     try{
         const buildingID = building.building_id;
+        const checkBuilding = await getBuildingById(buildingID);
+        if(checkBuilding){
+            Alert.alert('Error', 'Building already exists');
+            return;
+        }
         const buildinigRef = doc(collection(firestore, 'building'), buildingID);
         await setDoc(buildinigRef, building);
     }catch(error){

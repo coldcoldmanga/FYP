@@ -6,7 +6,7 @@ export const equipmentType = [
     { type: "Ceiling", equipment: ["Ceiling Fan", "Ceiling Light", "False Ceiling Panel", "Ceiling Board", "Suspended Ceiling Grid"] },
     { type: "Central Vacuum", equipment: ["Vacuum Unit", "Inlet Valve", "Hose", "Wand", "Dust Bag"] },
     { type: "Classroom ICT Support", equipment: ["Projector", "Interactive Whiteboard", "Desktop Computer", "Laptop", "Document Camera"] },
-    { type: "Computer", equipment: ["Desktop Computer", "Laptop", "Monitor", "Keyboard", "Mouse"] },
+    { type: "Computer Support", equipment: ["Desktop Computer", "Laptop", "Monitor", "Keyboard", "Mouse"] },
     { type: "Laptop Support", equipment: ["Desktop Computer", "Laptop", "Monitor", "Keyboard", "Mouse"] },
     { type: "Door", equipment: ["Door Hinge", "Door Lock", "Window Handle", "Roller Shutter Motor", "Window Frame"] },
     { type: "Window", equipment: ["Door Hinge", "Door Lock", "Window Handle", "Roller Shutter Motor", "Window Frame"] },

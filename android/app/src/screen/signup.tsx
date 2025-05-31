@@ -41,6 +41,10 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
         Alert.alert('Error', 'Please select a user type.');
         return;
     }
+    else if(!RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).test(password)){
+      Alert.alert('Error', 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
+      return;
+    }
     try{
         await signUp(email, password);
         await assignUserRoleTag(userType);

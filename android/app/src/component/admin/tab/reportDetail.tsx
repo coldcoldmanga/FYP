@@ -71,12 +71,47 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
             await fetchWorkers();
             const playerID = await getUserPlayerID(selectedWorker);
 
-            await axios.post("http://10.193.30.180:3000/updateAssignedTaskToWorker", {
-                playerID: playerID,
+            // Add detailed logging for debugging
+            console.log('Attempting to send push notification with:', {
+                playerID,
                 reportID: report.report_id
-            })
+            });
+
+            try{
+                const response = await axios.post(
+                    "https://fyp-backend-zeta-amber.vercel.app/updateAssignedTaskToWorker", 
+                    {
+                        playerID: [playerID],
+                        reportID: report.report_id
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        timeout: 10000 // 10 second timeout
+                    }
+                );
+                console.log('Push notification response:', response.data);
+            }catch(error){
+                // More detailed error logging
+                if (axios.isAxiosError(error)) {
+                    console.error('Push Notification Error Details:', {
+                        message: error.message,
+                        status: error.response?.status,
+                        statusText: error.response?.statusText,
+                        data: error.response?.data,
+                        config: {
+                            url: error.config?.url,
+                            method: error.config?.method,
+                            headers: error.config?.headers,
+                            data: error.config?.data
+                        }
+                    });
+                } else {
+                    console.error('Push Notification Error:', error);
+                }
+            }
             
-            // await updateAssignedTaskToWorker([playerID], report.report_id); to be removed later
             await addNotification(`You have been assigned a new report`, `The report ${report.report_id} has been assigned to you`, [selectedWorker], "");
            
             Alert.alert('Success', 'Report updated successfully', [

@@ -19,13 +19,11 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { getBuilding } from '../../service/buildingServices';
 import { getFacility } from '../../service/facilityServices';
-import { getEquipment } from '../../service/equipmentServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addReport } from '../../service/reportServices';
 import { faultType } from '../../constant/faultType';
 import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
-import { uploadImage, uploadVideo } from '../../service/cloudinaryServices';
 import { addAttachment } from '../../service/attachmentServices';
 import { getWorkerBySpecialization, updateWorker } from '../../service/userServices';
 import { assignTaskToWorker } from '../../service/reportServices';
@@ -50,20 +48,12 @@ interface Facility {
   building_id: string;
 }
 
-interface Equipment {
-  equipment_id: string;
-  equipment_name: string;
-  facility_id: string;
-}
-
 const SubmitReport = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [facilities, setFacilities] = useState<Facility[]>([]);
-  const [equipments, setEquipments] = useState<Equipment[]>([]);
   const [filteredFacilities, setFilteredFacilities] = useState<Facility[]>([]);
-  const [filteredEquipments, setFilteredEquipments] = useState<Equipment[]>([]);
   
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
@@ -85,7 +75,6 @@ const SubmitReport = () => {
   useEffect(() => {
     loadBuildings();
     loadFacilities();
-    loadEquipments();
   }, []);
 
   useEffect(() => {
@@ -96,19 +85,8 @@ const SubmitReport = () => {
       console.log(filtered);
       setFilteredFacilities(filtered);
       setSelectedFacility('');
-      setSelectedEquipment('');
     }
   }, [selectedBuilding, facilities]);
-
-  useEffect(() => {
-    if (selectedFacility) {
-      const filtered = equipments.filter(
-        equipment => equipment.facility_id === selectedFacility
-      );
-      setFilteredEquipments(filtered);
-      setSelectedEquipment('');
-    }
-  }, [selectedFacility, equipments]);
 
   const loadBuildings = async () => {
     try {
@@ -144,20 +122,7 @@ const SubmitReport = () => {
     }
   };
 
-  const loadEquipments = async () => {
-    try {
-      const equipmentSnapshot = await getEquipment();
-      const equipmentData = equipmentSnapshot.map((doc: any) => ({
-        equipment_id: doc.equipment_id,
-        equipment_name: doc.equipment_name,
-        facility_id: doc.facility_id
-      }));
-      setEquipments(equipmentData);
-      console.log(equipmentData);
-    } catch (error) {
-      console.error('Error loading equipment:', error);
-    }
-  };
+
 
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
@@ -315,7 +280,7 @@ const SubmitReport = () => {
 
       formData.append('mediaType', mediaType);
 
-      const response = await axios.post("http://10.193.30.180:3000/uploadAttachment", formData, {
+      const response = await axios.post("https://fyp-backend-zeta-amber.vercel.app/uploadAttachment", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -337,6 +302,21 @@ const SubmitReport = () => {
     if (!selectedBuilding) {
       Alert.alert('Error', 'Please select a building');
       return;
+    }
+
+    if(!selectedFacility) {
+      Alert.alert('Error', 'Please select a facility');
+      return
+    }
+
+    if(!selectedEquipment) {
+      Alert.alert('Error', 'Please select an equipment');
+      return
+    }
+
+    if(!selectedFaultType) {
+      Alert.alert('Error', 'Please select a fault type');
+      return
     }
 
     if (!description.trim()) {
@@ -394,7 +374,7 @@ const SubmitReport = () => {
       await addReport(reportData);
 
       //push notification to admin
-      await axios.post("http://10.193.30.180:3000/updateNewReportToAdmin", {
+      await axios.post("https://fyp-backend-zeta-amber.vercel.app/updateNewReportToAdmin", {
         userID: userID,
         faultType: reportData.fault_type,
         reportID: reportData.report_id

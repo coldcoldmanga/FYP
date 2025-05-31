@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Dimensions, RefreshControl } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { PieChart, LineChart } from "react-native-chart-kit";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getReport } from "../../../service/reportServices";
 import AiSummary from "./AiSummary";
+import { cacheManager } from "../../../util/cacheHelper";
 
 const AnalyticTab = () => {
     const navigation = useNavigation<NavigationProp<any>>();
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [reports, setReports] = useState<any[]>([]);
+    const [allReports, setAllReports] = useState<any[]>([]); // Store all reports to filter locally
     const [startDate, setStartDate] = useState<any>(new Date(new Date().setDate(new Date().getDate() - 7))); // get the date of seven days ago based on today's date
     const [endDate, setEndDate] = useState<any>(new Date());
     const [showStartPicker, setShowStartPicker] = useState(false);
@@ -18,32 +21,66 @@ const AnalyticTab = () => {
     const [selectedView, setSelectedView] = useState('week');
     const [activeView, setActiveView] = useState('analytics');
 
-    useEffect(() => {
-        if(startDate && endDate) {
-            fetchReportData();
-        }
-    }, [startDate, endDate]);
-
-    const fetchReportData = async () => {
+    // Function to fetch all reports from server or cache
+    const fetchAllReports = async () => {
         try {
             setLoading(true);
-            const reportData = await getReport();
             
-            // Filter reports by date range
-            if (startDate && endDate) {
-                const filteredReports = reportData.filter((report: any) => {
-                    const reportDate = report.submitted_at.toDate();
-                    return reportDate >= startDate && reportDate <= endDate;
-                });
-                setReports(filteredReports);
-                
-            } 
-
+            // Use a consistent cache key for all analytics reports
+            const cacheKey = 'admin_analytics_all_reports';
+            
+            // Get data from cache or fetch from Firestore
+            const reportData = await cacheManager.getOrFetch(cacheKey, async () => {
+                console.log('Fetching analytics reports from Firestore...');
+                return await getReport();
+            });
+            
+            // Store all reports in state
+            setAllReports(reportData);
+            
+            // Apply date filtering
+            filterReportsByDate(reportData, startDate, endDate);
         } catch (error) {
             console.error("Error fetching report data:", error);
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
+    };
+    
+    // Function to filter reports by date (runs client-side)
+    const filterReportsByDate = (reportData: any[], start: Date, end: Date) => {
+        if (!reportData || reportData.length === 0) {
+            setReports([]);
+            return;
+        }
+        
+        const filteredReports = reportData.filter((report: any) => {
+            const reportDate = report.submitted_at.toDate();
+            return reportDate >= start && reportDate <= end;
+        });
+        
+        setReports(filteredReports);
+    };
+
+    useEffect(() => {
+        // Only fetch all reports once when component mounts
+        fetchAllReports();
+    }, []);
+    
+    // When date range changes, just filter the existing data
+    useEffect(() => {
+        if (allReports.length > 0) {
+            filterReportsByDate(allReports, startDate, endDate);
+        }
+    }, [startDate, endDate]);
+    
+    // Function to refresh all data from server
+    const refreshData = () => {
+        setRefreshing(true);
+        // Invalidate the analytics reports cache
+        cacheManager.invalidate('admin_analytics_all_reports');
+        fetchAllReports();
     };
 
     const getFaultTypeData = () => {
@@ -54,7 +91,6 @@ const AnalyticTab = () => {
             faultTypeCounts[faultType] = (faultTypeCounts[faultType] || 0) + 1;
         });
 
-        // Convert to format needed for pie chart
         const data = Object.keys(faultTypeCounts).map((key, index) => {
             const colors = [
                 '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
@@ -77,14 +113,12 @@ const AnalyticTab = () => {
         const monthData = Array(6).fill(0);
         const monthLabels = [];
         
-        // Create labels for the last 6 months
         for (let i = 5; i >= 0; i--) {
             const date = new Date();
             date.setMonth(date.getMonth() - i);
             monthLabels.push(date.toLocaleString('default', { month: 'short' }));
         }
         
-        // Count reports per month
         reports.forEach(report => {
             const reportDate = report.submitted_at.toDate();
             const monthsAgo = (new Date().getMonth() - reportDate.getMonth() + 
@@ -116,7 +150,6 @@ const AnalyticTab = () => {
             }
         });
 
-        // Convert to format needed for pie chart
         const data = Object.keys(statusCounts).map((key, index) => {
             const colors = ['#FFCE56', '#36A2EB', '#4BC0C0', '#FF6384'];
             
@@ -140,7 +173,6 @@ const AnalyticTab = () => {
             facilityCounts[facility] = (facilityCounts[facility] || 0) + 1;
         });
     
-        // Convert to format needed for pie chart
         const data = Object.entries(facilityCounts)
             .sort(([, a], [, b]) => b - a) // Sort by count in descending order
             .slice(0, 5) // Take only top 5 buildings
@@ -169,7 +201,7 @@ const AnalyticTab = () => {
         
         const avgResponseTime = reports.length > 0 
             ? reports.reduce((sum, report) => {
-                // Calculate time between submission and first response
+               
                 const submittedAt = report.submitted_at.toDate();
                 const updatedAt = report.updated_at 
                     ? report.updated_at.toDate() 
@@ -217,6 +249,13 @@ const AnalyticTab = () => {
         <ScrollView 
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={refreshData}
+                    colors={['#1a2847']}
+                />
+            }
         >
             {/* Tab Header */}
             <View style={styles.tabHeader}>

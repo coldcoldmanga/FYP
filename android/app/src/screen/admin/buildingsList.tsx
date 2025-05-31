@@ -7,23 +7,26 @@ import {
     FlatList,
     TouchableOpacity,
     Alert,
-    TextInput
+    TextInput,
+    RefreshControl
 } from 'react-native';
 import { NavigationProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getBuilding, deleteBuilding } from '../../service/buildingServices';
 import EditBuildingModal from '../../component/admin/tab/editBuildingModal';
 import BuildingDetail from '../../component/admin/tab/buildingDetail';
+import { cacheManager } from '../../util/cacheHelper';
 
 type Building = {
-    building_id:string;
-    [key:string]:any;
+    building_id: string;
+    [key: string]: any;
 }
 
 const BuildingsList = () => {
     const navigation = useNavigation<NavigationProp<any>>();
     const [buildings, setBuildings] = useState<Building[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [selectedBuilding, setSelectedBuilding] = useState<any | null>(null);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isBuildingDetailVisible, setIsBuildingDetailVisible] = useState(false);
@@ -39,7 +42,17 @@ const BuildingsList = () => {
 
     const loadBuildings = async () => {
         try {
-            const data = await getBuilding();
+            setLoading(true);
+            
+            // Define a cache key for buildings list
+            const cacheKey = 'admin_buildings_list';
+            
+            // Use cacheManager to get data from cache or fetch from Firestore
+            const data = await cacheManager.getOrFetch(cacheKey, async () => {
+                console.log('Fetching buildings from Firestore...');
+                return await getBuilding();
+            });
+            
             setBuildings(data);
             setFilteredBuildings(data);
         } catch (error) {
@@ -47,15 +60,26 @@ const BuildingsList = () => {
             Alert.alert('Error', 'Failed to load buildings');
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
 
-    const handleSearch = (buildingName:string) => {
+    // Function to force refresh and bypass cache
+    const refreshBuildings = () => {
+        setRefreshing(true);
+        // Invalidate the buildings cache
+        cacheManager.invalidate('admin_buildings_list');
+        loadBuildings();
+    };
+
+    const handleSearch = (buildingName: string) => {
         setSearchQuery(buildingName);
-        if(buildingName){
-            const filtered = buildings.filter((building) => building.building_name.toLowerCase().includes(buildingName.toLowerCase()));
+        if (buildingName) {
+            const filtered = buildings.filter((building) => 
+                building.building_name.toLowerCase().includes(buildingName.toLowerCase())
+            );
             setFilteredBuildings(filtered);
-        }else{
+        } else {
             setFilteredBuildings(buildings);
         }
     }
@@ -92,6 +116,8 @@ const BuildingsList = () => {
                     onPress: async () => {
                         try {
                             await deleteBuilding(buildingId);
+                            // Invalidate the buildings cache after deletion
+                            cacheManager.invalidate('admin_buildings_list');
                             loadBuildings(); // Reload the list
                             Alert.alert('Success', 'Building deleted successfully');
                         } catch (error) {
@@ -151,7 +177,7 @@ const BuildingsList = () => {
             </View>
 
             <View style={styles.searchContainer}>
-            <TextInput  
+                <TextInput  
                     placeholder="Search building by building name"
                     style={styles.searchInput}
                     value={searchQuery}
@@ -164,6 +190,13 @@ const BuildingsList = () => {
                 renderItem={renderItem}
                 keyExtractor={(item) => item.building_id}
                 contentContainerStyle={styles.listContainer}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={refreshBuildings}
+                        colors={['#4A90E2']}
+                    />
+                }
                 ListEmptyComponent={() => (
                     loading ? null : <Text style={styles.emptyText}>No buildings found</Text>
                 )}
@@ -183,7 +216,11 @@ const BuildingsList = () => {
                 visible={isEditModalVisible}
                 building={selectedBuilding}
                 onClose={handleModalClose}
-                onUpdate={loadBuildings}
+                onUpdate={() => {
+                    // Invalidate the buildings cache after update
+                    cacheManager.invalidate('admin_buildings_list');
+                    loadBuildings();
+                }}
             />
 
             <BuildingDetail

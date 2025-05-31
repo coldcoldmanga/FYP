@@ -71,13 +71,13 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                 }
             }
             //push notification to admin and user
-            await axios.post("http://10.193.30.180:3000/updateReportStatusToAdmin", {
+            await axios.post("https://fyp-backend-zeta-amber.vercel.app/updateReportStatusToAdmin", {
                 reportID: report.report_id,
                 status: status,
                 workerID: report.assigned_to
             })
 
-            await axios.post("http://10.193.30.180:3000/updateReportStatusToUser",{
+            await axios.post("https://fyp-backend-zeta-amber.vercel.app/updateReportStatusToUser",{
                 reportID: report.report_id,
                 status: status,
                 playerID: playerID

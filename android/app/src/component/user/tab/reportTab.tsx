@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, SafeAreaView, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getReportByUser } from '../../../service/reportServices';
+import { getReportByUser, getUserTrackingReport } from '../../../service/reportServices';
 import { Alert } from 'react-native';
 import ReportDetail from '../../../component/user/tab/reportDetail';
 import { getReportByStatus } from '../../../service/reportServices';
 import { useIsFocused } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cacheManager } from '../../../util/cacheHelper';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
@@ -16,36 +18,50 @@ const ReportsTab = () => {
     const [viewReportDetail, setViewReportDetail] = useState(false);
     const isFocused = useIsFocused();
     const filterOptions = ['All', 'Pending', 'Assigned', 'In Progress', 'Completed'];
-
+    
     useEffect(() => {
         if (isFocused) {
             switch(reportFilter){
                 case 'All':
                     fetchReports();
-                break;
-            case 'Pending':
-                fetchReportsByStatus('Pending');
-                break;
-            case 'Assigned':
-                fetchReportsByStatus('Assigned');
-                break;
-            case 'In Progress':
-                fetchReportsByStatus('In Progress');
-                break;
-            case 'Completed':
-                fetchReportsByStatus('Completed');
-                break;
-            default:
+                    break;
+                case 'Pending':
+                case 'Assigned':
+                case 'In Progress':
+                case 'Completed':
+                    fetchReportsByStatus(reportFilter);
+                    break;
+                default:
                     fetchReports();
             }
         }
     }, [reportFilter, isFocused]);
 
     const fetchReportsByStatus = async (status: string) => {
-        try{
+        try {
             setLoading(true);
-            const fetchedReports = await getReportByStatus(status);
-            setReports(fetchedReports);
+            
+            const cacheKey = `reports_status_${status}`;
+            const userID = (await AsyncStorage.getItem('userEmail'))?.split('@')[0];
+            
+            const fetchAndCombine = async () => {
+                const fetchedReports = await getReportByStatus(status);
+                const trackedReports = await getUserTrackingReport(userID ? userID : '');
+                
+                // Filter tracked reports by status
+                const filteredTrackedReports = trackedReports.filter((report:any) => report.status === status);
+                
+                // Combine both arrays of reports
+                const combinedReports = [...fetchedReports, ...filteredTrackedReports];
+                
+                // Remove duplicates
+                return Array.from(
+                    new Map(combinedReports.map(report => [report.report_id, report])).values()
+                );
+            };
+            
+            const uniqueReports = await cacheManager.getOrFetch(cacheKey, fetchAndCombine);
+            setReports(uniqueReports);
             setError(null);
         } catch (error) {
             setError('Failed to load reports');
@@ -62,8 +78,25 @@ const ReportsTab = () => {
     const fetchReports = async () => {
         try {
             setLoading(true);
-            const fetchedReports = await getReportByUser();
-            setReports(fetchedReports);
+            
+            const cacheKey = 'reports_all';
+            const userID = (await AsyncStorage.getItem('userEmail'))?.split('@')[0];
+            
+            const fetchAndCombine = async () => {
+                const fetchedReports = await getReportByUser();
+                const trackedReports = await getUserTrackingReport(userID ? userID : '');
+                
+                // Combine both arrays of reports
+                const combinedReports = [...fetchedReports, ...trackedReports];
+                
+                // Remove duplicates
+                return Array.from(
+                    new Map(combinedReports.map(report => [report.report_id, report])).values()
+                );
+            };
+            
+            const uniqueReports = await cacheManager.getOrFetch(cacheKey, fetchAndCombine);
+            setReports(uniqueReports);
             setError(null);
         } catch (error) {
             setError('Failed to load reports');
@@ -87,6 +120,17 @@ const ReportsTab = () => {
             month: 'short',
             day: 'numeric',
         });
+    };
+
+    const refreshReports = () => {
+        // Invalidate cache based on current filter
+        if (reportFilter === 'All') {
+            cacheManager.invalidate('reports_all');
+            fetchReports();
+        } else {
+            cacheManager.invalidate(`reports_status_${reportFilter}`);
+            fetchReportsByStatus(reportFilter);
+        }
     };
 
     return (
@@ -132,7 +176,7 @@ const ReportsTab = () => {
                 <View style={styles.centerContainer}>
                     <Icon name="error-outline" size={48} color="#c62828" />
                     <Text style={styles.messageText}>{error}</Text>
-                    <TouchableOpacity style={styles.retryButton} onPress={fetchReports}>
+                    <TouchableOpacity style={styles.retryButton} onPress={refreshReports}>
                         <Text style={styles.retryButtonText}>Retry</Text>
                     </TouchableOpacity>
                 </View>
@@ -146,6 +190,13 @@ const ReportsTab = () => {
                     style={styles.reportsList}
                     contentContainerStyle={styles.reportsListContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={loading}
+                            onRefresh={refreshReports}
+                            colors={['#1a2847']}
+                        />
+                    }
                 >
                     {reports.map((report) => (
                         <TouchableOpacity key={report.report_id} style={styles.reportCard} onPress={() => handleReportPress(report)}>

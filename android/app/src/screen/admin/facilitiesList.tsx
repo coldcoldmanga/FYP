@@ -8,7 +8,8 @@ import {
     TouchableOpacity,
     Alert,
     TextInput,
-    Modal
+    Modal,
+    RefreshControl
 } from 'react-native';
 import { NavigationProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,19 +18,20 @@ import EditFacilityModal from '../../component/admin/tab/editFacilityModal';
 import FacilityDetail from '../../component/admin/tab/facilityDetail';
 import { getBuilding } from '../../service/buildingServices';
 import { Picker } from '@react-native-picker/picker';
-
+import { cacheManager } from '../../util/cacheHelper';
 
 type Building = {
-    building_id:string;
-    [key:string]:any;
+    building_id: string;
+    [key: string]: any;
 }
 
 const FacilitiesList = () => {
     const navigation = useNavigation<NavigationProp<any>>();
     const [facilities, setFacilities] = useState<any[]>([]);
     const [filteredFacilities, setFilteredFacilities] = useState<any[]>([]);
-    const [buildings, setBuildings] = useState<any[]>([])
+    const [buildings, setBuildings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [isFacilityDetailVisible, setIsFacilityDetailVisible] = useState(false);
@@ -45,7 +47,7 @@ const FacilitiesList = () => {
         }
     }, [isFocused]);
     
-    const handleSearch = (text:string) => {
+    const handleSearch = (text: string) => {
         setSearchQuery(text);
         if(filteredBuilding){
             const filtered = filteredFacilities.filter((facility) => facility.facility_id.toLowerCase().includes(text.toLowerCase()));
@@ -85,7 +87,16 @@ const FacilitiesList = () => {
     const loadFacilities = async () => {
         try {
             setLoading(true);
-            const data = await getFacility();
+            
+            // Define a cache key for facilities list
+            const cacheKey = 'admin_facilities_list';
+            
+            // Use cacheManager to get data from cache or fetch from Firestore
+            const data = await cacheManager.getOrFetch(cacheKey, async () => {
+                console.log('Fetching facilities from Firestore...');
+                return await getFacility();
+            });
+            
             setFacilities(data);
             setFilteredFacilities(data);
         } catch (error) {
@@ -93,21 +104,40 @@ const FacilitiesList = () => {
             Alert.alert('Error', 'Failed to load facilities');
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
 
     const loadBuildings = async () => {
         try {
             setLoading(true);
-            const data = await getBuilding();
-            setBuildings(data);
             
+            // Define a cache key for buildings list
+            const cacheKey = 'admin_buildings_list';
+            
+            // Use cacheManager to get data from cache or fetch from Firestore
+            const data = await cacheManager.getOrFetch(cacheKey, async () => {
+                console.log('Fetching buildings from Firestore...');
+                return await getBuilding();
+            });
+            
+            setBuildings(data);
         } catch (error) {
             console.error('Error Loading Buildings:', error);
-        }finally{
+        } finally {
             setLoading(false);
         }
     }
+
+    // Function to force refresh and bypass cache
+    const refreshData = () => {
+        setRefreshing(true);
+        // Invalidate both facilities and buildings cache
+        cacheManager.invalidate('admin_facilities_list');
+        cacheManager.invalidate('admin_buildings_list');
+        loadBuildings();
+        loadFacilities();
+    };
 
     const handleEdit = (facilityId: string) => {
         setSelectedFacility(facilities.find(facility => facility.facility_id === facilityId));
@@ -141,6 +171,8 @@ const FacilitiesList = () => {
                     onPress: async () => {
                         try {
                             await deleteFacility(facilityId);
+                            // Invalidate the facilities cache after deletion
+                            cacheManager.invalidate('admin_facilities_list');
                             loadFacilities();
                             Alert.alert('Success', 'Facility deleted successfully');
                         } catch (error) {
@@ -193,7 +225,6 @@ const FacilitiesList = () => {
     );
 
     return (
-        
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity 
@@ -248,6 +279,13 @@ const FacilitiesList = () => {
                 renderItem={renderItem}
                 keyExtractor={(item) => item.facility_id}
                 contentContainerStyle={styles.listContainer}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={refreshData}
+                        colors={['#4A90E2']}
+                    />
+                }
                 ListEmptyComponent={() => (
                     loading ? null : <Text style={styles.emptyText}>No facilities found</Text>
                 )}
@@ -264,7 +302,11 @@ const FacilitiesList = () => {
                 visible={isEditModalVisible}
                 facility={selectedFacility}
                 onClose={handleModalClose}
-                onUpdate={loadFacilities}
+                onUpdate={() => {
+                    // Invalidate the facilities cache after update
+                    cacheManager.invalidate('admin_facilities_list');
+                    loadFacilities();
+                }}
             />
 
             <FacilityDetail

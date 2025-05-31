@@ -85,7 +85,7 @@ const AiSummary = ({navigation}: {navigation: NavigationProp<any>}) => {
     setError("");
 
     try {
-      const response = await axios.post("http://10.193.30.180:3000/analyzeReport", {
+      const response = await axios.post("https://fyp-backend-zeta-amber.vercel.app/analyzeReport", {
         startDate: startDate,
         endDate: endDate
       });
