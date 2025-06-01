@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, TextInput,
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import { updateReport } from '../../../service/reportServices';
-import { getUserPlayerID, getUserTracking, updateWorker } from '../../../service/userServices';
+import { getUserPlayerID, getUserTracking, updateWorkerActiveTask } from '../../../service/userServices';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
@@ -89,7 +89,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
             
 
             if(status === 'Completed'){
-                await updateWorker(report.assigned_to, status);
+                await updateWorkerActiveTask(report.assigned_to, "Completed");
             }
 
             Alert.alert('Success', 'Report updated successfully', [

@@ -1,9 +1,9 @@
 import { firebaseApp } from '../config/firebase';
-import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, increment, collectionGroup, getDoc, Timestamp } from '@react-native-firebase/firestore';
+import { setDoc, doc, updateDoc, query, where, collection, getDocs, getFirestore, increment, collectionGroup, getDoc, Timestamp, deleteDoc } from '@react-native-firebase/firestore';
 import { Alert } from 'react-native';
 const firestore = getFirestore(firebaseApp);
 
-export const addUser = async (fullname:string, email:string, phoneNumber:string, userType:string, playerID:string|null, createdAt:Date, updatedAt:Date, lastLogin:any, status:string, active_task:number) => {
+export const addUser = async (fullname:string, email:string, phoneNumber:string, userType:string, playerID:string|null, createdAt:Date, updatedAt:Date, lastLogin:any, status:string, active_task:number, _superAdmin:boolean = false) => {
     try{
         const docID = email.split('@')[0];
 
@@ -22,7 +22,23 @@ export const addUser = async (fullname:string, email:string, phoneNumber:string,
                 login_attempt_error: 0,
                 lockout_until: null,
             });
-        }else{
+        }
+        else if(userType === 'Admin'){
+
+            await setDoc(doc(firestore, 'user', docID), {
+                fullname,
+                email,
+                phone_number: phoneNumber,
+                user_type: userType,
+                player_id: playerID,
+                created_at: createdAt,
+                updated_at: updatedAt,
+                last_login: lastLogin,
+                status,
+                super_admin: _superAdmin,
+            })
+        }
+        else{
 
         await setDoc(doc(firestore, 'user', docID), {
             fullname,
@@ -92,10 +108,17 @@ export const getWorker = async () => {
     try{
         const workerQuery = query(collection(firestore, 'user'), where('user_type', '==', 'Maintenance Worker'), where('active_task', '<', 5));
         const workerSnapshot = await getDocs(workerQuery);
-        return workerSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
+        return workerSnapshot.docs.map((doc) => {
+            const data = doc.data();
+            // Clean up specialization data if it exists
+            if (data.specialize && Array.isArray(data.specialize)) {
+                data.specialize = data.specialize.map((spec: string) => spec.trim()).filter(Boolean);
+            }
+            return {
+                id: doc.id,
+                ...data,
+            };
+        });
     } catch (error) {
         console.error('Get Worker Error: ', error);
         throw error;
@@ -116,7 +139,7 @@ export const getUserPlayerID = async (userID:string) => {
     }
 }
 
-export const updateWorker = async (workerID: string, status:string) => {
+export const updateWorkerActiveTask = async (workerID: string, status:string) => {
     try{
         const workerRef = doc(firestore, 'user', workerID);
         if(status !== 'Completed'){
@@ -203,4 +226,50 @@ export const getWorkerBySpecialization = async (specialization: string) => {
     } catch (error) {
         console.error('Get Worker By Specialization Error: ', error);
     }
+}
+
+export const updateAdmin = async (adminData: any) => {
+    try{
+        const adminRef = doc(firestore, 'user', adminData.user_id);
+        await updateDoc(adminRef, adminData);
+    }catch(error){
+        console.error('Update Admin Error: ', error);
+        throw error;
+    }
+}
+
+export const deleteAdmin = async (userID: string) => {
+    try {
+        const adminRef = doc(firestore, 'user', userID);
+        await deleteDoc(adminRef);
+    } catch (error) {
+        console.error('Delete Admin Error: ', error);
+        throw error;
+
+    }
+
+}
+
+export const updateWorker = async (workerData: any) => {
+    try {
+        const workerRef = doc(firestore, 'user', workerData.user_id);
+        await updateDoc(workerRef, workerData);
+    } catch (error) {
+        console.error('Update Worker Error: ', error);
+        throw error;
+    }
+
+}
+
+
+export const deleteWorker = async (userID: string) => {
+    try {
+        const workerRef = doc(firestore, 'user', userID);
+        await deleteDoc(workerRef);
+    } catch (error) {
+        console.error('Delete Worker Error: ', error);
+        throw error;
+
+    }
+
 }

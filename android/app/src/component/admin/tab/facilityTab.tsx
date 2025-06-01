@@ -14,7 +14,7 @@ const FacilityTab = () => {
         navigation.navigate('FacilitiesList');
     };
 
-    const navigateToEquipment = () => {
+    const navigateToAdminsAndWorkers = () => {
         navigation.navigate('EquipmentsList');
     };
 
@@ -58,21 +58,21 @@ const FacilityTab = () => {
                 </TouchableOpacity>
                 
                 {/* Equipment Block */}
-                {/* <TouchableOpacity 
+                <TouchableOpacity 
                     style={styles.navBlock}
-                    onPress={navigateToEquipment}
+                    onPress={navigateToAdminsAndWorkers}
                 >
                     <View style={styles.iconContainer}>
                         <Icon name="build" size={40} color="#1a2847" />
                     </View>
                     <View style={styles.blockTextContainer}>
-                        <Text style={styles.blockTitle}>Equipment</Text>
+                        <Text style={styles.blockTitle}>Admins and Workers</Text>
                         <Text style={styles.blockDescription}>
-                            Manage all equipment within facilities
+                            Manage all admins and workers
                         </Text>
                     </View>
                     <Icon name="chevron-right" size={24} color="#1a2847" />
-                </TouchableOpacity> */}
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
     );

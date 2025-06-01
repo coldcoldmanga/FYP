@@ -25,7 +25,7 @@ import { faultType } from '../../constant/faultType';
 import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
 import { addAttachment } from '../../service/attachmentServices';
-import { getWorkerBySpecialization, updateWorker } from '../../service/userServices';
+import { getWorkerBySpecialization, updateWorkerActiveTask } from '../../service/userServices';
 import { assignTaskToWorker } from '../../service/reportServices';
 import { getWorkerID } from '../../util/getWorkerID';
 import { addNotification } from '../../service/notificationServices';
@@ -399,7 +399,7 @@ const SubmitReport = () => {
         if(workers && workers.length > 0){
           const workerID = await getWorkerID(workers); // the worker with the least active task
           await assignTaskToWorker(reportId, workerID);
-          await updateWorker(workerID, "Assigned");
+          await updateWorkerActiveTask(workerID, "Assigned");
           await addNotification(`New Task Assigned`, `You have been assigned a new task.`, [workerID], "");
         }else{
           console.log("No workers found");

@@ -11,11 +11,11 @@ import WorkerHome from '../screen/worker/home';
 import SubmitReport from '../screen/user/submit_report';
 import EditProfile from '../screen/editProfile';
 import AddBuilding from '../screen/admin/addBuilding';
-import AddEquipment from '../screen/admin/addEquipment';
+import AddAdminWorker from '../screen/admin/addAdminWorker';
 import AddFacility from '../screen/admin/addFacility';
 import BuildingsList from '../screen/admin/buildingsList';
 import FacilitiesList from '../screen/admin/facilitiesList';
-import EquipmentsList from '../screen/admin/equipmentsList';
+import AdminWorkerList from '../screen/admin/adminWorkerList';
 import Feedback from '../screen/feedback';
 import AddFeedback from '../screen/user/addFeedback';
 import EditFeedback from '../screen/user/editFeedback';
@@ -86,11 +86,11 @@ const AppNavigator = () => {
                 <Stack.Screen name='SubmitReport' component={SubmitReport} options={{headerShown: false}} />
                 <Stack.Screen name='EditProfile' component={EditProfile} options={{headerShown: false}} />
                 <Stack.Screen name='AddBuilding' component={AddBuilding} options={{headerShown: false}} />
-                <Stack.Screen name='AddEquipment' component={AddEquipment} options={{headerShown: false}} />
+                <Stack.Screen name='AddAdminWorker' component={AddAdminWorker} options={{headerShown: false}} />
                 <Stack.Screen name='AddFacility' component={AddFacility} options={{headerShown: false}} />
                 <Stack.Screen name='BuildingsList' component={BuildingsList} options={{headerShown: false}} />
                 <Stack.Screen name='FacilitiesList' component={FacilitiesList} options={{headerShown: false}} />
-                <Stack.Screen name='EquipmentsList' component={EquipmentsList} options={{headerShown: false}} />
+                <Stack.Screen name='EquipmentsList' component={AdminWorkerList} options={{headerShown: false}} />
                 <Stack.Screen name='Feedback' component={Feedback} options={{headerShown: false}} />
                 <Stack.Screen name='AddFeedback' component={AddFeedback} options={{headerShown: false}} />
                 <Stack.Screen name='EditFeedback' component={EditFeedback} options={{headerShown: false}} />
