@@ -20,6 +20,7 @@ import Feedback from '../screen/feedback';
 import AddFeedback from '../screen/user/addFeedback';
 import EditFeedback from '../screen/user/editFeedback';
 import SummarizeHistory from '../screen/summary_history';
+import Help from '../screen/help';
 import { isLoggedIn, isSessionExpired } from '../service/authServices';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
@@ -95,6 +96,7 @@ const AppNavigator = () => {
                 <Stack.Screen name='AddFeedback' component={AddFeedback} options={{headerShown: false}} />
                 <Stack.Screen name='EditFeedback' component={EditFeedback} options={{headerShown: false}} />
                 <Stack.Screen name='Summary History' component={SummarizeHistory} />
+                <Stack.Screen name='Help' component={Help} options={{headerShown: false}} />
             </Stack.Navigator>
         </NavigationContainer>
     )

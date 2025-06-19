@@ -72,7 +72,7 @@ const ProfileTab = () => {
             icon: 'help-outline',
             title: 'Help & Support',
             subtitle: 'Get help or contact support',
-            action: () => console.log('Help pressed')
+            action: () => navigation.navigate('Help')
         }
     ];
 
