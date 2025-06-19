@@ -7,13 +7,23 @@ import Notification from '../../notification';
 
 const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const [submittedSearch, setSubmittedSearch] = useState('');
     const [showNotification, setShowNotification] = useState(false);
+
+    const handleSearch = () => {
+        setSubmittedSearch(searchQuery.trim());
+    };
+
+    const handleClear = () => {
+        setSearchQuery('');
+        setSubmittedSearch('');
+    };
 
     return (
         <SafeAreaView style={styles.container}>
         <View style={styles.container}>
             {/* Map View */}
-            <Map />
+            <Map searchText={submittedSearch} />
             
             {/* Search Bar and Notification Container */}
             <View style={styles.topContainer}>
@@ -22,13 +32,23 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
                     <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search locations (e.g. Building A, Room 301)"
+                        placeholder="Search buildings"
                         placeholderTextColor="#666"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
+                        onSubmitEditing={handleSearch}
                     />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity onPress={handleClear} style={{padding:4}}>
+                            <Icon name="close" size={20} color="#666" />
+                        </TouchableOpacity>
+                    )}
                 </View>
                 
+                <TouchableOpacity onPress={handleSearch} style={{marginLeft:8,padding:6}}>
+                    <Icon name="search" size={24} color="#1a2847" />
+                </TouchableOpacity>
+
                 {/* Notification Icon */}
                 <TouchableOpacity style={styles.notificationButton} onPress={() => setShowNotification(true)}>
                     <Icon name="notifications" size={24} color="#1a2847" />

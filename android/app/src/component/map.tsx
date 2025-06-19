@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Modal, StyleSheet, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import MapView, { Callout, Marker, PoiClickEvent, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -15,7 +15,15 @@ interface BuildingGroup {
     longitude: number;
 }
 
-const Map = () => {
+interface MapProps {
+    /**
+     * Current text from the search bar. When it matches a building id (case-insensitive),
+     * the map will zoom to that building and open its report list automatically.
+     */
+    searchText?: string;
+}
+
+const Map: React.FC<MapProps> = ({ searchText = '' }) => {
 
     const INITIAL_REGION = {
         latitude: 2.2490057879268996,  
@@ -34,6 +42,9 @@ const Map = () => {
     
     const [buildingGroups, setBuildingGroups] = useState<BuildingGroup[]>([]);
     const [selectedBuilding, setSelectedBuilding] = useState<BuildingGroup | null>(null);
+    
+    // Reference to the MapView so we can programmatically move/zoom the camera
+    const mapRef = useRef<MapView>(null);
     
     useEffect(() => {
         if (isFocused) {
@@ -132,6 +143,36 @@ const Map = () => {
 
     };
 
+    // Whenever the search text changes, try to find a matching building and
+    // centre the map on it.
+    useEffect(() => {
+        const query = searchText.trim().toLowerCase();
+
+        // Look for exact id match first
+        const exactMatch = buildingGroups.find((b) => b.buildingId.toLowerCase() === query);
+
+        // If no exact match, fall back to partial match **only** if it uniquely identifies a building
+        let match: BuildingGroup | undefined;
+        if (exactMatch) {
+            match = exactMatch;
+        } else {
+            const partialMatches = buildingGroups.filter((b) => b.buildingId.toLowerCase().includes(query));
+            if (partialMatches.length === 1) {
+                match = partialMatches[0];
+            }
+        }
+
+        if (match && mapRef.current) {
+            mapRef.current.animateToRegion({
+                latitude: match.latitude,
+                longitude: match.longitude,
+                latitudeDelta: 0.0005,
+                longitudeDelta: 0.0005,
+            }, 500);
+            setSelectedBuilding(match);
+        }
+    }, [searchText, buildingGroups]);
+
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -143,6 +184,7 @@ const Map = () => {
     return (
         <View>
             <MapView
+                ref={mapRef}
                 provider={PROVIDER_GOOGLE}
                 style={styles.map}
                 mapType='hybrid'
@@ -152,6 +194,7 @@ const Map = () => {
             >
                 {buildingGroups.map((building) => (
                     <Marker
+                        title={`Building ${building.buildingId}`}
                         key={`building-${building.buildingId}`}
                         coordinate={{
                             latitude: building.latitude,
