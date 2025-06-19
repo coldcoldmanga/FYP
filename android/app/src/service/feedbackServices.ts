@@ -25,6 +25,7 @@ export const getFeedback = async (fault_type:string) => {
                 const feedbackRef = collection(doc.ref, 'feedback')
                 const feedbackSnapshot = await getDocs(feedbackRef)
                 return feedbackSnapshot.docs.map(feedbackData => ({
+                    feedback_id: feedbackData.id,
                     ...feedbackData.data(),
                     report_id: reportID,
                 }))
