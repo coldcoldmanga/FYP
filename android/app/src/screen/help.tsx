@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, Image, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
@@ -15,7 +15,8 @@ const Help = () => {
     };
 
     return (
-        <ScrollView style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <ScrollView>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity 
@@ -25,7 +26,7 @@ const Help = () => {
                     <Icon name="arrow-back" size={24} color="#1a2847" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Help & Support</Text>
-                <View style={{width: 24}} /> {/* Empty view for alignment */}
+                <View style={{width: 24}} />
             </View>
 
             {/* Content */}
@@ -89,11 +90,12 @@ const Help = () => {
 
                 {/* App Info */}
                 <View style={styles.footerContainer}>
-                    <Text style={styles.appVersion}>FixIT Facility Maintenance App v1.0.0</Text>
-                    <Text style={styles.copyright}>© 2023 MMU</Text>
+                    <Text style={styles.appVersion}>Facility Helpdesk App v1.0.0</Text>
+                    <Text style={styles.copyright}>© 2025 Melvin Kwan Yii Syn</Text>
                 </View>
             </View>
         </ScrollView>
+        </SafeAreaView>
     );
 };
 
