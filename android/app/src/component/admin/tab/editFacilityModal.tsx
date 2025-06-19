@@ -86,6 +86,7 @@ const EditFacilityModal = ({ visible, facility, onClose, onUpdate }: FacilityDet
                             value={formData.facility_name}
                             onChangeText={(text) => setFormData({...formData, facility_name: text})}
                             placeholder="Enter facility name"
+                            placeholderTextColor="#aaa"
                         />
                     </View>
 
@@ -109,6 +110,7 @@ const EditFacilityModal = ({ visible, facility, onClose, onUpdate }: FacilityDet
                             value={formData.description}
                             onChangeText={(text) => setFormData({...formData, description: text})}
                             placeholder="Enter description"
+                            placeholderTextColor="#aaa"
                             multiline
                             numberOfLines={4}
                         />
@@ -191,6 +193,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
+        color: '#333',
     },
     textArea: {
         height: 100,
@@ -208,6 +211,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
+        color: '#666666',
     },
     buttonContainer: {
         flexDirection: 'row',

@@ -239,6 +239,7 @@ const FacilitiesList = () => {
             <View style={styles.searchContainer}>
                 <TextInput  
                     placeholder="Search facilities by Facility ID"
+                    placeholderTextColor="#666666"
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={handleSearch}
@@ -469,6 +470,7 @@ const styles = StyleSheet.create({
     picker: {
         width: '100%',
         height: 50,
+        color: '#666666',
     },
     selectedFilterContainer: {
         flexDirection: 'row',
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
         borderColor: '#BBDEFB',
     },
     selectedFilterText: {
-        color: '#1976D2',
+        color: '#666666',
         marginLeft: 8,
         fontSize: 14,
         fontWeight: '500',

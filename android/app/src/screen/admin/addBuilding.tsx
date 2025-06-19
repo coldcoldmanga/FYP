@@ -174,6 +174,7 @@ const AddBuilding = () => {
                         value={formData.building_name}
                         onChangeText={(text) => setFormData({...formData, building_name: text})}
                         placeholder="Enter building name"
+                        placeholderTextColor="#666666"
                     />
                 </View>
 
@@ -184,6 +185,7 @@ const AddBuilding = () => {
                         value={formData.building_id}
                         onChangeText={(text) => setFormData({...formData, building_id: text})}
                         placeholder="Enter building code"
+                        placeholderTextColor="#666666"
                     />
                 </View>
 
@@ -194,6 +196,7 @@ const AddBuilding = () => {
                         value={formData.description}
                         onChangeText={(text) => setFormData({...formData, description: text})}
                         placeholder="Enter description"
+                        placeholderTextColor="#666666"
                         multiline
                         numberOfLines={4}
                     />
@@ -274,6 +277,7 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 16,
         backgroundColor: '#fff',
+        color: '#333',
     },
     textArea: {
         height: 100,

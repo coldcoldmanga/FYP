@@ -12,12 +12,9 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
     return (
         <SafeAreaView style={styles.container}>
         <View style={styles.container}>
-            {/* Map View */}
             <Map />
-            
-            {/* Search Bar and Notification Container */}
+           
             <View style={styles.topContainer}>
-                {/* Search Bar */}
                 <View style={styles.searchBarContainer}>
                     <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
                     <TextInput
@@ -29,7 +26,7 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
                     />
                 </View>
                 
-                {/* Notification Icon */}
+               
                 <TouchableOpacity style={styles.notificationButton} onPress={() => setShowNotification(true)}>
                     <Icon name="notifications" size={24} color="#1a2847" />
                 </TouchableOpacity>
@@ -40,7 +37,6 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
                 onClose={() => setShowNotification(false)} 
             />
 
-            {/* Floating Action Button */}
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('SubmitReport')}>
                 <Icon name="add" size={24} color="#FFF" />
             </TouchableOpacity>
@@ -108,7 +104,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#1a2847', // Same as background color for seamless look
+        borderColor: '#1a2847',
     },
 });
 

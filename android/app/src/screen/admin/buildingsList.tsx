@@ -179,6 +179,7 @@ const BuildingsList = () => {
             <View style={styles.searchContainer}>
                 <TextInput  
                     placeholder="Search building by building name"
+                    placeholderTextColor="#666666"
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={handleSearch}

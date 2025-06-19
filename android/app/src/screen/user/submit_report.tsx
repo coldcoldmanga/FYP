@@ -25,7 +25,7 @@ import { faultType } from '../../constant/faultType';
 import { generateReportId } from '../../util/reportIdGenerator';
 import { launchImageLibrary, ImageLibraryOptions, launchCamera, CameraOptions } from 'react-native-image-picker';
 import { addAttachment } from '../../service/attachmentServices';
-import { getWorkerBySpecialization, updateWorkerActiveTask } from '../../service/userServices';
+import { getWorkerBySpecialization, updateWorkerActiveTask, getUserPlayerID } from '../../service/userServices';
 import { assignTaskToWorker } from '../../service/reportServices';
 import { getWorkerID } from '../../util/getWorkerID';
 import { addNotification } from '../../service/notificationServices';
@@ -398,9 +398,16 @@ const SubmitReport = () => {
         const workers = await getWorkerBySpecialization(specialization);
         if(workers && workers.length > 0){
           const workerID = await getWorkerID(workers); // the worker with the least active task
+          const playerID = await getUserPlayerID(workerID);
           await assignTaskToWorker(reportId, workerID);
           await updateWorkerActiveTask(workerID, "Assigned");
           await addNotification(`New Task Assigned`, `You have been assigned a new task.`, [workerID], "");
+          await axios.post("https://fyp-backend-zeta-amber.vercel.app/updateAssignedTaskToWorker", {
+            playerID: [playerID],
+            reportID: reportData.report_id
+          })
+
+
         }else{
           console.log("No workers found");
         }
@@ -573,6 +580,7 @@ const SubmitReport = () => {
             value={description}
             onChangeText={setDescription}
             placeholder="Describe the issue in detail"
+            placeholderTextColor="#aaa"
             multiline
             numberOfLines={4}
           />
@@ -720,6 +728,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
+    color: '#666666',
   },
   input: {
     borderWidth: 1,
@@ -728,6 +737,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#fff',
+    color: '#333',
   },
   textArea: {
     height: 120,

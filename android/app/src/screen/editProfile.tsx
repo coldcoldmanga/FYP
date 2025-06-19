@@ -179,6 +179,7 @@ const EditProfile = () => {
                 value={profileData.fullname}
                 onChangeText={(text) => setProfileData({...profileData, fullname: text})}
                 placeholder="Enter your full name"
+                placeholderTextColor="#666666"
               />
             </View>
             
@@ -189,6 +190,7 @@ const EditProfile = () => {
                 value={profileData.email}
                 editable={false}
                 placeholder="Email cannot be changed"
+                placeholderTextColor="#666666"
               />
               <Text style={styles.helperText}>Email cannot be changed</Text>
             </View>
@@ -201,6 +203,7 @@ const EditProfile = () => {
                 onChangeText={(text) => setProfileData({...profileData, phone_number: text})}
                 placeholder="Enter your phone number"
                 keyboardType="phone-pad"
+                placeholderTextColor="#666666"
               />
             </View>
             

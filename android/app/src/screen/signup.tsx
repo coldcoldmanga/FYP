@@ -74,12 +74,14 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
         <TextInput
           style={styles.input}
           placeholder="Full Name"
+          placeholderTextColor="#666666"
           value={fullName}
           onChangeText={setFullName}
         />
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="#666666"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -87,6 +89,7 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
         <TextInput
           style={styles.input}
           placeholder="Phone Number"
+          placeholderTextColor="#666666"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
           keyboardType="phone-pad"
@@ -100,12 +103,12 @@ const SignUp = ({navigation}: {navigation: NavigationProp<any>}) => {
           <Picker.Item label="Select User Type" value="" />
           <Picker.Item label="Student" value="Student" />
           <Picker.Item label="Staff" value="Staff" />
-          <Picker.Item label="Maintenance Worker" value="Maintenance Worker" />
         </Picker>
 
         <TextInput
           style={styles.input}
           placeholder="Password"
+          placeholderTextColor="#666666"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -163,6 +166,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 15,
     backgroundColor: '#fff',
+    color: '#666666',
   },
   submitButton: {
     backgroundColor: '#1a2847',
@@ -194,7 +198,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
-    backgroundColor: '#ddd',
+    backgroundColor: '#ffffff',
+    color: '#666666',
   },
    placeholder: {
     color: '#666',

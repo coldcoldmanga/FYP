@@ -257,7 +257,6 @@ const AnalyticTab = () => {
                 />
             }
         >
-            {/* Tab Header */}
             <View style={styles.tabHeader}>
                 <TouchableOpacity 
                     style={[styles.tabButton, activeView === 'analytics' && styles.activeTabButton]}
@@ -280,7 +279,7 @@ const AnalyticTab = () => {
 
             {activeView === 'analytics' ? (
                 <>
-                    {/* Main Analytics Card */}
+                   
                     <View style={styles.card}>
                         <View style={styles.header}>
                             <Text style={styles.title}>Analytics Dashboard</Text>
@@ -443,7 +442,7 @@ const AnalyticTab = () => {
                         )}
                     </View>
 
-                    {/* Fault Type Distribution Card */}
+                    
                     {!loading && (
                         <View style={styles.card}>
                             <Text style={styles.sectionTitle}>Fault Type Distribution</Text>
@@ -492,7 +491,7 @@ const AnalyticTab = () => {
                         </View>
                     )}
 
-                    {/* Reports Over Time Card */}
+                  
                     {!loading && (
                         <View style={styles.card}>
                             <Text style={styles.sectionTitle}>Reports Over Time</Text>
@@ -532,7 +531,7 @@ const AnalyticTab = () => {
                         </View>
                     )}
 
-                    {/* Status Distribution Card */}
+                
                     {!loading && (
                         <View style={styles.card}>
                             <Text style={styles.sectionTitle}>Status Distribution</Text>
@@ -579,7 +578,7 @@ const AnalyticTab = () => {
                         </View>
                     )}
 
-                    {/* Frequently Reported Building Card */}
+                
                     {!loading && (
                         <View style={styles.card}>
                             <Text style={styles.sectionTitle}>Frequently Reported Facility</Text>
@@ -627,7 +626,6 @@ const AnalyticTab = () => {
                     )}
                 </>
             ) : (
-                // This will be replaced with the AiSummary component
                 <AiSummary navigation={navigation} />
             )}
 
@@ -946,10 +944,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     contentContainer: {
-        paddingBottom: 80, // Adjust based on your navigation bar height
+        paddingBottom: 80, 
     },
     bottomSpacer: {
-        height: 20, // Additional space if needed
+        height: 20, 
     },
 });
 

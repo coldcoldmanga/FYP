@@ -195,6 +195,7 @@ const ReportDetail = ({ report, visible, onClose, onUpdate}: ReportDetailProps) 
                                 value={progress}
                                 onChangeText={(text) => setProgress(text)}
                                 placeholder="Enter progress details..."
+                                placeholderTextColor="#666666"
                                 multiline
                                 numberOfLines={4}
                                 textAlignVertical="top"
@@ -287,6 +288,7 @@ const styles = StyleSheet.create({
     },
     picker: {
         height: 50,
+        color: '#666666',
     },
     progressInput: {
         borderWidth: 1,
@@ -296,6 +298,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: '#fff',
         minHeight: 100,
+        color: '#333',
     },
     updateButton: {
         backgroundColor: '#1a2847',

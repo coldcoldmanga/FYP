@@ -96,6 +96,7 @@ const EditFeedback = () => {
         <TextInput
           style={styles.commentInput}
           placeholder="Tell us what you think..."
+          placeholderTextColor="#aaa"
           value={comment}
           onChangeText={setComment}
           multiline

@@ -99,6 +99,7 @@ const EditBuildingModal = ({ visible, building, onClose, onUpdate }: BuildingDet
                             value={formData.building_name}
                             onChangeText={(text) => setFormData({...formData, building_name: text})}
                             placeholder="Enter building name"
+                            placeholderTextColor="#aaa"
                         />
                     </View>
 
@@ -109,6 +110,7 @@ const EditBuildingModal = ({ visible, building, onClose, onUpdate }: BuildingDet
                             value={formData.building_code}
                             onChangeText={(text) => setFormData({...formData, building_code: text})}
                             placeholder="Enter building code"
+                            placeholderTextColor="#aaa"
                         />
                     </View>
 
@@ -119,6 +121,7 @@ const EditBuildingModal = ({ visible, building, onClose, onUpdate }: BuildingDet
                             value={formData.description}
                             onChangeText={(text) => setFormData({...formData, description: text})}
                             placeholder="Enter description"
+                            placeholderTextColor="#aaa"
                             multiline
                             numberOfLines={4}
                         />
@@ -136,6 +139,7 @@ const EditBuildingModal = ({ visible, building, onClose, onUpdate }: BuildingDet
                                 })}
                                 placeholder="Latitude"
                                 keyboardType="numeric"
+                                placeholderTextColor="#aaa"
                             />
                             <TextInput
                                 style={[styles.input, styles.locationInput]}
@@ -146,6 +150,7 @@ const EditBuildingModal = ({ visible, building, onClose, onUpdate }: BuildingDet
                                 })}
                                 placeholder="Longitude"
                                 keyboardType="numeric"
+                                placeholderTextColor="#aaa"
                             />
                         </View>
                     </View>
@@ -207,6 +212,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
+        color: '#333',
     },
     textArea: {
         height: 100,

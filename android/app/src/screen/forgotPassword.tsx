@@ -32,6 +32,7 @@ const ForgotPassword = ({navigation}: {navigation: NavigationProp<any>}) => {
             <TextInput
               style={styles.input}
               placeholder="Enter your email"
+              placeholderTextColor="#666666"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
       padding: 12,
       marginBottom: 15,
       backgroundColor: '#fff',
+      color: '#666666',
     },
     submitButton: {
       backgroundColor: '#1a2847',

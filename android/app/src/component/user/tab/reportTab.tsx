@@ -8,6 +8,7 @@ import { getReportByStatus } from '../../../service/reportServices';
 import { useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cacheManager } from '../../../util/cacheHelper';
+import { formatDate } from '../../../util/formatDate';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
@@ -48,13 +49,10 @@ const ReportsTab = () => {
                 const fetchedReports = await getReportByStatus(status);
                 const trackedReports = await getUserTrackingReport(userID ? userID : '');
                 
-                // Filter tracked reports by status
                 const filteredTrackedReports = trackedReports.filter((report:any) => report.status === status);
                 
-                // Combine both arrays of reports
                 const combinedReports = [...fetchedReports, ...filteredTrackedReports];
                 
-                // Remove duplicates
                 return Array.from(
                     new Map(combinedReports.map(report => [report.report_id, report])).values()
                 );
@@ -86,10 +84,8 @@ const ReportsTab = () => {
                 const fetchedReports = await getReportByUser();
                 const trackedReports = await getUserTrackingReport(userID ? userID : '');
                 
-                // Combine both arrays of reports
                 const combinedReports = [...fetchedReports, ...trackedReports];
                 
-                // Remove duplicates
                 return Array.from(
                     new Map(combinedReports.map(report => [report.report_id, report])).values()
                 );
@@ -111,19 +107,7 @@ const ReportsTab = () => {
         setViewReportDetail(true);
     };
 
-    // Format date helper
-    const formatDate = (timestamp: any) => {
-        if (!timestamp) return 'Unknown date';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     const refreshReports = () => {
-        // Invalidate cache based on current filter
         if (reportFilter === 'All') {
             cacheManager.invalidate('reports_all');
             fetchReports();
@@ -136,7 +120,6 @@ const ReportsTab = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
-                {/* Filter Bar */}
                 <View style={styles.filterContainer}>
                     <Text style={styles.filterLabelText}>Filter by:</Text>
                     <ScrollView 
@@ -166,7 +149,6 @@ const ReportsTab = () => {
                         ))}
                     </ScrollView>
                 </View>
-                {/* Reports List */}
                 {loading ? (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#1a2847" />

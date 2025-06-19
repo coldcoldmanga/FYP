@@ -77,7 +77,7 @@ const EditWorkerModal = ({ visible, worker, onClose, onUpdate }: EditWorkerModal
                     updated_at: new Date()
                 };
 
-                // Add specialization if provided
+                
                 if (specialization) {
                     const specializationArray = specialization.split(',').map(s => s.trim());
                     workerData.specialize = specializationArray;
@@ -126,6 +126,7 @@ const EditWorkerModal = ({ visible, worker, onClose, onUpdate }: EditWorkerModal
                                 value={fullname}
                                 onChangeText={setFullname}
                                 placeholder="Enter full name"
+                                placeholderTextColor="#aaa"
                             />
                         </View>
 
@@ -143,6 +144,7 @@ const EditWorkerModal = ({ visible, worker, onClose, onUpdate }: EditWorkerModal
                                 onChangeText={setPhoneNumber}
                                 placeholder="Enter phone number"
                                 keyboardType="phone-pad"
+                                placeholderTextColor="#aaa"
                             />
                         </View>
 
@@ -206,6 +208,7 @@ const EditWorkerModal = ({ visible, worker, onClose, onUpdate }: EditWorkerModal
                                     value={specialization}
                                     onChangeText={setSpecialization}
                                     placeholder="E.g. Plumbing, Electrical, HVAC"
+                                    placeholderTextColor="#aaa"
                                 />
                             </View>
                         )}
@@ -281,6 +284,7 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 16,
         minHeight: 45,
+        color: '#333',
     },
     disabledInput: {
         borderWidth: 1,

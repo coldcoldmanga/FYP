@@ -124,6 +124,7 @@ const AddAdminWorker = () => {
                         value={fullname}
                         onChangeText={setFullname}
                         placeholder="Enter full name"
+                        placeholderTextColor="#666666"
                     />
                 </View>
 
@@ -134,6 +135,7 @@ const AddAdminWorker = () => {
                         value={email}
                         onChangeText={setEmail}
                         placeholder="Enter email"
+                        placeholderTextColor="#666666"
                         keyboardType="email-address"
                         autoCapitalize="none"
                     />
@@ -147,6 +149,7 @@ const AddAdminWorker = () => {
                         onChangeText={setPhoneNumber}
                         placeholder="Enter phone number"
                         keyboardType="phone-pad"
+                        placeholderTextColor="#666666"
                     />
                 </View>
 
@@ -210,6 +213,7 @@ const AddAdminWorker = () => {
                             value={specialization}
                             onChangeText={setSpecialization}
                             placeholder="E.g. Plumbing, Electrical, HVAC"
+                            placeholderTextColor="#aaa"
                         />
                     </View>
                 )}
@@ -268,6 +272,7 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 16,
         backgroundColor: '#fff',
+        color: '#666666',
     },
     userTypeContainer: {
         flexDirection: 'row',

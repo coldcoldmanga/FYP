@@ -50,15 +50,15 @@ const ReportsTab = () => {
         try {
             setLoading(true);
             
-            // Create a unique cache key for all admin reports
+           
             const cacheKey = 'admin_reports_all';
             
-            // Define the fetch function to be used if cache is invalid
+          
             const fetchData = async () => {
                 return await getReport();
             };
             
-            // Get from cache or fetch new data
+          
             const reportData = await cacheManager.getOrFetch(cacheKey, fetchData);
             
             setReports(reportData);
@@ -75,15 +75,12 @@ const ReportsTab = () => {
         try {
             setLoading(true);
             
-            // Create a unique cache key for admin reports by status
             const cacheKey = `admin_reports_status_${status}`;
             
-            // Define the fetch function to be used if cache is invalid
             const fetchData = async () => {
                 return await getReportByStatus(status);
             };
             
-            // Get from cache or fetch new data
             const reportData = await cacheManager.getOrFetch(cacheKey, fetchData);
             
             setReports(reportData);
@@ -96,9 +93,7 @@ const ReportsTab = () => {
         }
     };
 
-    // Function to refresh reports and bypass cache
     const refreshReports = () => {
-        // Invalidate cache based on current filter
         if (reportFilter === 'All') {
             cacheManager.invalidate('admin_reports_all');
             fetchReports();
@@ -113,7 +108,6 @@ const ReportsTab = () => {
         setViewReportDetail(true);
     };
 
-    // Format date helper
     const formatDate = (timestamp: any) => {
         if (!timestamp) return 'Unknown date';
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -127,7 +121,6 @@ const ReportsTab = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
-                {/* Filter Bar */}
                 <View style={styles.filterContainer}>
                     <Text style={styles.filterLabelText}>Filter by:</Text>
                     <ScrollView 
@@ -158,7 +151,6 @@ const ReportsTab = () => {
                 </ScrollView>
                 </View>
 
-                {/* Reports List */}
                 {loading ? (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#1a2847" />
@@ -239,7 +231,6 @@ const ReportsTab = () => {
                     visible={viewReportDetail}
                     onClose={() => setViewReportDetail(false)}
                     onUpdate={() => {
-                        // Invalidate all caches when a report is updated
                         cacheManager.invalidate('admin_reports_all');
                         filterOptions.forEach(filter => 
                             cacheManager.invalidate(`admin_reports_status_${filter}`)
@@ -288,7 +279,7 @@ const styles = StyleSheet.create({
     },
     reportsListContent: {
         paddingHorizontal: 16,
-        paddingBottom: 100, // Extra padding for bottom nav
+        paddingBottom: 100, 
     },
     reportCard: {
         backgroundColor: '#FFF',
@@ -378,8 +369,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     filterScroll: {
-        flex: 1, // Take remaining space
-        height: 28, // Match button height
+        flex: 1, 
+        height: 28, 
     },
     filterLabelText: {
         fontSize: 12,

@@ -8,7 +8,6 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { getReportMedia } from '../../../service/attachmentServices';
 import { formatDate } from '../../../util/formatDate';
-// import { updateAssignedTaskToWorker } from '../../../service/onesignalServices';
 import { addNotification } from '../../../service/notificationServices';
 import axios from 'axios';
 interface ReportDetailProps {
@@ -71,12 +70,6 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
             await fetchWorkers();
             const playerID = await getUserPlayerID(selectedWorker);
 
-            // Add detailed logging for debugging
-            console.log('Attempting to send push notification with:', {
-                playerID,
-                reportID: report.report_id
-            });
-
             try{
                 const response = await axios.post(
                     "https://fyp-backend-zeta-amber.vercel.app/updateAssignedTaskToWorker", 
@@ -88,12 +81,12 @@ const ReportDetail = ({ report, visible, onClose, onUpdate }: ReportDetailProps)
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        timeout: 10000 // 10 second timeout
+                        timeout: 10000 
                     }
                 );
                 console.log('Push notification response:', response.data);
             }catch(error){
-                // More detailed error logging
+            
                 if (axios.isAxiosError(error)) {
                     console.error('Push Notification Error Details:', {
                         message: error.message,
@@ -325,6 +318,7 @@ const styles = StyleSheet.create({
     picker: {
         height: 50,
         width: '100%',
+        color: '#666666',
     },
     updateButton: {
         backgroundColor: '#4A90E2',
