@@ -8,7 +8,7 @@ This project is a **Facility Helpdesk Mobile Application** designed for universi
 
 Before installing and running the application, ensure you have the following tools and dependencies set up on your development machine:
 
-- **Node.js** (Recommended: v14 or higher)  
+- **Node.js** (Recommended: v18 or higher)  
   [Download Node.js](https://nodejs.org/)
 - **npm** (comes with Node.js) or [Yarn](https://classic.yarnpkg.com/lang/en/)
 - **Git**  
