@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project is a **Facility Helpdesk Mobile Application** designed for university environments. It enables students, staff, and faculty to report facility issues, track requests, and communicate with the maintenance team directly from their mobile devices. Built with [React Native](https://reactnative.dev), the app runs on both Android and iOS platforms, providing a seamless and accessible experience for all users.
+This project is a **Facility Helpdesk Mobile Application** designed for university environments. It enables students and staff to report facility issues and track requests. It also centralizes the operation for the maintenance workers and administrators for managing reported issues. Built with [React Native](https://reactnative.dev), the app runs on both Android and iOS platforms, providing a seamless and accessible experience for all users.
 
 ## Prerequisites
 
