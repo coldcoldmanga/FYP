@@ -53,7 +53,7 @@ const AddAdminWorker = () => {
                     email,
                     phoneNumber,
                     userType,
-                    null, // playerID
+                    '', // playerID
                     currentDate, // createdAt
                     currentDate, // updatedAt
                     null, // lastLogin
@@ -73,7 +73,7 @@ const AddAdminWorker = () => {
                     email,
                     phoneNumber,
                     userType,
-                    null, // playerID
+                    '', // playerID
                     currentDate, // createdAt
                     currentDate, // updatedAt
                     null, // lastLogin

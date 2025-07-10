@@ -1,10 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUser } from '../../../service/userServices';
 
 const FacilityTab = () => {
     const navigation = useNavigation<NavigationProp<any>>();
+
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+    const [checkingRole, setCheckingRole] = useState(true);
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const userEmail = await AsyncStorage.getItem('userEmail');
+                if (userEmail) {
+                    const currentUser = await getUser(userEmail);
+                    setIsSuperAdmin(!!currentUser?.super_admin);
+                }
+            } catch (error) {
+                console.error('Error checking user role:', error);
+            } finally {
+                setCheckingRole(false);
+            }
+        };
+
+        fetchUserRole();
+    }, []);
 
     const navigateToBuildings = () => {
         navigation.navigate('BuildingsList');
@@ -17,6 +40,14 @@ const FacilityTab = () => {
     const navigateToAdminsAndWorkers = () => {
         navigation.navigate('EquipmentsList');
     };
+
+    if (checkingRole) {
+        return (
+            <SafeAreaView style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#1a2847" />
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -57,22 +88,24 @@ const FacilityTab = () => {
                     <Icon name="chevron-right" size={24} color="#1a2847" />
                 </TouchableOpacity>
                 
-                {/* Equipment Block */}
-                <TouchableOpacity 
-                    style={styles.navBlock}
-                    onPress={navigateToAdminsAndWorkers}
-                >
-                    <View style={styles.iconContainer}>
-                        <Icon name="build" size={40} color="#1a2847" />
-                    </View>
-                    <View style={styles.blockTextContainer}>
-                        <Text style={styles.blockTitle}>Admins and Workers</Text>
-                        <Text style={styles.blockDescription}>
-                            Manage all admins and workers
-                        </Text>
-                    </View>
-                    <Icon name="chevron-right" size={24} color="#1a2847" />
-                </TouchableOpacity>
+                {/* Admins & Workers Block - visible only to super admins */}
+                {isSuperAdmin && (
+                    <TouchableOpacity 
+                        style={styles.navBlock}
+                        onPress={navigateToAdminsAndWorkers}
+                    >
+                        <View style={styles.iconContainer}>
+                            <Icon name="build" size={40} color="#1a2847" />
+                        </View>
+                        <View style={styles.blockTextContainer}>
+                            <Text style={styles.blockTitle}>Admins and Workers</Text>
+                            <Text style={styles.blockDescription}>
+                                Manage all admins and workers
+                            </Text>
+                        </View>
+                        <Icon name="chevron-right" size={24} color="#1a2847" />
+                    </TouchableOpacity>
+                )}
             </View>
         </SafeAreaView>
     );
@@ -126,6 +159,12 @@ const styles = StyleSheet.create({
     blockDescription: {
         fontSize: 14,
         color: '#666',
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f5f5f5',
     },
 });
 
