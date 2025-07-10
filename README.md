@@ -1,97 +1,86 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# University Facility Helpdesk Mobile Application
 
-# Getting Started
+## Introduction
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+This project is a **Facility Helpdesk Mobile Application** designed for university environments. It enables students, staff, and faculty to report facility issues, track requests, and communicate with the maintenance team directly from their mobile devices. Built with [React Native](https://reactnative.dev), the app runs on both Android and iOS platforms, providing a seamless and accessible experience for all users.
 
-## Step 1: Start Metro
+## Prerequisites
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Before installing and running the application, ensure you have the following tools and dependencies set up on your development machine:
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **Node.js** (Recommended: v14 or higher)  
+  [Download Node.js](https://nodejs.org/)
+- **npm** (comes with Node.js) or [Yarn](https://classic.yarnpkg.com/lang/en/)
+- **Git**  
+  [Download Git](https://git-scm.com/)
+- **Android Studio** (for Android development/emulation)  
+  [Download Android Studio](https://developer.android.com/studio)
+- **Xcode** (for iOS development, macOS only)  
+  [Download Xcode](https://developer.apple.com/xcode/)
+- **CocoaPods** (for iOS dependencies, macOS only)  
+  Install via terminal:  
+  ```sh
+  sudo gem install cocoapods
+  ```
+- **Watchman** (recommended for macOS)  
+  [Install Watchman](https://facebook.github.io/watchman/docs/install.html)
 
-```sh
-# Using npm
-npm start
+For detailed environment setup, refer to the [React Native Environment Setup Guide](https://reactnative.dev/docs/environment-setup).
 
-# OR using Yarn
-yarn start
-```
+## Installation
 
-## Step 2: Build and run your app
+Follow these steps to set up and run the project locally:
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+1. **Clone the repository**
+   ```sh
+   git clone <your-repository-url>
+   cd <project-directory>
+   ```
 
-### Android
+2. **Install project dependencies**
+   ```sh
+   npm install
+   # or
+   yarn install
+   ```
 
-```sh
-# Using npm
-npm run android
+3. **Start the Metro bundler**
+   ```sh
+   npm start
+   # or
+   yarn start
+   ```
 
-# OR using Yarn
-yarn android
-```
+4. **Run the application**
 
-### iOS
+   - **For Android:**
+     - Start an Android emulator or connect a device.
+     - In a new terminal window, run:
+       ```sh
+       npm run android
+       # or
+       yarn android
+       ```
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+   - **For iOS (macOS only):**
+     - Install CocoaPods dependencies:
+       ```sh
+       cd ios
+       pod install
+       cd ..
+       ```
+     - Start an iOS simulator or connect a device.
+     - In a new terminal window, run:
+       ```sh
+       npm run ios
+       # or
+       yarn ios
+       ```
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## Support
 
-```sh
-bundle install
-```
+If you encounter issues during setup or installation, please consult the [React Native Troubleshooting Guide](https://reactnative.dev/docs/troubleshooting) or open an issue in this repository.
 
-Then, and every time you update your native dependencies, run:
+---
 
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+**Enjoy using the University Facility Helpdesk Mobile Application!**
