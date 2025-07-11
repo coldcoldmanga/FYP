@@ -17,7 +17,6 @@ const Help = () => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity 
                     style={styles.backButton}
@@ -29,9 +28,7 @@ const Help = () => {
                 <View style={{width: 24}} />
             </View>
 
-            {/* Content */}
             <View style={styles.content}>
-                {/* FMD Logo/Icon */}
                 <View style={styles.logoContainer}>
                     <Icon name="apartment" size={60} color="#1a2847" />
                     <Text style={styles.logoText}>Facilities Management Division (FMD)</Text>
@@ -40,7 +37,6 @@ const Help = () => {
 
                 <Text style={styles.sectionTitle}>Contact Information</Text>
 
-                {/* Phone Number Card */}
                 <TouchableOpacity style={styles.contactCard} onPress={handlePhoneCall}>
                     <View style={styles.contactIconContainer}>
                         <Icon name="phone" size={28} color="#1a2847" />
@@ -53,7 +49,6 @@ const Help = () => {
                     <Icon name="chevron-right" size={24} color="#ccc" />
                 </TouchableOpacity>
 
-                {/* Email Card */}
                 <TouchableOpacity style={styles.contactCard} onPress={handleEmail}>
                     <View style={styles.contactIconContainer}>
                         <Icon name="email" size={28} color="#1a2847" />
@@ -66,7 +61,6 @@ const Help = () => {
                     <Icon name="chevron-right" size={24} color="#ccc" />
                 </TouchableOpacity>
 
-                {/* Office Hours */}
                 <View style={styles.contactCard}>
                     <View style={styles.contactIconContainer}>
                         <Icon name="schedule" size={28} color="#1a2847" />
@@ -78,7 +72,6 @@ const Help = () => {
                     </View>
                 </View>
 
-                {/* Additional Information */}
                 <View style={styles.infoContainer}>
                     <Text style={styles.infoTitle}>About FMD</Text>
                     <Text style={styles.infoText}>
@@ -88,7 +81,6 @@ const Help = () => {
                     </Text>
                 </View>
 
-                {/* App Info */}
                 <View style={styles.footerContainer}>
                     <Text style={styles.appVersion}>Facility Helpdesk App v1.0.0</Text>
                     <Text style={styles.copyright}>© 2025 Melvin Kwan Yii Syn</Text>

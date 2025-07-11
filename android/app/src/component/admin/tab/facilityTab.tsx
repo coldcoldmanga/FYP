@@ -54,7 +54,6 @@ const FacilityTab = () => {
             <View style={styles.content}>
                 <Text style={styles.pageTitle}>Facility Management</Text>
                 
-                {/* Buildings Block */}
                 <TouchableOpacity 
                     style={styles.navBlock}
                     onPress={navigateToBuildings}
@@ -71,7 +70,6 @@ const FacilityTab = () => {
                     <Icon name="chevron-right" size={24} color="#1a2847" />
                 </TouchableOpacity>
                 
-                {/* Facilities Block */}
                 <TouchableOpacity 
                     style={styles.navBlock}
                     onPress={navigateToFacilities}
@@ -88,7 +86,6 @@ const FacilityTab = () => {
                     <Icon name="chevron-right" size={24} color="#1a2847" />
                 </TouchableOpacity>
                 
-                {/* Admins & Workers Block - visible only to super admins */}
                 {isSuperAdmin && (
                     <TouchableOpacity 
                         style={styles.navBlock}

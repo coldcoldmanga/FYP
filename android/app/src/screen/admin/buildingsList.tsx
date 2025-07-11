@@ -64,7 +64,6 @@ const BuildingsList = () => {
         }
     };
 
-    // Function to force refresh and bypass cache
     const refreshBuildings = () => {
         setRefreshing(true);
         // Invalidate the buildings cache
@@ -144,7 +143,7 @@ const BuildingsList = () => {
             <View style={styles.actions}>
                 <TouchableOpacity 
                     onPress={(e) => {
-                        e.stopPropagation(); // Prevent triggering the card's onPress
+                        e.stopPropagation(); 
                         handleEdit(item.building_id);
                     }}
                     style={styles.actionButton}
@@ -205,7 +204,6 @@ const BuildingsList = () => {
 
             <View style={styles.bottomSpacer}/>
 
-            {/* FAB for adding new building */}
             <TouchableOpacity 
                 style={styles.fab}
                 onPress={() => navigation.navigate('AddBuilding')}

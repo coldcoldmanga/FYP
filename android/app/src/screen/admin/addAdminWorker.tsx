@@ -44,10 +44,8 @@ const AddAdminWorker = () => {
             
             // For maintenance workers, include specialization if provided
             if (userType === 'Maintenance Worker' && specialization) {
-                // Assuming specialization is stored as an array
                 const specializationArray = specialization.split(',').map(s => s.trim());
                 
-                // Add user with specialization
                 await addUser(
                     fullname,
                     email,

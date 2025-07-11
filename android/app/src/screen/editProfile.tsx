@@ -46,7 +46,6 @@ const EditProfile = () => {
         return;
       }
       
-      // Fetch user data from Firestore
       const userData = await getUser(userEmail || '');
       if (userData) {
         setProfileData({
@@ -105,7 +104,6 @@ const EditProfile = () => {
       
       setLoading(true);
       
-      // Use the updateUser function from firestoreServices
       await updateUser(
         profileData.profile_picture,
         profileData.fullname,

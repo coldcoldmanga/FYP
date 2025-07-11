@@ -6,6 +6,7 @@ import { Alert } from 'react-native';
 import ReportDetail from '../../../component/worker/tab/reportDetail';
 import { useIsFocused } from '@react-navigation/native';
 import { cacheManager } from '../../../util/cacheHelper';
+import { formatDate } from '../../../util/formatDate';
 
 const ReportsTab = () => {
     const [reports, setReports] = useState<Array<any>>([]);
@@ -112,17 +113,6 @@ const ReportsTab = () => {
             cacheManager.invalidate(`worker_reports_status_${reportFilter}`);
             await fetchReportsByStatus(reportFilter);
         }
-    };
-
-    // Format date helper
-    const formatDate = (timestamp: any) => {
-        if (!timestamp) return 'Unknown date';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
     };
 
     return (

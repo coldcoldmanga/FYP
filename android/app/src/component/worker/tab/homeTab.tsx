@@ -22,12 +22,10 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
     return (
         <SafeAreaView style={styles.container}>
         <View style={styles.container}>
-            {/* Map View */}
+       
             <Map searchText={submittedSearch} />
             
-            {/* Search Bar and Notification Container */}
             <View style={styles.topContainer}>
-                {/* Search Bar */}
                 <View style={styles.searchBarContainer}>
                     <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
                     <TextInput
@@ -49,7 +47,6 @@ const HomeTab = ({navigation}: {navigation: NavigationProp<any>}) => {
                     <Icon name="search" size={24} color="#1a2847" />
                 </TouchableOpacity>
 
-                {/* Notification Icon */}
                 <TouchableOpacity style={styles.notificationButton} onPress={() => setShowNotification(true)}>
                     <Icon name="notifications" size={24} color="#1a2847" />
                 </TouchableOpacity>

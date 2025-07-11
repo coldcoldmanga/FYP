@@ -55,13 +55,10 @@ const AdminWorkerList = () => {
     const loadStaff = async () => {
         setLoading(true);
         try {
-            // Get maintenance workers
             const maintenanceWorkers = await getWorker();
             
-            // Get admin users
             const adminUsers = await getAdmins();
             
-            // Combine both sets of users
             const allStaff = [...maintenanceWorkers, ...adminUsers];
             
             setWorkers(allStaff);
@@ -90,11 +87,8 @@ const AdminWorkerList = () => {
     };
 
     const handleEdit = (worker: any) => {
-        console.log("Editing worker:", worker);
-        // Make sure we have all the required fields
         let specializations = [];
         
-        // Clean up specialization data
         if (worker.specialize && Array.isArray(worker.specialize)) {
             specializations = worker.specialize.map((spec: string) => spec.trim()).filter(Boolean);
         }
@@ -189,7 +183,7 @@ const AdminWorkerList = () => {
             <View style={styles.actions}>
                 <TouchableOpacity 
                     onPress={(e) => {
-                        e.stopPropagation(); // Prevent triggering the card's onPress
+                        e.stopPropagation(); 
                         handleEdit(item);
                     }}
                     style={styles.actionButton}
@@ -198,7 +192,7 @@ const AdminWorkerList = () => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                     onPress={(e) => {
-                        e.stopPropagation(); // Prevent triggering the card's onPress
+                        e.stopPropagation(); 
                         handleDelete(item);
                     }}
                     style={styles.actionButton}

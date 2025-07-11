@@ -43,7 +43,6 @@ const Map: React.FC<MapProps> = ({ searchText = '' }) => {
     const [buildingGroups, setBuildingGroups] = useState<BuildingGroup[]>([]);
     const [selectedBuilding, setSelectedBuilding] = useState<BuildingGroup | null>(null);
     
-    // Reference to the MapView so we can programmatically move/zoom the camera
     const mapRef = useRef<MapView>(null);
     
     useEffect(() => {
@@ -57,7 +56,6 @@ const Map: React.FC<MapProps> = ({ searchText = '' }) => {
     const loadReports = async () => {
         try {
             const reportData = await getReport();
-            // Filter for unresolved reports
             const unresolvedReports = reportData.filter(
                 (report: any) => report.status !== 'Completed'
             );
@@ -120,9 +118,7 @@ const Map: React.FC<MapProps> = ({ searchText = '' }) => {
             return acc;
         }, {});
 
-        // Convert to array of building groups with location
         const buildingGroupsArray = Object.entries(groupedByBuilding).map(([buildingId, buildingReports]) => {
-            // Use the location of the first report as the building location
             const firstReport = buildingReports[0];
             return {
                 buildingId,
@@ -143,15 +139,12 @@ const Map: React.FC<MapProps> = ({ searchText = '' }) => {
 
     };
 
-    // Whenever the search text changes, try to find a matching building and
-    // centre the map on it.
+    // Whenever the search text changes, try to find a matching building and centre the map on it.
     useEffect(() => {
         const query = searchText.trim().toLowerCase();
 
-        // Look for exact id match first
         const exactMatch = buildingGroups.find((b) => b.buildingId.toLowerCase() === query);
 
-        // If no exact match, fall back to partial match **only** if it uniquely identifies a building
         let match: BuildingGroup | undefined;
         if (exactMatch) {
             match = exactMatch;

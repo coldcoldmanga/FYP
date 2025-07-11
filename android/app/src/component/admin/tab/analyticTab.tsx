@@ -21,7 +21,6 @@ const AnalyticTab = () => {
     const [selectedView, setSelectedView] = useState('week');
     const [activeView, setActiveView] = useState('analytics');
 
-    // Function to fetch all reports from server or cache
     const fetchAllReports = async () => {
         try {
             setLoading(true);
@@ -38,7 +37,6 @@ const AnalyticTab = () => {
             // Store all reports in state
             setAllReports(reportData);
             
-            // Apply date filtering
             filterReportsByDate(reportData, startDate, endDate);
         } catch (error) {
             console.error("Error fetching report data:", error);
@@ -48,7 +46,6 @@ const AnalyticTab = () => {
         }
     };
     
-    // Function to filter reports by date (runs client-side)
     const filterReportsByDate = (reportData: any[], start: Date, end: Date) => {
         if (!reportData || reportData.length === 0) {
             setReports([]);
@@ -64,7 +61,6 @@ const AnalyticTab = () => {
     };
 
     useEffect(() => {
-        // Only fetch all reports once when component mounts
         fetchAllReports();
     }, []);
     

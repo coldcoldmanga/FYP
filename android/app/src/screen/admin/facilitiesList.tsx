@@ -129,7 +129,6 @@ const FacilitiesList = () => {
         }
     }
 
-    // Function to force refresh and bypass cache
     const refreshData = () => {
         setRefreshing(true);
         // Invalidate both facilities and buildings cache
@@ -171,7 +170,6 @@ const FacilitiesList = () => {
                     onPress: async () => {
                         try {
                             await deleteFacility(facilityId);
-                            // Invalidate the facilities cache after deletion
                             cacheManager.invalidate('admin_facilities_list');
                             loadFacilities();
                             Alert.alert('Success', 'Facility deleted successfully');
@@ -204,7 +202,7 @@ const FacilitiesList = () => {
             <View style={styles.actions}>
                 <TouchableOpacity 
                     onPress={(e) => {
-                        e.stopPropagation(); // Prevent triggering the card's onPress
+                        e.stopPropagation();
                         handleEdit(item.facility_id);
                     }}
                     style={styles.actionButton}
@@ -213,7 +211,7 @@ const FacilitiesList = () => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                     onPress={(e) => {
-                        e.stopPropagation(); // Prevent triggering the card's onPress
+                        e.stopPropagation();
                         handleDelete(item.facility_id);
                     }}
                     style={styles.actionButton}

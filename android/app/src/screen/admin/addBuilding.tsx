@@ -68,7 +68,6 @@ const AddBuilding = () => {
       };
 
     useEffect(() => {
-        // Set the initial region when the component mounts
         setMapRegion(INITIAL_REGION);
         loadBuildings();
         setLoading(false);

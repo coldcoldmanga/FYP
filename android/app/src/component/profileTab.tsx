@@ -87,22 +87,17 @@ const ProfileTab = () => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* Profile Header */}
             <View style={styles.header}>
                 <View style={styles.profileImageContainer}>
                     <Image
                         source={require('../asset/avatar.png')}
                         style={styles.profileImage}
                     />
-                    {/* <TouchableOpacity style={styles.editImageButton}>
-                        <Icon name="camera-alt" size={20} color="#FFF" />
-                    </TouchableOpacity> */}
                 </View>
                 <Text style={styles.userName}>{profileData.fullname}</Text>
                 <Text style={styles.userEmail}>{profileData.email}</Text>
             </View>
 
-            {/* User Info Cards */}
             <View style={styles.infoContainer}>
                 <View style={styles.infoCard}>
                     <Icon name="badge" size={20} color="#1a2847" />
@@ -113,7 +108,6 @@ const ProfileTab = () => {
                 </View>
             </View>
 
-            {/* Menu Items */}
             <View style={styles.menuContainer}>
                 {menuItems.map((item, index) => (
                     <TouchableOpacity 
@@ -131,7 +125,6 @@ const ProfileTab = () => {
                 ))}
             </View>
 
-            {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                 <Icon name="logout" size={20} color="#FF3B30" />
                 <Text style={styles.logoutText}>Log Out</Text>
